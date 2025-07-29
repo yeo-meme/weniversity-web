@@ -1,0 +1,29 @@
+name: 🔔 Notify Discord on GitHub Events
+
+on:
+  issues:
+    types: [opened, edited, closed]
+  project_card:
+    types: [created, edited, moved, deleted]
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📣 Send Discord Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          EVENT_NAME: ${{ github.event_name }}
+          ACTOR: ${{ github.actor }}
+          REPO: ${{ github.repository }}
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d "{
+            \"username\": \"GitHub 알림봇\",
+            \"avatar_url\": \"https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png\",
+            \"content\": \"📢 [${{ env.REPO }}]에서 ${{ env.EVENT_NAME }} 이벤트 발생! by ${{ env.ACTOR }}\"
+          }" \
+          \"$DISCORD_WEBHOOK\"
