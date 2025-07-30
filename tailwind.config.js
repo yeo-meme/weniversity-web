@@ -18,4 +18,11 @@ export default {
     },
   },
   plugins: [],
+  theme: {
+    extend: {
+      fontFamily: {
+        pretendard: ["Pretendard", "sans-serif"],
+      },
+    },
+  },
 };
