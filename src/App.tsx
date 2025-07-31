@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Header from "./components/header/header.tsx";
 import LearnerDashboard from './pages/dashboard/LearnerDashboard';
 import MissionPage from './pages/mission/MissionPage';
 import VideoPage from './pages/video/VideoPage';
@@ -22,7 +23,8 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="min-h-screen bg-white flex items-center justify-center font-pretendard">
+      <Header />
       <button 
         onClick={() => setShowDashboard(true)}
         className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
