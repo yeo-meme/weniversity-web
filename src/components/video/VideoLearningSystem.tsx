@@ -1,5 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, Maximize, Settings, BookOpen, Clock, CheckCircle, X } from 'lucide-react';
+
+// VideoPlayer 컴포넌트
+const VideoPlayer = () => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [progress, setProgress] = useState(0);
+  
+  // 재생 시간 감지
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      const { currentTime, duration } = videoRef.current;
+      setProgress((currentTime / duration) * 100);
+    }
+  };
+  
+  return (
+    <div className="w-full">
+      <video
+        ref={videoRef}
+        onTimeUpdate={handleTimeUpdate}
+        controls
+        className="w-full aspect-video rounded-lg"
+      >
+        <source src="../../../public/video/video1.mp4" type="video/mp4" />
+        브라우저가 video 태그를 지원하지 않습니다.
+      </video>
+      <div className="mt-2 w-full h-2 bg-gray-300 rounded">
+        <div className="h-full bg-blue-500 rounded" style={{ width: `${progress}%` }} />
+      </div>
+    </div>
+  );
+};
 
 // Props 타입 정의
 interface VideoLearningSystemProps {
@@ -8,6 +39,7 @@ interface VideoLearningSystemProps {
     id: number;
     title: string;
     description?: string;
+    // 필요하면 다른 필드들도 추가
   } | null;
 }
 
@@ -64,134 +96,14 @@ const VideoLearningSystem: React.FC<VideoLearningSystemProps> = ({ onClose, cour
       <div className="max-w-6xl mx-auto p-4">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Video Container */}
-          <div className="relative bg-black aspect-video group">
-            {/* Video placeholder */}
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-              <div className="text-white text-center">
-                <div className="w-20 h-20 mx-auto mb-4 bg-blue-600 rounded-full flex items-center justify-center">
-                  <Play className="w-8 h-8 ml-1" />
-                </div>
-                <p className="text-lg font-medium">Chapter 1: 연산과 구문</p>
-                <p className="text-sm text-gray-300 mt-2">마지막 시청: 2:05</p>
-              </div>
-            </div>
-
+          <div className="relative bg-black group">
+            <VideoPlayer />
+            
             {/* Resume watching notification */}
             <div className="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg opacity-90">
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="w-4 h-4" />
                 <span>2:05에서 이어보기</span>
-              </div>
-            </div>
-
-            {/* Video Controls Overlay */}
-            <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <button 
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="w-16 h-16 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 backdrop-blur-sm"
-                >
-                  {isPlaying ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white ml-1" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Bottom Controls */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {/* Progress Bar */}
-              <div className="mb-4">
-                <div className="relative h-2 bg-gray-600 rounded-full cursor-pointer">
-                  {/* Watched sections background */}
-                  <div className="absolute inset-0 bg-gray-500 rounded-full overflow-hidden">
-                    {watchedSections.map((section, index) => (
-                      <div
-                        key={index}
-                        className={`absolute h-full ${section.completed ? 'bg-green-500' : 'bg-gray-400'}`}
-                        style={{
-                          left: `${(section.start / duration) * 100}%`,
-                          width: `${((section.end - section.start) / duration) * 100}%`
-                        }}
-                      />
-                    ))}
-                  </div>
-                  {/* Current progress */}
-                  <div 
-                    className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
-                    style={{ width: `${progressPercent}%` }}
-                  />
-                  {/* Progress handle */}
-                  <div 
-                    className="absolute top-1/2 w-4 h-4 bg-blue-500 rounded-full transform -translate-y-1/2 -translate-x-1/2"
-                    style={{ left: `${progressPercent}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Control Buttons */}
-              <div className="flex items-center justify-between text-white">
-                <div className="flex items-center gap-4">
-                  <button 
-                    onClick={() => setIsPlaying(!isPlaying)}
-                    className="hover:bg-white hover:bg-opacity-20 p-2 rounded transition-colors"
-                  >
-                    {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
-                  </button>
-                  <button className="hover:bg-white hover:bg-opacity-20 p-2 rounded transition-colors">
-                    <SkipBack className="w-5 h-5" />
-                  </button>
-                  <button className="hover:bg-white hover:bg-opacity-20 p-2 rounded transition-colors">
-                    <SkipForward className="w-5 h-5" />
-                  </button>
-                  
-                  {/* Volume Control */}
-                  <div className="flex items-center gap-2">
-                    <Volume2 className="w-5 h-5" />
-                    <div className="w-20 h-1 bg-gray-600 rounded-full">
-                      <div 
-                        className="h-full bg-white rounded-full"
-                        style={{ width: `${volume}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Time Display */}
-                  <span className="text-sm font-mono">
-                    {formatTime(currentTime)} / {formatTime(duration)}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {/* Playback Speed */}
-                  <button 
-                    onClick={() => setShowSettings(!showSettings)}
-                    className="hover:bg-white hover:bg-opacity-20 p-2 rounded transition-colors text-sm font-medium relative"
-                  >
-                    {playbackSpeed}x
-                    {showSettings && (
-                      <div className="absolute bottom-full right-0 mb-2 bg-gray-900 rounded-lg shadow-lg p-2 min-w-24">
-                        {[0.5, 0.75, 1.0, 1.25, 1.5, 2.0].map(speed => (
-                          <button
-                            key={speed}
-                            onClick={() => {setPlaybackSpeed(speed); setShowSettings(false);}}
-                            className={`block w-full text-left px-3 py-1 rounded text-sm hover:bg-gray-700 ${
-                              speed === playbackSpeed ? 'bg-blue-600' : ''
-                            }`}
-                          >
-                            {speed}x
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </button>
-                  
-                  <button className="hover:bg-white hover:bg-opacity-20 p-2 rounded transition-colors">
-                    <Settings className="w-5 h-5" />
-                  </button>
-                  
-                  <button className="hover:bg-white hover:bg-opacity-20 p-2 rounded transition-colors">
-                    <Maximize className="w-5 h-5" />
-                  </button>
-                </div>
               </div>
             </div>
           </div>
