@@ -1,7 +1,8 @@
-import React from "react";
+// import React from "react";
 import Header from "./components/header/header.tsx";
 import HeroSection from "./components/hero/hero-section.tsx";
 import "./index.css";
+import RegisterPage from "./pages/auth/RegisterPage.tsx";
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       <Header />
       <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
         <HeroSection />
+        <RegisterPage />
         <div className="mt-4 flex gap-4"></div>
       </main>
     </>

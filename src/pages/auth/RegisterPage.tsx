@@ -3,8 +3,8 @@ import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { register, resetAuthState } from "../../store/authSlice";
 import type { RegisterFormData, ValidationMessages } from "../../types/user";
 import { validateForm, isFormValid } from "../../services/validation";
-import RegisterInput from "../../components/RegisterInput";
-import RegisterSelect from "../../components/RegisterSelect";
+import RegisterInput from "../../components/auth/RegisterInput";
+import RegisterSelect from "../../components/auth/RegisterSelect";
 
 const RegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();

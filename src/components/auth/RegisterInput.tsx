@@ -10,6 +10,8 @@ interface RegisterInputProps {
   onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
   className?: string;
   required?: boolean;
+  errorMessage?: string;
+  showError?: boolean;
 }
 
 const RegisterInput: React.FC<RegisterInputProps> = ({
@@ -21,7 +23,9 @@ const RegisterInput: React.FC<RegisterInputProps> = ({
   onChange,
   onBlur,
   className = "",
-  required = true,
+  required = false,
+  errorMessage,
+  showError = false,
 }) => {
   return (
     <div>
@@ -41,6 +45,13 @@ const RegisterInput: React.FC<RegisterInputProps> = ({
           className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`}
         />
       </div>
+
+      {/* 에러 메시지 */}
+      {showError && errorMessage && (
+        <div className="mt-1 bg-red-50 border border-red-200 rounded-md p-2">
+          <p className="text-sm text-red-600">{errorMessage}</p>
+        </div>
+      )}
     </div>
   );
 };

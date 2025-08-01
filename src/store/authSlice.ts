@@ -33,7 +33,6 @@ export const register = createAsyncThunk(
       birth_date: formData.birth_date,
     };
 
-    console.log("data 확인 : ", requestData);
     const response = await fetch("http://13.125.180.222/api/users/register/", {
       method: "POST",
       headers: {
@@ -41,6 +40,10 @@ export const register = createAsyncThunk(
       },
       body: JSON.stringify(requestData),
     });
+
+    if (response.status === 400) {
+      throw new Error("이미 가입되어 있는 이메일입니다.");
+    }
 
     if (!response.ok) {
       throw new Error("회원가입에 실패했습니다.");

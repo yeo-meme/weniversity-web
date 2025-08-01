@@ -15,6 +15,8 @@ interface RegisterSelectProps {
   onBlur: (e: React.FocusEvent<HTMLSelectElement>) => void;
   className?: string;
   required?: boolean;
+  errorMessage?: string;
+  showError?: boolean;
 }
 
 const RegisterSelect: React.FC<RegisterSelectProps> = ({
@@ -27,6 +29,8 @@ const RegisterSelect: React.FC<RegisterSelectProps> = ({
   onBlur,
   className = "",
   required = false,
+  errorMessage,
+  showError = false,
 }) => {
   return (
     <div>
@@ -51,6 +55,13 @@ const RegisterSelect: React.FC<RegisterSelectProps> = ({
           ))}
         </select>
       </div>
+
+      {/* 에러 메시지 */}
+      {showError && errorMessage && (
+        <div className="mt-1 bg-red-50 border border-red-200 rounded-md p-2">
+          <p className="text-sm text-red-600">{errorMessage}</p>
+        </div>
+      )}
     </div>
   );
 };
