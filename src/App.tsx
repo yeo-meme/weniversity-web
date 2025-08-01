@@ -1,11 +1,16 @@
 import "./App.css";
 import Header from "./components/header/header.tsx";
+import HeroSection from "./components/hero/hero-section.tsx";
+import "./index.css";
 
 function App() {
   return (
-    <div className="font-pretendard">
+    <>
       <Header />
-    </div>
+      <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
+        <HeroSection />
+      </main>
+    </>
   );
 }
 
