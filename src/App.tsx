@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
-import LearnerDashboard from './pages/dashboard/LearnerDashboard';
-import MissionPage from './pages/mission/MissionPage';
-import VideoPage from './pages/video/VideoPage';
-import './index.css';
+import { useState } from "react";
+import LearnerDashboard from "./pages/dashboard/LearnerDashboard";
+import MissionPage from "./pages/mission/MissionPage";
+import VideoPage from "./pages/video/VideoPage";
+import "./index.css";
+import RegisterPage from "./pages/auth/RegisterPage";
 
 function App() {
   const [showDashboard, setShowDashboard] = useState(false);
   const [showMission, setShowMission] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
   if (showDashboard) {
     return <LearnerDashboard />;
@@ -21,25 +23,35 @@ function App() {
     return <VideoPage />;
   }
 
+  if (showRegister) {
+    return <RegisterPage />;
+  }
+
   return (
     <div className="min-h-screen bg-white flex items-center justify-center">
-      <button 
+      <button
         onClick={() => setShowDashboard(true)}
         className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
       >
         대시보드로 이동
       </button>
-      <button 
+      <button
         onClick={() => setShowMission(true)}
         className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
       >
         미션 이동
       </button>
-      <button 
+      <button
         onClick={() => setShowVideo(true)}
         className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
       >
         비디오 이동
+      </button>
+      <button
+        onClick={() => setShowRegister(true)}
+        className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
+      >
+        회원가입 이동
       </button>
     </div>
   );
