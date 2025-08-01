@@ -3,8 +3,8 @@ import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { register, resetAuthState } from "../../store/authSlice";
 import type { RegisterFormData, ValidationMessages } from "../../types/user";
 import { validateForm, isFormValid } from "../../services/validation";
-import RegisterInput from "../../components/auth/RegisterInput";
-import RegisterSelect from "../../components/auth/RegisterSelect";
+import RegisterInput from "../../components/RegisterInput";
+import RegisterSelect from "../../components/RegisterSelect";
 
 const RegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -62,11 +62,15 @@ const RegisterPage: React.FC = () => {
   const handleBlur = (
     e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name } = e.target;
-    setTouchedFields(prev => ({
-      ...prev,
-      [name]: true,
-    }));
+    const { name, value } = e.target;
+
+    // 값이 있을 때만 touched 상태로 설정
+    if (value.trim()) {
+      setTouchedFields(prev => ({
+        ...prev,
+        [name]: true,
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -75,41 +79,30 @@ const RegisterPage: React.FC = () => {
     const messages = validateForm(formData);
     setValidationMessages(messages);
 
-    if (!isFormValid(messages) || !termsAgreed) {
+    if (isFormEmpty() || !isFormValid(messages) || !termsAgreed) {
       return;
     }
 
     dispatch(register(formData));
   };
 
-  const isSubmitDisabled =
-    !isFormValid(validationMessages) || !termsAgreed || loading;
-
-  const getCurrentErrorMessage = () => {
-    const fieldOrder = [
-      "email",
-      "password",
-      "passwordConfirm",
-      "name",
-      "gender",
-      "birth_date",
-    ];
-
-    for (const field of fieldOrder) {
-      if (
-        touchedFields[field] &&
-        validationMessages[field as keyof ValidationMessages]
-      ) {
-        return validationMessages[field as keyof ValidationMessages];
-      }
-    }
-
-    if (error) {
-      return error;
-    }
-
-    return null;
+  // 폼이 비어있는지 확인하는 함수
+  const isFormEmpty = () => {
+    return (
+      !formData.email ||
+      !formData.password ||
+      !formData.passwordConfirm ||
+      !formData.name ||
+      !formData.gender ||
+      !formData.birth_date
+    );
   };
+
+  const isSubmitDisabled =
+    isFormEmpty() ||
+    !isFormValid(validationMessages) ||
+    !termsAgreed ||
+    loading;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -131,6 +124,8 @@ const RegisterPage: React.FC = () => {
               placeholder="이메일을 입력하세요"
               onChange={handleInputChange}
               onBlur={handleBlur}
+              errorMessage={validationMessages.email}
+              showError={touchedFields.email}
             />
 
             {/* 비밀번호 */}
@@ -142,6 +137,8 @@ const RegisterPage: React.FC = () => {
               placeholder="비밀번호를 입력하세요"
               onChange={handleInputChange}
               onBlur={handleBlur}
+              errorMessage={validationMessages.password}
+              showError={touchedFields.password}
             />
 
             {/* 비밀번호 확인 */}
@@ -153,6 +150,8 @@ const RegisterPage: React.FC = () => {
               placeholder="비밀번호를 다시 입력하세요"
               onChange={handleInputChange}
               onBlur={handleBlur}
+              errorMessage={validationMessages.passwordConfirm}
+              showError={touchedFields.passwordConfirm}
             />
 
             {/* 이름 */}
@@ -164,6 +163,8 @@ const RegisterPage: React.FC = () => {
               placeholder="이름을 입력하세요"
               onChange={handleInputChange}
               onBlur={handleBlur}
+              errorMessage={validationMessages.name}
+              showError={touchedFields.name}
             />
 
             {/* 성별 */}
@@ -175,6 +176,8 @@ const RegisterPage: React.FC = () => {
               placeholder="성별을 선택하세요"
               onChange={handleInputChange}
               onBlur={handleBlur}
+              errorMessage={validationMessages.gender}
+              showError={touchedFields.gender}
             />
 
             {/* 생년월일 */}
@@ -185,14 +188,14 @@ const RegisterPage: React.FC = () => {
               value={formData.birth_date}
               onChange={handleInputChange}
               onBlur={handleBlur}
+              errorMessage={validationMessages.birth_date}
+              showError={touchedFields.birth_date}
             />
 
-            {/* 에러 메시지 */}
-            {getCurrentErrorMessage() && (
+            {/* API 에러 메시지 (서버 에러가 있을 때만 표시) */}
+            {error && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-sm text-red-600">
-                  {getCurrentErrorMessage()}
-                </p>
+                <p className="text-sm text-red-600">{error}</p>
               </div>
             )}
 
