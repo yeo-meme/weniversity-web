@@ -1,4 +1,4 @@
-import type { RegisterFormData, ValidationMessages } from "../types/user";
+import type { RegisterFormData, ValidationMessages } from "../../types/user";
 
 export const validateEmail = (email: string): string | undefined => {
   if (!email) {
