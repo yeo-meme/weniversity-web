@@ -9,18 +9,18 @@ export const validateProfileName = (name: string): string | undefined => {
     return "이름을 입력해주세요.";
   }
 
+  const koreanRegex = /^[가-힣ㄱ-ㅎㅏ-ㅣ\s]+$/;
+
+  if (!koreanRegex.test(name)) {
+    return "이름은 한글만 입력 가능합니다.";
+  }
+
   if (name.length < 2) {
     return "이름은 2자 이상이어야 합니다.";
   }
 
   if (name.length > 10) {
     return "이름은 10자 이하여야 합니다.";
-  }
-
-  // 한글만 허용하는 정규식 (완성된 한글 + 자음/모음)
-  const koreanRegex = /^[가-힣ㄱ-ㅎㅏ-ㅣ\s]+$/;
-  if (!koreanRegex.test(name)) {
-    return "이름은 한글만 입력 가능합니다.";
   }
 
   return undefined;

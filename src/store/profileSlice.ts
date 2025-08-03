@@ -1,15 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type {
-  // UserProfile,
+  UserProfile,
   ProfileFormData,
   ProfileState,
 } from "../types/profile";
 
-// 프로필 정보 가져오기 (GET)
-export const fetchProfile = createAsyncThunk(
+// 프로필 정보 가져오기
+export const fetchProfile = createAsyncThunk<UserProfile>(
   "profile/fetchProfile",
   async () => {
-    const response = await fetch("/api/profile", {
+    const response = await fetch("http://13.125.180.222/api/users/mypage/", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -24,8 +24,8 @@ export const fetchProfile = createAsyncThunk(
   }
 );
 
-// 프로필 정보 수정 (PATCH)
-export const updateProfile = createAsyncThunk(
+// 프로필 정보 수정
+export const updateProfile = createAsyncThunk<UserProfile, ProfileFormData>(
   "profile/updateProfile",
   async (formData: ProfileFormData) => {
     const requestData = new FormData();
@@ -37,13 +37,16 @@ export const updateProfile = createAsyncThunk(
       requestData.append("profile_image", formData.profile_image);
     }
 
-    const response = await fetch("/api/profile", {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: requestData,
-    });
+    const response = await fetch(
+      "http://13.125.180.222/api/profile/users/mypage/",
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: requestData,
+      }
+    );
 
     if (!response.ok) {
       throw new Error("프로필 수정에 실패했습니다.");
