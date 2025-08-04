@@ -58,6 +58,34 @@ const chapters = [
   },
 ];
 
+
+const watch = {
+  id: "uuid",
+  userId: "user123",
+  chapterId: 1,
+  courseId: 1,
+  
+  // 진행률 정보
+  currentTime: 245.5,      // 현재 위치(초)
+  totalDuration: 300,      // 전체 길이(초)
+  watchedPercentage: 81.8, // 시청률(%)
+  isCompleted: false,      // 완료 여부
+  
+  // 시청 시간 추적
+  totalWatchTime: 1250000, // 실제 시청시간(ms)
+  sessionCount: 3,         // 시청 세션 수
+  
+  // 타임스탬프
+  firstWatchedAt: "2024-01-15T09:00:00Z",
+  lastWatchedAt: "2024-01-16T14:30:00Z",
+  completedAt: null,
+  
+  // 메타데이터
+  watchSpeed: 1.0,         // 재생 속도
+  skipCount: 2,            // 건너뛴 횟수
+  pauseCount: 5            // 일시정지 횟수
+}
+
 const VideoPlayer = ({ currentVideo, onTimeUpdate, onLoadedMetadata, onEnded }) => {
   const videoRef = useRef(null);
   

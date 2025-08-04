@@ -163,6 +163,9 @@ $RECYCLE.BIN/
 # Linux
 *~
 
+# media files
+*.mp4
+
 # Archive files
 *.7z
 *.dmg
