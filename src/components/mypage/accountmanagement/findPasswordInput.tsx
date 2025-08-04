@@ -1,29 +1,19 @@
 import React, { useState } from "react";
 
-interface MyPageInputProps {
+interface FindPasswordInputProps {
   id: string;
-  label: string;
-  type: "text" | "date";
   value: string;
-  placeholder?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
-  className?: string;
-  required?: boolean;
+  onBlur: (e: React.ChangeEvent<HTMLInputElement>) => void;
   errorMessage?: string;
   showError?: boolean;
 }
 
-const MyPageInput: React.FC<MyPageInputProps> = ({
+const FindPasswordInput: React.FC<FindPasswordInputProps> = ({
   id,
-  label,
-  type,
   value,
-  placeholder,
   onChange,
   onBlur,
-  className = "",
-  required = false,
   errorMessage,
   showError = false,
 }) => {
@@ -32,32 +22,42 @@ const MyPageInput: React.FC<MyPageInputProps> = ({
     setIsFocused(true);
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+  const handleBlur = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIsFocused(false);
-    if (onBlur) onBlur(e);
+    onBlur(e);
   };
   return (
-    <div className="w-[257px]">
+    <div>
       <label
         htmlFor={id}
         className={`block text-sm font-medium transition-colors ${
           isFocused ? "text-blue-500" : "text-gray-700"
         }`}
       >
-        {label}
+        이메일
       </label>
       <div className="mt-1">
         <input
           id={id}
           name={id}
-          type={type}
+          type="email"
           value={value}
-          placeholder={placeholder}
+          placeholder="이메일을 입력하세요."
           onChange={onChange}
-          onBlur={handleBlur}
           onFocus={handleFocus}
-          required={required}
-          className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`}
+          onBlur={handleBlur}
+          required={true}
+          className="w-full
+    border-0
+    border-b-2
+    border-gray-300
+    focus:outline-none
+    focus:ring-0
+    focus:border-blue-500
+    placeholder-gray-400
+    text-gray-900
+    text-lg
+    py-1.5"
         />
       </div>
 
@@ -71,4 +71,4 @@ const MyPageInput: React.FC<MyPageInputProps> = ({
   );
 };
 
-export default MyPageInput;
+export default FindPasswordInput;

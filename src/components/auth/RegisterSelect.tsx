@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import DownIcon from "../../assets/icon-down.png";
 
 interface Option {
@@ -33,9 +33,23 @@ const RegisterSelect: React.FC<RegisterSelectProps> = ({
   errorMessage,
   showError = false,
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLSelectElement>) => {
+    setIsFocused(false);
+    if (onBlur) onBlur(e);
+  };
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+      <label
+        htmlFor={id}
+        className={`block text-sm font-medium transition-colors ${
+          isFocused ? "text-blue-500" : "text-gray-700"
+        }`}
+      >
         {label}
       </label>
       <div className="mt-1 relative">
@@ -44,7 +58,8 @@ const RegisterSelect: React.FC<RegisterSelectProps> = ({
           name={id}
           value={value}
           onChange={onChange}
-          onBlur={onBlur}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           required={required}
           className={`appearance-none
             w-full

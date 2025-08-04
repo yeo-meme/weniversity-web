@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 interface RegisterInputProps {
   id: string;
@@ -27,9 +27,23 @@ const RegisterInput: React.FC<RegisterInputProps> = ({
   errorMessage,
   showError = false,
 }) => {
+  const [isFocused, setIsFocused] = useState(false);
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(false);
+    if (onBlur) onBlur(e);
+  };
   return (
     <div>
-      <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+      <label
+        htmlFor={id}
+        className={`block text-sm font-medium transition-colors ${
+          isFocused ? "text-blue-500" : "text-gray-700"
+        }`}
+      >
         {label}
       </label>
       <div className="mt-1">
@@ -40,7 +54,8 @@ const RegisterInput: React.FC<RegisterInputProps> = ({
           value={value}
           placeholder={placeholder}
           onChange={onChange}
-          onBlur={onBlur}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
           required={required}
           className={`w-full
     border-0
