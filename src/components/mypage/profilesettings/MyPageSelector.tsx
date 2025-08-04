@@ -1,4 +1,5 @@
 import React from "react";
+import DownIcon from "../../../assets/icon-down.png";
 
 interface Option {
   value: string;
@@ -37,7 +38,7 @@ const MyPageSelect: React.FC<MyPageSelectProps> = ({
       <label htmlFor={id} className="block text-sm font-medium text-gray-700">
         {label}
       </label>
-      <div className="mt-1">
+      <div className="mt-1 relative">
         <select
           id={id}
           name={id}
@@ -45,7 +46,7 @@ const MyPageSelect: React.FC<MyPageSelectProps> = ({
           onChange={onChange}
           onBlur={onBlur}
           required={required}
-          className={`block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`}
+          className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`}
         >
           <option value="">{placeholder}</option>
           {options.map(option => (
@@ -54,6 +55,9 @@ const MyPageSelect: React.FC<MyPageSelectProps> = ({
             </option>
           ))}
         </select>
+        <div className="pointer-events-none absolute inset-y-0 right-2 flex items-center">
+          <img src={DownIcon} alt="화살표" className="w-4 h-4" />
+        </div>
       </div>
 
       {/* 에러 메시지 */}
