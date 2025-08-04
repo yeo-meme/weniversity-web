@@ -200,28 +200,30 @@ const RegisterPage: React.FC = () => {
             )}
 
             {/* 약관 동의 */}
-            <div className="flex items-center">
-              <input
-                id="terms"
-                type="checkbox"
-                checked={termsAgreed}
-                onChange={e => setTermsAgreed(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="terms"
-                className="ml-2 block text-sm text-gray-900"
-              >
-                본인은 만 14세 이상이며,{" "}
-                <span className="text-blue-600 hover:text-blue-500 cursor-pointer">
-                  이용 약관
-                </span>
-                ,{" "}
-                <span className="text-blue-600 hover:text-blue-500 cursor-pointer">
-                  개인정보취급방침
-                </span>
-                을 확인하였습니다.
-              </label>
+            <div className="flex justify-center">
+              <div className="relative">
+                <input
+                  id="terms"
+                  type="checkbox"
+                  checked={termsAgreed}
+                  onChange={e => setTermsAgreed(e.target.checked)}
+                  className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="terms"
+                  className="pl-8 text-sm text-gray-900 text-center block"
+                >
+                  본인은 만 14세 이상이며, 위니버시티의 <br />
+                  <span className="text-blue-600 hover:text-blue-500 cursor-pointer">
+                    이용 약관
+                  </span>
+                  ,{" "}
+                  <span className="text-blue-600 hover:text-blue-500 cursor-pointer">
+                    개인정보취급방침
+                  </span>
+                  을 확인하였습니다.
+                </label>
+              </div>
             </div>
 
             {/* 회원가입 버튼 */}
