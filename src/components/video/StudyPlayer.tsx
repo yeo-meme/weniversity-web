@@ -23,7 +23,7 @@ const chapters: Chapter[] = [
     title: "변수와 상수", 
     time: "0:00", 
     duration: "5:00", 
-    durationSeconds: 300,
+    durationSeconds: 5,
     videoFile: "video1.mp4",
     completed: false 
   },
@@ -32,7 +32,7 @@ const chapters: Chapter[] = [
     title: "연산자 종류", 
     time: "5:00", 
     duration: "10:00", 
-    durationSeconds: 600,
+    durationSeconds: 5,
     videoFile: "video2.mp4",
     completed: false 
   },
@@ -41,7 +41,7 @@ const chapters: Chapter[] = [
     title: "조건문 기초", 
     time: "15:00", 
     duration: "8:00", 
-    durationSeconds: 480,
+    durationSeconds: 5,
     videoFile: "video3.mp4",
     completed: false 
   },
@@ -50,7 +50,7 @@ const chapters: Chapter[] = [
     title: "반복문 활용", 
     time: "23:00", 
     duration: "12:00", 
-    durationSeconds: 720,
+    durationSeconds: 5,
     videoFile: "video4.mp4",
     completed: false 
   },
@@ -59,7 +59,7 @@ const chapters: Chapter[] = [
     title: "함수 정의", 
     time: "35:00", 
     duration: "15:00", 
-    durationSeconds: 900,
+    durationSeconds: 5,
     videoFile: "video5.mp4",
     completed: false 
   },
@@ -68,7 +68,7 @@ const chapters: Chapter[] = [
     title: "실습 문제", 
     time: "50:00", 
     duration: "10:00", 
-    durationSeconds: 600,
+    durationSeconds: 5,
     videoFile: "video6.mp4",
     completed: false 
   },
@@ -193,6 +193,8 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
   userId = 'user123'
 }) => {
 
+// 🔥 챕터별 진행률을 상태로 캐시하여 불필요한 조회 방지
+const [cachedProgress, setCachedProgress] = useState<Record<number, any>>({});
 
 
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
@@ -228,16 +230,16 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
 
   // 📊 기존 진행률 데이터만 조회 (생성 X)
   const loadExistingProgress = useCallback(() => {
-    console.log(`🔍 사용자 ${userId} 기존 진행률 조회 중...`);
+    console.log(`🔍 사용자 ${userId} 진행률 최초 로드...`);
     
+    const progressCache: Record<number, any> = {};
     const userCompletedChapters = new Set<number>();
     const userChapterProgress: Record<number, number> = {};
-    let foundAnyProgress = false;
     
     chapters.forEach((chapter, index) => {
       const progress = ProgressTracker.getWatchProgress(userId, chapter.id);
       if (progress) {
-        foundAnyProgress = true;
+        progressCache[chapter.id] = progress; // 캐시에 저장
         if (progress.isCompleted) {
           userCompletedChapters.add(index);
         }
@@ -245,35 +247,43 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
       }
     });
     
-    // 🔥 상태 업데이트를 한 번에 처리
-    if (foundAnyProgress) {
-      setCompletedChapters(userCompletedChapters);
-      setChapterProgress(userChapterProgress);
-      
-      const summary = ProgressTracker.getUserProgressSummary(userId, chapters.length);
-      setProgressSummary(summary);
-      
-      console.log(`📈 기존 진행률 로드 완료: ${summary.completedChapters}/${summary.totalChapters}`);
-    }
-  }, [userId]); // useCallback으로 메모이제이션
+    setCachedProgress(progressCache); // 캐시 상태 업데이트
+    setCompletedChapters(userCompletedChapters);
+    setChapterProgress(userChapterProgress);
+    
+    console.log(`📈 진행률 캐시 완료:`, progressCache);
+  }, [userId]);
+
+  const getProgressFromCache = (chapterId: number) => {
+    return cachedProgress[chapterId] || ProgressTracker.getWatchProgress(userId, chapterId);
+  };
 
   // 📊 특정 챕터의 기존 진행률 확인 (생성 X)
-  const checkExistingChapterProgress = (chapterIndex: number) => {
-    const chapter = chapters[chapterIndex];
-    const progress = ProgressTracker.getWatchProgress(userId, chapter.id);
-    
-    if (progress) {
-      // 기존 진행률이 있으면 마지막 시청 지점으로 설정
-      setStartTime(progress.currentTime);
-      setHasProgressData(true);
-      console.log(`📖 기존 진행률 발견 - 챕터 ${chapter.id}: ${progress.currentTime}초부터`);
-    } else {
-      // 기존 진행률이 없으면 처음부터
-      setStartTime(0);
-      setHasProgressData(false);
-      console.log(`📝 새 챕터 - 챕터 ${chapter.id}: 처음부터 시작`);
-    }
-  };
+// 📊 특정 챕터의 기존 진행률 확인 및 상태 설정
+const checkExistingChapterProgress = (chapterIndex: number) => {
+  const chapter = chapters[chapterIndex];
+  if (!chapter || !userId) {
+    console.warn("⚠️ chapter 또는 userId 없음 — 진행률 확인 생략");
+    return;
+  }
+
+  const progress = ProgressTracker.getWatchProgress(userId, chapter.id);
+
+  if (progress && typeof progress.currentTime === "number") {
+    setStartTime(progress.currentTime);
+    setHasProgressData(true);
+
+    console.log(
+      `📖 기존 진행률 발견 - 챕터 ${chapter.id}: ${progress.currentTime}초부터 (전체 ${progress.watchedPercentage}%)`
+    );
+  } else {
+    setStartTime(0);
+    setHasProgressData(false);
+
+    console.log(`📝 새 챕터 - 챕터 ${chapter.id}: 처음부터 시작`);
+  }
+};
+
 
   // 🎬 비디오 재생 시작 시 진행률 생성
   const handleVideoPlay = () => {

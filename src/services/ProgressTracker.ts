@@ -119,17 +119,29 @@ interface WatchProgress {
         };
         
         this.saveAllProgress(allProgress);
+
+          // 🔥 저장 시점 상세 로그 추가
+    console.log(`💾 진행률 저장 완료:`, {
+      userId,
+      chapterId,
+      currentTime: updates.currentTime,
+      watchedPercentage: updates.watchedPercentage?.toFixed(1) + '%',
+      isCompleted,
+      저장시각: now,
+      전체저장데이터: JSON.stringify(allProgress[key], null, 2)
+    });
         
-        console.log(`✅ 진행률 업데이트: ${userId}_${chapterId} → ${updates.watchedPercentage?.toFixed(1)}% ${isCompleted ? '(완료!)' : ''}`);
         return allProgress[key];
       } else {
         console.log(`❌ 진행률 업데이트 실패: ${key} 데이터가 없습니다.`);
         return null;
       }
     }
-  
-    // 🔥 3. 진행률 조회
+//조회 호출 스택 추
     static getWatchProgress(userId: string, chapterId: number): WatchProgress | null {
+      // 🔥 호출 스택 추적
+      console.trace(`📊 진행률 조회 호출:`, `${userId}_${chapterId}`);
+      
       const allProgress = this.getAllProgress();
       const key = `${userId}_${chapterId}`;
       const progress = allProgress[key] || null;
@@ -140,6 +152,7 @@ interface WatchProgress {
       
       return progress;
     }
+  
   
     // 🔥 4. 사용자 전체 진행률 요약
     static getUserProgressSummary(userId: string, totalChapters: number = 6): UserProgressSummary {

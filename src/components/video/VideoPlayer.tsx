@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, RotateCcw, Clock, CheckCircle } from 'lucide-react';
-import { WatchProgress } from '../../types/video';
-import { WatchProgressService } from '../../services/ WatchProgressService';
-import { chaptersData } from '../../data/chapters';
-
+import React, { useState, useEffect, useRef } from "react";
+import { Play, Pause, Volume2, Settings, RotateCcw } from "lucide-react";
+import { WatchProgress, Chapter } from "../../types/videoTypes";
+import { WatchProgressService } from "../../services/WatchProgressService";
+import { chaptersData } from "../../data/chapters";
+import { useWatchProgress } from "../../hooks/useWatchProgress";
 
 interface VideoPlayerProps {
   userId: string;
@@ -12,24 +12,19 @@ interface VideoPlayerProps {
   className?: string;
 }
 
-export const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
-  userId, 
-  chapterId, 
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  userId,
+  chapterId,
   onProgressUpdate,
-  className = ""
+  className = "",
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [watchStartTime, setWatchStartTime] = useState<number | null>(null);
   const [sessionWatchTime, setSessionWatchTime] = useState<number>(0);
 
-  const { 
-    watchProgress, 
-    loading, 
-    error, 
-    updateProgress, 
-    incrementSession 
-  } = useWatchProgress(userId, chapterId);
+  const { watchProgress, loading, error, updateProgress, incrementSession } =
+    useWatchProgress(userId, chapterId);
 
   // 비디오 메타데이터 로드 완료
   const handleLoadedMetadata = useCallback(() => {
@@ -46,11 +41,11 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       if (isPlaying) {
         videoRef.current.pause();
         setIsPlaying(false);
-        
+
         // 일시정지 시 세션 시청 시간 계산
         if (watchStartTime) {
           const sessionTime = Date.now() - watchStartTime;
-          setSessionWatchTime(prev => prev + sessionTime);
+          setSessionWatchTime((prev) => prev + sessionTime);
           setWatchStartTime(null);
         }
       } else {
@@ -59,7 +54,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         setWatchStartTime(Date.now());
       }
     } catch (error) {
-      console.error('비디오 재생 오류:', error);
+      console.error("비디오 재생 오류:", error);
     }
   }, [isPlaying, watchProgress, watchStartTime]);
 
@@ -81,7 +76,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       const updates = {
         currentTime,
         watchedPercentage,
-        totalWatchTime
+        totalWatchTime,
       };
 
       updateProgress(updates);
@@ -91,7 +86,13 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onProgressUpdate({ ...watchProgress, ...updates });
       }
     }
-  }, [watchProgress, sessionWatchTime, watchStartTime, updateProgress, onProgressUpdate]);
+  }, [
+    watchProgress,
+    sessionWatchTime,
+    watchStartTime,
+    updateProgress,
+    onProgressUpdate,
+  ]);
 
   // 처음부터 다시보기
   const restartVideo = useCallback(() => {
@@ -99,7 +100,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
       videoRef.current.currentTime = 0;
       updateProgress({
         currentTime: 0,
-        watchedPercentage: 0
+        watchedPercentage: 0,
       });
       incrementSession();
     }
@@ -110,7 +111,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setIsPlaying(false);
     if (watchStartTime) {
       const sessionTime = Date.now() - watchStartTime;
-      setSessionWatchTime(prev => prev + sessionTime);
+      setSessionWatchTime((prev) => prev + sessionTime);
       setWatchStartTime(null);
     }
   }, [watchStartTime]);
@@ -118,7 +119,9 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // 로딩 상태
   if (loading) {
     return (
-      <div className={`flex items-center justify-center h-64 bg-gray-100 rounded-lg ${className}`}>
+      <div
+        className={`flex items-center justify-center h-64 bg-gray-100 rounded-lg ${className}`}
+      >
         <div className="text-gray-500">진행률 데이터 로딩 중...</div>
       </div>
     );
@@ -127,16 +130,22 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   // 에러 상태
   if (error || !watchProgress) {
     return (
-      <div className={`flex items-center justify-center h-64 bg-red-50 rounded-lg border border-red-200 ${className}`}>
-        <div className="text-red-600">{error || '진행률 데이터를 불러올 수 없습니다.'}</div>
+      <div
+        className={`flex items-center justify-center h-64 bg-red-50 rounded-lg border border-red-200 ${className}`}
+      >
+        <div className="text-red-600">
+          {error || "진행률 데이터를 불러올 수 없습니다."}
+        </div>
       </div>
     );
   }
 
-  const chapter = chaptersData.find(c => c.id === chapterId);
+  const chapter = chaptersData.find((c) => c.id === chapterId);
 
   return (
-    <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${className}`}>
+    <div
+      className={`bg-white rounded-lg shadow-lg overflow-hidden ${className}`}
+    >
       {/* 헤더 */}
       <div className="p-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
         <h3 className="text-xl font-bold">📺 {chapter?.title}</h3>
@@ -154,18 +163,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             </div>
           )}
         </div>
-        
+
         <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-          <div 
+          <div
             className="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500"
             style={{ width: `${watchProgress.watchedPercentage}%` }}
           />
         </div>
-        
+
         <div className="flex justify-between text-xs text-gray-600">
           <span>{watchProgress.watchedPercentage.toFixed(1)}% 완료</span>
           <span>세션 {watchProgress.sessionCount}회</span>
-          <span>총 {Math.floor(watchProgress.totalWatchTime / (1000 * 60))}분 시청</span>
+          <span>
+            총 {Math.floor(watchProgress.totalWatchTime / (1000 * 60))}분 시청
+          </span>
         </div>
       </div>
 
@@ -179,16 +190,17 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
           onEnded={handleVideoEnded}
           src="https://www.w3schools.com/html/mov_bbb.mp4"
         />
-        
+
         {/* 이어보기 알림 */}
-        {watchProgress.currentTime > 10 && watchProgress.watchedPercentage < 90 && (
-          <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>이어보기: {formatTime(watchProgress.currentTime)}</span>
+        {watchProgress.currentTime > 10 &&
+          watchProgress.watchedPercentage < 90 && (
+            <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4" />
+                <span>이어보기: {formatTime(watchProgress.currentTime)}</span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
 
       {/* 컨트롤 버튼 */}
@@ -198,10 +210,14 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             onClick={togglePlay}
             className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
           >
-            {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-            {isPlaying ? '일시정지' : '재생'}
+            {isPlaying ? (
+              <Pause className="w-4 h-4" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+            {isPlaying ? "일시정지" : "재생"}
           </button>
-          
+
           <button
             onClick={restartVideo}
             className="flex items-center gap-2 px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-lg transition-colors"
