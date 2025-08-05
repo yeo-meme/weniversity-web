@@ -137,7 +137,7 @@ interface WatchProgress {
         return null;
       }
     }
-//조회 호출 스택 추
+
     static getWatchProgress(userId: string, chapterId: number): WatchProgress | null {
       // 🔥 호출 스택 추적
       console.trace(`📊 진행률 조회 호출:`, `${userId}_${chapterId}`);
