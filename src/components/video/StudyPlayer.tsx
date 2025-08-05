@@ -1,5 +1,5 @@
 // src/components/StudyPlayer.tsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect,useMemo } from "react";
 import {
   Play,
   Pause,
@@ -18,6 +18,7 @@ import {
 
 // ProgressTracker import
 import { ProgressTracker } from "../../services/ProgressTracker";
+import { ProgressCalculator } from '../../utils/progressCalculator';
 
 // 챕터 데이터 타입
 interface Chapter {
@@ -157,16 +158,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   //     video.removeEventListener("loadedmetadata", handleLoadedMetadata);
   //   };
   // }, [currentVideo]);
-  const formatTime = (seconds: number): string => {
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-    return hrs > 0
-      ? `${hrs}:${mins.toString().padStart(2, "0")}:${secs
-          .toString()
-          .padStart(2, "0")}`
-      : `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  // const formatTime = (seconds: number): string => {
+  //   const hrs = Math.floor(seconds / 3600);
+  //   const mins = Math.floor((seconds % 3600) / 60);
+  //   const secs = Math.floor(seconds % 60);
+  //   return hrs > 0
+  //     ? `${hrs}:${mins.toString().padStart(2, "0")}:${secs
+  //         .toString()
+  //         .padStart(2, "0")}`
+  //     : `${mins}:${secs.toString().padStart(2, "0")}`;
+  // };
 
   const handlePlayPause = () => {
     const video = videoRef.current;
@@ -226,19 +227,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     onLoadedMetadata(duration);
   };
 
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const video = videoRef.current;
-    if (!video) return;
 
-    const progressBar = e.currentTarget;
-    const clickPosition = e.nativeEvent.offsetX;
-    const progressBarWidth = progressBar.offsetWidth;
-
-    const newTime = (clickPosition / progressBarWidth) * video.duration;
-
-    video.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
 
   // const handleTimeUpdate = () => {
   //   if (videoRef.current) {
@@ -327,7 +316,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
           {/* 시간 표시 */}
           <span className="text-white text-sm">
-            {formatTime(currentTime)} / {formatTime(duration)}
+          {ProgressCalculator.formatTime(currentTime)} / {ProgressCalculator.formatTime(duration)}
           </span>
 
           {/* 진행률 바 */}
@@ -368,6 +357,7 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
 
   //🏠 냉장고 (캐시) 만들기
   const [cachedProgress, setCachedProgress] = useState<Record<number, any>>({});
+
 
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -592,10 +582,22 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
         }
         setLastSaveTime(now);
       }
-    }
+    // }
+    // // 90% 이상 재생되면 완료로 표시
+    // if (videoDuration > 0 && currentTime / videoDuration >= 0.9) {
+    //   if (!completedChapters.has(currentChapterIndex)) {
+    //     setCompletedChapters((prev) => new Set([...prev, currentChapterIndex]));
 
-    // 90% 이상 재생되면 완료로 표시
-    if (videoDuration > 0 && currentTime / videoDuration >= 0.9) {
+    //     if (hasProgressData) {
+    //       ProgressTracker.completeChapter(userId, currentChapter.id);
+    //       console.log(`🎉 챕터 완료: ${currentChapter.title}`);
+    //     }
+    //   }
+    // }
+  };
+
+    // ✅ 수정된 코드: 유틸 함수 사용
+    if (ProgressCalculator.isChapterCompleted(currentTime, videoDuration)) {
       if (!completedChapters.has(currentChapterIndex)) {
         setCompletedChapters((prev) => new Set([...prev, currentChapterIndex]));
 
@@ -668,25 +670,43 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
   };
 
   // 🔄 이어보기 기능
+  // const handleContinueWatching = () => {
+  //   const nextChapter = ProgressTracker.getNextChapterToWatch(
+  //     userId,
+  //     chapters.length
+  //   );
+  //   const chapterIndex = chapters.findIndex((ch) => ch.id === nextChapter);
+
+  //   if (chapterIndex !== -1) {
+  //     const lastPosition = ProgressTracker.getLastWatchPosition(
+  //       userId,
+  //       nextChapter
+  //     );
+
+  //     setCurrentChapterIndex(chapterIndex);
+  //     setStartTime(lastPosition);
+
+  //     console.log(
+  //       `▶️ 이어보기: 챕터 ${nextChapter} (${chapters[chapterIndex].title}) ${lastPosition}초부터`
+  //     );
+  //   }
+  // };
+
   const handleContinueWatching = () => {
-    const nextChapter = ProgressTracker.getNextChapterToWatch(
-      userId,
-      chapters.length
-    );
-    const chapterIndex = chapters.findIndex((ch) => ch.id === nextChapter);
+    // ✅ 수정된 코드: 유틸 함수 사용
+    const nextChapterId = ProgressCalculator.getNextChapterToWatch(chapters, progressMap);
+    
+    if (nextChapterId) {
+      const chapterIndex = chapters.findIndex((ch) => ch.id === nextChapterId);
+      if (chapterIndex !== -1) {
+        const savedProgress = progressMap[nextChapterId];
+        const lastPosition = savedProgress?.currentTime || 0;
 
-    if (chapterIndex !== -1) {
-      const lastPosition = ProgressTracker.getLastWatchPosition(
-        userId,
-        nextChapter
-      );
+        setCurrentChapterIndex(chapterIndex);
+        setStartTime(lastPosition);
 
-      setCurrentChapterIndex(chapterIndex);
-      setStartTime(lastPosition);
-
-      console.log(
-        `▶️ 이어보기: 챕터 ${nextChapter} (${chapters[chapterIndex].title}) ${lastPosition}초부터`
-      );
+        console.log(`▶️ 이어보기: 챕터 ${nextChapterId} ${ProgressCalculator.formatTime(lastPosition)}부터`);
+      }
     }
   };
 
@@ -710,26 +730,59 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
   };
 
   // 시간 포맷팅
-  const formatTime = (seconds: number): string => {
-    const roundedSeconds = Math.floor(seconds); // 소수점 제거로 버벅임 방지
-    const hrs = Math.floor(roundedSeconds / 3600);
-    const mins = Math.floor((roundedSeconds % 3600) / 60);
-    const secs = roundedSeconds % 60;
-    return hrs > 0
-      ? `${hrs}:${mins.toString().padStart(2, "0")}:${secs
-          .toString()
-          .padStart(2, "0")}`
-      : `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
+  // const formatTime = (seconds: number): string => {
+  //   const roundedSeconds = Math.floor(seconds); // 소수점 제거로 버벅임 방지
+  //   const hrs = Math.floor(roundedSeconds / 3600);
+  //   const mins = Math.floor((roundedSeconds % 3600) / 60);
+  //   const secs = roundedSeconds % 60;
+  //   return hrs > 0
+  //     ? `${hrs}:${mins.toString().padStart(2, "0")}:${secs
+  //         .toString()
+  //         .padStart(2, "0")}`
+  //     : `${mins}:${secs.toString().padStart(2, "0")}`;
+  // };
 
   // 전체 완료된 시간 계산
-  const completedTime =
-    Array.from(completedChapters).reduce((acc, chapterIndex) => {
-      return acc + chapters[chapterIndex].durationSeconds;
-    }, 0) + (chapterProgress[currentChapterIndex] || 0);
+  // const completedTime =
+  //   Array.from(completedChapters).reduce((acc, chapterIndex) => {
+  //     return acc + chapters[chapterIndex].durationSeconds;
+  //   }, 0) + (chapterProgress[currentChapterIndex] || 0);
 
-  const overallProgress =
-    totalDuration > 0 ? (completedTime / totalDuration) * 100 : 0;
+  // const overallProgress =
+  //   totalDuration > 0 ? (completedTime / totalDuration) * 100 : 0;
+  const progressMap = useMemo(() => {
+    const map: Record<number, any> = {};
+    chapters.forEach((chapter, index) => {
+      if (cachedProgress[chapter.id]) {
+        map[chapter.id] = {
+          ...cachedProgress[chapter.id],
+          isCompleted: completedChapters.has(index)
+        };
+      }
+    });
+    return map;
+  }, [cachedProgress, completedChapters, chapters]);
+
+  // 계산된 값들
+  const totalWatchTime = useMemo(() => 
+    ProgressCalculator.getTotalWatchTime(chapters, progressMap), 
+    [chapters, progressMap]
+  );
+
+  const overallProgress = useMemo(() => 
+    ProgressCalculator.getOverallProgress(chapters, progressMap), 
+    [chapters, progressMap]
+  );
+
+  const estimatedRemaining = useMemo(() => 
+    ProgressCalculator.getEstimatedRemaining(chapters, progressMap), 
+    [chapters, progressMap]
+  );
+
+  const progressSummaryData = useMemo(() => 
+    ProgressCalculator.generateProgressSummary(chapters, progressMap), 
+    [chapters, progressMap]
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -819,7 +872,7 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
               <div className="flex items-center gap-4 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  <span>{formatTime(totalDuration)}</span>
+                  <span> ({ProgressCalculator.formatTime(totalDuration)})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <CheckCircle className="w-4 h-4 text-green-500" />
@@ -830,13 +883,10 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
 
             {/* Progress Summary */}
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-3">
                 <h3 className="font-medium text-gray-900">학습 진행률</h3>
                 <span className="text-sm text-gray-600">
-                  {progressSummary
-                    ? `${Math.round(progressSummary.overallProgress)}%`
-                    : `${Math.round(overallProgress)}%`}{" "}
-                  완료
+                  {Math.round(overallProgress)}% 완료
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
@@ -852,10 +902,8 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
                 />
               </div>
               <div className="flex justify-between text-sm text-gray-600">
-                <span>시청 시간: {formatTime(completedTime)}</span>
-                <span>
-                  남은 시간: {formatTime(totalDuration - completedTime)}
-                </span>
+              <span>시청 시간: {ProgressCalculator.formatTime(totalWatchTime)}</span>
+              <span>남은 시간: {ProgressCalculator.formatTime(estimatedRemaining)}</span>
               </div>
 
               {/* 현재 챕터 진행률 */}
@@ -863,7 +911,7 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
                   <span>현재 챕터: {currentChapter.title}</span>
                   <span>
-                    {formatTime(currentTime)} / {formatTime(duration)}
+                    {ProgressCalculator.formatTime(currentTime)} / {ProgressCalculator.formatTime(duration)}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
@@ -999,7 +1047,8 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
                                     {Math.round(savedPercent)}%
                                   </span>
                                   <span className="text-gray-500">
-                                    ({formatTime(lastWatchTime)})
+                                    {/* ✅ 유틸 함수 사용 */}
+                                ({ProgressCalculator.formatTime(lastWatchTime)})
                                   </span>
                                 </div>
                               )}
@@ -1042,7 +1091,8 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
                         )}
                         {!isCompleted && hasData && !isCurrent && (
                           <span className="text-yellow-600">
-                            {formatTime(lastWatchTime)}부터
+                                      {/* ✅ 유틸 함수 사용 */}
+                          {ProgressCalculator.formatTime(lastWatchTime)}부터
                           </span>
                         )}
                         {!hasData && !isCurrent && (
@@ -1063,10 +1113,10 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
                   현재 챕터: {currentChapter.id} - {currentChapter.title}
                 </div>
                 <div>
-                  현재 재생 시간: {formatTime(currentTime)} /{" "}
-                  {formatTime(duration)}
+                 {/* ✅ 유틸 함수 사용 */}
+                 현재 재생 시간: {ProgressCalculator.formatTime(currentTime)} / {ProgressCalculator.formatTime(duration)}
                 </div>
-                <div>시작 지점: {formatTime(startTime)}</div>
+                <div>시작 지점: {ProgressCalculator.formatTime(startTime)}</div>
                 <div>
                   진행률 데이터 존재: {hasProgressData ? "✅ 있음" : "❌ 없음"}
                 </div>
