@@ -1,5 +1,5 @@
 // src/components/StudyPlayer.tsx
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Play,
   Pause,
@@ -107,13 +107,54 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   startTime = 0,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [currentTime, setCurrentTime] = useState(startTime);
+  const [duration, setDuration] = useState(0);
+  const [isPaused, setIsPaused] = useState(true);
+  const [isReady, setIsReady] = useState(false);
 
+  //tartTime 변경 감지
   useEffect(() => {
-    if (videoRef.current) {
-      console.log(`🎬 비디오 로드 시도: ${currentVideo}`);
-      videoRef.current.load();
-    }
-  }, [currentVideo]);
+    console.log(`🔄 VideoPlayer startTime 변경: ${startTime.toFixed(1)}초`);
+    setCurrentTime(startTime);
+    setIsReady(true); // 준비 완료
+  }, [startTime]);
+
+  //비디오 변경 시 초기화
+  useEffect(() => {
+    console.log(`🎬 비디오 변경: ${currentVideo}`);
+    setCurrentTime(startTime);
+    setDuration(0);
+    setIsPaused(true);
+  }, [currentVideo, startTime]);
+
+  //이벤트 리스너 등록만 담당 (한 번만)
+  // useEffect(() => {
+  //   const video = videoRef.current;
+  //   if (!video) return;
+
+  //   const handleLoadedMetadata = () => {
+  //     setDuration(video.duration);
+
+  //     // ⭐️ 핵심: startTime 적용 및 UI 상태 동기화
+  //     if (startTime > 0) {
+  //       e.currentTarget.currentTime = startTime;
+  //       setCurrentTime(startTime); // 🔥 UI 상태도 즉시 동기화
+  //       console.log(`✅ 시작 지점 설정: ${startTime.toFixed(1)}초`);
+  //     } else {
+  //       setCurrentTime(0);
+  //       console.log(`✅ 처음부터 시작: 0초`);
+  //     }
+
+  //     // onLoadedMetadata는 useCallback으로 안정화된 함수 사용
+  //     onLoadedMetadata?.();
+  //   };
+
+  //   video.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+  //   return () => {
+  //     video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+  //   };
+  // }, [currentVideo]);
 
   const handleLoadStart = () => {
     console.log(`📥 비디오 로드 시작: ${currentVideo}`);
@@ -131,32 +172,73 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     console.log(`📊 비디오 데이터 로드 완료: ${currentVideo}`);
   };
 
-  // 시작 지점 설정
-  useEffect(() => {
-    if (videoRef.current && startTime > 0) {
-      videoRef.current.currentTime = startTime;
-      console.log(`▶️ 이어보기: ${startTime}초부터 시작`);
-    }
-  }, [startTime, currentVideo]);
+  const handleTimeUpdate = (
+    e: React.SyntheticEvent<HTMLVideoElement, Event>
+  ) => {
+    setCurrentTime(e.currentTarget.currentTime); // 현재 재생 시간 상태 업데이트
+    onTimeUpdate(currentTime, duration); // 외부에서 전달받은 콜백도 호출
+  };
 
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      const { currentTime, duration } = videoRef.current;
-      onTimeUpdate(currentTime, duration);
+  const handleLoadedMetadata = (e: React.SyntheticEvent<HTMLVideoElement, Event>) => {
+    const video = e.currentTarget;
+    setDuration(video.duration);
+    
+    if (startTime > 0) {
+      video.currentTime = startTime;
+      setCurrentTime(startTime); // 동기화
+      console.log(`🎥 시작 지점: ${startTime.toFixed(1)}초`);
+    }
+    
+    onLoadedMetadata?.(e);
+  };
+
+  //추가: 재생/일시정지 핸들러
+  const handlePlayPause = () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.play();
+      setIsPaused(false);
+      onPlay?.(); // 외부 onPlay 핸들러 호출
+    } else {
+      video.pause();
+      setIsPaused(true);
     }
   };
 
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      const { duration } = videoRef.current;
-      onLoadedMetadata(duration);
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const video = videoRef.current;
+    if (!video) return;
 
-      // 메타데이터 로드 후 시작 지점 설정
-      if (startTime > 0) {
-        videoRef.current.currentTime = startTime;
-      }
-    }
+    const progressBar = e.currentTarget;
+    const clickPosition = e.nativeEvent.offsetX;
+    const progressBarWidth = progressBar.offsetWidth;
+
+    const newTime = (clickPosition / progressBarWidth) * video.duration;
+
+    video.currentTime = newTime;
+    setCurrentTime(newTime);
   };
+
+  // const handleTimeUpdate = () => {
+  //   if (videoRef.current) {
+  //     const { currentTime, duration } = videoRef.current;
+  //     onTimeUpdate(currentTime, duration);
+  //   }
+  // };
+
+  // const handleLoadedMetadata = () => {
+  //   if (videoRef.current) {
+  //     const { duration } = videoRef.current;
+  //     onLoadedMetadata(duration);
+
+  //     // 메타데이터 로드 후 시작 지점 설정
+  //     if (startTime > 0) {
+  //       videoRef.current.currentTime = startTime;
+  //     }
+  //   }
+  // };
 
   const handleEnded = () => {
     onEnded();
@@ -180,12 +262,37 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onCanPlay={handleCanPlay} // 🔥 추가
         onError={handleError} // 🔥 추가
         onLoadedData={handleLoadedData} // 🔥 추가
-        controls
+        controls={false}
         className="w-full aspect-video rounded-lg"
       >
         <source src={`/video/${currentVideo}`} type="video/mp4" />
         브라우저가 video 태그를 지원하지 않습니다.
       </video>
+
+      {/* 재생/일시정지 버튼 추가 */}
+      <button
+        onClick={handlePlayPause}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white bg-black bg-opacity-50 rounded-full p-4 text-2xl"
+      >
+        {isPaused ? "▶️" : "⏸️"}
+      </button>
+      {/* 재생 커스텀 UI */}
+      <div className="progress-container relative h-2 bg-gray-300 rounded-full cursor-pointer mt-2" onClick={handleSeek}>
+        <div
+          className="progress-bar absolute h-full bg-blue-500 rounded-full transition-all duration-300"
+          style={{ 
+            width: `${isReady && duration > 0 ? (currentTime / duration) * 100 : 0}%` 
+          }}
+        />
+        {/* 🔧 디버깅용 정보 표시 */}
+        <div className="text-xs text-gray-600 mt-1 flex justify-between">
+          <span>현재: {currentTime.toFixed(1)}초</span>
+          <span>총: {duration.toFixed(1)}초</span>
+          <span>진행률: {duration > 0 ? ((currentTime / duration) * 100).toFixed(1) : 0}%</span>
+          <span>startTime: {startTime.toFixed(1)}초</span>
+          <span>준비상태: {isReady ? '✅' : '⏳'}</span>
+        </div>
+      </div>
     </div>
   );
 };
@@ -206,6 +313,8 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
   courseData,
   userId = "user123",
 }) => {
+  const STORAGE_KEY = "cachedProgress";
+
   //🏠 냉장고 (캐시) 만들기
   const [cachedProgress, setCachedProgress] = useState<Record<number, any>>({});
 
@@ -232,9 +341,42 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
 
   //🛒 편의점 : 컴포넌트 마운트 시 기존 진행률만 조회 (생성하지 않음)
   useEffect(() => {
+    const savedCache = localStorage.getItem(STORAGE_KEY);
+    console.log("✅ 로컬스토리지 불러오기:", savedCache);
+    
+    if (savedCache) {
+      const parsed = JSON.parse(savedCache);
+      setCachedProgress(parsed);
+      console.log("📦 캐시 설정 완료:", parsed);
+    }
+    
     loadExistingProgress();
-    console.log("진행률만 조회 실행");
-  }, [userId]);
+  }, [userId]); // currentChapterIndex 제거
+
+  //캐시변경시 스토리지저장
+  useEffect(() => {
+    try {
+      const json = JSON.stringify(cachedProgress);
+      localStorage.setItem(STORAGE_KEY, json);
+      console.log("✅ 로컬스토리지에 진행률 저장 완료:", json);
+    } catch (error) {
+      console.error("❌ 로컬스토리지 저장 실패:", error);
+    }
+  }, [cachedProgress]);
+
+  useEffect(() => {
+    if (Object.keys(cachedProgress).length > 0) { // 캐시가 로드된 후에만
+      const chapterId = chapters[currentChapterIndex]?.id;
+      if (chapterId && cachedProgress[chapterId]?.currentTime) {
+        const savedTime = cachedProgress[chapterId].currentTime;
+        setStartTime(savedTime);
+        console.log(`🎯 챕터 ${chapterId} 진행률 적용: ${savedTime}초`);
+      } else {
+        setStartTime(0);
+        console.log(`🎯 챕터 ${chapterId} 처음부터 시작`);
+      }
+    }
+  }, [currentChapterIndex, cachedProgress]); // cachedProgress 의존성 추가
 
   // 🔥 챕터 변경 시 기존 진행률 확인 (생성하지 않음) 무한루프발생
   // useEffect(() => {
@@ -245,18 +387,18 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
       // 유효한 인덱스일 때만
       checkExistingChapterProgress(currentChapterIndex);
     }
-  }, [currentChapterIndex]); // userId 제거
+  }, [currentChapterIndex]);
 
   // 🛒 편의점쇼핑 : 기존 진행률 데이터만 조회 (생성 X)
-  const loadExistingProgress = useCallback(() => {
-    const progressCache: Record<number, any> = {};
+  const loadExistingProgress = () => {
+    const progressCache: Record<number, any> = {}; // 빈 객체 초기화
     const userCompletedChapters = new Set<number>();
     const userChapterProgress: Record<number, number> = {};
 
     chapters.forEach((chapter, index) => {
       const progress = ProgressTracker.getWatchProgress(userId, chapter.id);
       if (progress) {
-        progressCache[chapter.id] = progress; // 캐시에 저장
+        progressCache[chapter.id] = progress; // ✅ 임시 객체에 데이터 누적
         if (progress.isCompleted) {
           userCompletedChapters.add(index);
         }
@@ -264,12 +406,13 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
       }
     });
 
-    setCachedProgress(progressCache); // 🏠 냉장고에 저장
+    // ✅ 루프가 끝난 후 상태를 한 번에 업데이트
+    setCachedProgress(progressCache);
     setCompletedChapters(userCompletedChapters);
     setChapterProgress(userChapterProgress);
 
     console.log(`📈 진행률 캐시 완료:`, progressCache);
-  }, [userId]);
+  };
 
   // 📊 특정 챕터의 기존 진행률 확인 (생성 X)
   // 📊 특정 챕터의 기존 진행률 확인 및 상태 설정
@@ -286,6 +429,7 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
     // const progress = ProgressTracker.getWatchProgress(userId, chapter.id);
 
     if (progress && typeof progress.currentTime === "number") {
+      console.log(`저장시작 : ${progress.currentTime.toFixed(1)}`);
       setStartTime(progress.currentTime);
       setHasProgressData(true);
 
@@ -330,6 +474,12 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
 
       if (newProgress) {
         setHasProgressData(true);
+
+        setCachedProgress((prev) => ({
+          ...prev,
+          [currentChapter.id]: newProgress,
+        }));
+
         console.log(`✅ 진행률 생성 완료: ${newProgress.id}`);
       }
     }
@@ -352,7 +502,7 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
     if (hasProgressData && isVideoPlaying) {
       // 5초마다 저장 (너무 자주 저장하지 않기 위해)
       const now = Date.now();
-      if (now - lastSaveTime > 5000) {
+      if (now - lastSaveTime > 1000) {
         // 5초 간격
         const watchedPercentage =
           videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0;
@@ -710,11 +860,18 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
                   const hasData = savedProgress !== null;
 
                   if (savedProgress) {
-                    console.log(
-                      `🏠 [캐시 사용] 챕터 ${chapter.id}: ${savedPercent}%`
-                    );
+                    console.log(`🏠 [캐시 사용] 챕터 ${chapter.id}:`, {
+                      재생시간: `${savedProgress.currentTime.toFixed(1)}초`,
+                      총길이: `${savedProgress.totalDuration.toFixed(1)}초`,
+                      진행률: `${savedPercent.toFixed(1)}%`,
+                      완료여부: savedProgress.isCompleted
+                        ? "✅ 완료"
+                        : "⏳ 진행중",
+                      마지막시청: new Date(
+                        savedProgress.lastWatchedAt
+                      ).toLocaleTimeString(),
+                    });
                   }
-
                   return (
                     <div
                       key={chapter.id}
