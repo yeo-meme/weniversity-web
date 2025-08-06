@@ -1,6 +1,6 @@
 // src/App.tsx
 import React, { useState } from 'react';
-import StudyPlayeringSystem from './components/video/StudyPlayer';
+// import StudyPlayeringSystem from './components/video/StudyPlayer';
 import PlayeringSystem from './components/video/StudyLayoutPlayer';
 
 const App: React.FC = () => {
