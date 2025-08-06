@@ -8,6 +8,8 @@ import {
 } from "../store/courseSlice";
 import CourseCard from "../components/course/CourseCard";
 import FilterButton from "../components/course/FilterButton";
+import ResetIcon from "../assets/icon-reset.png";
+import DeleteIcon from "../assets/icon-X.png";
 
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -128,90 +130,98 @@ const CoursePage: React.FC = () => {
               ))}
             </div>
           </div>
-
-          {/* 필터 컨트롤 버튼들 */}
-          <div className="flex items-center justify-between pt-4 border-t border-gray-200">
-            {hasActiveFilters() && (
-              <button
-                onClick={handleClearFilters}
-                className="text-sm text-blue-600 hover:text-blue-500"
-              >
-                필터 초기화
-              </button>
-            )}
-          </div>
         </div>
+        {/* 필터 컨트롤 버튼들 */}
+        <div className="flex items-center mt-8">
+          {hasActiveFilters() && (
+            <button
+              onClick={handleClearFilters}
+              className="border rounded-lg px-4 py-3 flex text-sm hover:text-blue-500"
+            >
+              <img src={ResetIcon} alt="" className="mr-2" /> 필터 초기화
+            </button>
+          )}
+          {/* 선택된 필터 표시 */}
+          {hasActiveFilters() && (
+            <div className="ml-6">
+              <div className="flex flex-wrap gap-2">
+                {/* 카테고리 필터 */}
+                {!activeFilters.categories.includes("전체") &&
+                  activeFilters.categories.map(category => (
+                    <span
+                      key={`category-${category}`}
+                      className="inline-flex items-center text-sm rounded-md px-3 py-1 bg-slate-700 text-white"
+                    >
+                      {category}
+                      <button
+                        onClick={() =>
+                          handleFilterChange("categories", category)
+                        }
+                        className="ml-2 hover:text-blue-600"
+                      >
+                        <img src={DeleteIcon} alt="" />
+                      </button>
+                    </span>
+                  ))}
 
-        {/* 선택된 필터 표시 */}
-        {hasActiveFilters() && (
-          <div className="mb-6">
-            <div className="flex flex-wrap gap-2">
-              {/* 카테고리 필터 */}
-              {!activeFilters.categories.includes("전체") &&
-                activeFilters.categories.map(category => (
+                {/* 유형 필터 */}
+                {activeFilters.subjects.map(subject => (
                   <span
-                    key={`category-${category}`}
-                    className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800"
+                    key={`subject-${subject}`}
+                    className="inline-flex items-center text-sm rounded-md px-3 py-1 bg-slate-700 text-white"
                   >
-                    주제: {category}
+                    {subject}
                     <button
-                      onClick={() => handleFilterChange("categories", category)}
+                      onClick={() => handleFilterChange("subjects", subject)}
                       className="ml-2 hover:text-blue-600"
                     >
-                      <svg
-                        className="w-3 h-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
+                      <img src={DeleteIcon} alt="" />
                     </button>
                   </span>
                 ))}
 
-              {/* 기타 필터들 */}
-              {activeFilters.subjects.map(subject => (
-                <span
-                  key={`subject-${subject}`}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
-                >
-                  유형: {subject}
-                  <button
-                    onClick={() => handleFilterChange("subjects", subject)}
-                    className="ml-2 hover:text-green-600"
+                {/* 난이도 필터 */}
+                {activeFilters.levels.map(level => (
+                  <span
+                    key={`level-${level}`}
+                    className="inline-flex items-center text-sm rounded-md px-3 py-1 bg-slate-700 text-white"
                   >
-                    <svg
-                      className="w-3 h-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                    {level}
+                    <button
+                      onClick={() => handleFilterChange("levels", level)}
+                      className="ml-2 hover:text-blue-600"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </span>
-              ))}
+                      <img src={DeleteIcon} alt="" />
+                    </button>
+                  </span>
+                ))}
+
+                {/* 가격 필터 */}
+                {activeFilters.formats.map(format => (
+                  <span
+                    key={`format-${format}`}
+                    className="inline-flex items-center text-sm rounded-md px-3 py-1 bg-slate-700 text-white"
+                  >
+                    {format}
+                    <button
+                      onClick={() => handleFilterChange("formats", format)}
+                      className="ml-2 hover:text-blue-600"
+                    >
+                      <img src={DeleteIcon} alt="" />
+                    </button>
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* 코스 목록 */}
-        <div className="mb-6">
+        <div className="my-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900">
               강의 목록 ({filteredCourses.length}개)
-            </h2>
+            </h3>
           </div>
 
           {error && (

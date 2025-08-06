@@ -1,3 +1,4 @@
+// store/courseSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { Course, CourseState } from "../types/course";
@@ -13,78 +14,75 @@ export const fetchCourses = createAsyncThunk<Course[]>(
     // }
     // return await response.json();
 
-    // 더미 데이터
+    // 🔥 더미 데이터 (가격 태그 추가)
     return [
       {
         id: "1",
         title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-        instructor: "김여밈 강사님",
+        instructor: "한재현 강사님",
         instructorRole: "위니버 CPO",
         description:
           "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
         image: "/course-images/python-community.jpg",
-        tags: ["KDC", "프론트엔드", "초급"],
+        tags: ["부스트 커뮤니티", "백엔드", "초급", "무료"],
         category: "프론트엔드",
         level: "초급",
       },
       {
         id: "2",
         title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-        instructor: "김여밈 강사님",
+        instructor: "한재현 강사님",
         instructorRole: "위니버 CPO",
         description:
           "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
         image: "/course-images/python-community.jpg",
-        tags: ["VOD", "백엔드", "중급"],
+        tags: ["부스트 커뮤니티", "백엔드", "중급", "유료"],
         category: "백엔드",
         level: "중급",
       },
       {
         id: "3",
         title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-        instructor: "이혜민 강사님",
+        instructor: "한재현 강사님",
         instructorRole: "위니버 CPO",
         description:
           "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
         image: "/course-images/python-community.jpg",
-        tags: ["부스트 커뮤니티", "AI", "초급"],
+        tags: ["부스트 커뮤니티", "AI", "초급", "국비지원"],
         category: "AI",
         level: "초급",
       },
       {
         id: "4",
-        title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
+        title: "견고한 리액트 부스트 커뮤니티 1기",
         instructor: "이혜민 강사님",
-        instructorRole: "위니버 CPO",
-        description:
-          "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
-        image: "/course-images/python-community.jpg",
-        tags: ["부스트 커뮤니티", "AI", "초급"],
-        category: "AI",
-        level: "초급",
+        instructorRole: "위니버 CTO",
+        description: "리액트로 현대적인 웹 애플리케이션을 만들어보세요!",
+        image: "/course-images/react-community.jpg",
+        tags: ["VOD", "프론트엔드", "중급", "유료"],
+        category: "프론트엔드",
+        level: "중급",
       },
       {
         id: "5",
-        title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-        instructor: "최나영 강사님",
-        instructorRole: "위니버 CPO",
-        description:
-          "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
-        image: "/course-images/python-community.jpg",
-        tags: ["KDC", "백엔드", "실무"],
-        category: "백엔드",
+        title: "AI 머신러닝 기초 과정",
+        instructor: "김데이터 강사님",
+        instructorRole: "데이터 사이언티스트",
+        description: "AI와 머신러닝의 기초부터 실무까지 배워보세요!",
+        image: "/course-images/ai-course.jpg",
+        tags: ["KDC", "AI", "실무", "국비지원"],
+        category: "AI",
         level: "실무",
       },
       {
         id: "6",
-        title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-        instructor: "최나영 강사님",
-        instructorRole: "위니버 CPO",
-        description:
-          "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
-        image: "/course-images/python-community.jpg",
-        tags: ["VOD", "프론트엔드", "실무"],
-        category: "AI",
+        title: "풀스택 개발자 과정",
+        instructor: "박풀스택 강사님",
+        instructorRole: "시니어 개발자",
+        description: "프론트엔드부터 백엔드까지 모든 것을 배우는 과정입니다!",
+        image: "/course-images/fullstack-course.jpg",
+        tags: ["VOD", "백엔드", "실무", "무료"],
+        category: "백엔드",
         level: "실무",
       },
     ];
@@ -104,7 +102,7 @@ const initialState: CourseState = {
       "디자인",
       "기타",
     ],
-    subjects: ["VOD", "부스트 커뮤니티", "KDC"],
+    subjects: ["VOD", "부스트 커뮤니티"],
     levels: ["초급", "중급", "실무"],
     formats: ["무료", "유료", "국비지원"],
     prices: [],
@@ -194,12 +192,30 @@ const courseSlice = createSlice({
         );
       }
 
-      // 기타 필터들 (구현 예정)
-      // if (state.activeFilters.subjects.length > 0) {
-      //   filtered = filtered.filter(course =>
-      //     state.activeFilters.subjects.some(subject => course.tags.includes(subject))
-      //   );
-      // }
+      // 🔥 유형 필터 (subjects)
+      if (state.activeFilters.subjects.length > 0) {
+        filtered = filtered.filter(course =>
+          state.activeFilters.subjects.some(subject =>
+            course.tags.includes(subject)
+          )
+        );
+      }
+
+      // 🔥 난이도 필터 (levels)
+      if (state.activeFilters.levels.length > 0) {
+        filtered = filtered.filter(course =>
+          state.activeFilters.levels.includes(course.level)
+        );
+      }
+
+      // 🔥 가격 필터 (formats)
+      if (state.activeFilters.formats.length > 0) {
+        filtered = filtered.filter(course =>
+          state.activeFilters.formats.some(format =>
+            course.tags.includes(format)
+          )
+        );
+      }
 
       state.filteredCourses = filtered;
     },
