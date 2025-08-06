@@ -1,0 +1,35 @@
+name: 🔔 Notify Discord on PR Events to Staging
+
+on:
+  pull_request:
+    types: [opened, closed]  # PR 생성 또는 닫힘(병합 포함)
+    branches:
+      - staging              # 대상 브랜치가 staging일 때만
+
+jobs:
+  notify-on-pr-open:
+    if: github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify PR Opened to Discord
+        uses: Ilshidur/action-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          message: |
+            📝 새로운 Pull Request가 생성되었습니다!
+            📌 브랜치: ${{ github.head_ref }} → staging
+            🔗 제목: ${{ github.event.pull_request.title }}
+            ✍️ 작성자: ${{ github.event.pull_request.user.login }}
+
+  notify-on-pr-merge:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify PR Merged to Discord
+        uses: Ilshidur/action-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          message: |
+            ✅ Pull Request가 staging 브랜치에 병합되었습니다!
+            🔗 제목: ${{ github.event.pull_request.title }}
+            ✍️ 작성자: ${{ github.event.pull_request.user.login }}
