@@ -9,10 +9,13 @@ import type {
 export const fetchProfile = createAsyncThunk<UserProfile>(
   "profile/fetchProfile",
   async () => {
+    // 임시 토큰 받아오기
+    const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
+
     const response = await fetch("http://13.125.180.222/api/users/mypage/", {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -32,24 +35,27 @@ export const updateProfile = createAsyncThunk<UserProfile, ProfileFormData>(
     requestData.append("name", formData.name);
     requestData.append("gender", formData.gender as string);
     requestData.append("birth_date", formData.birth_date);
+    requestData.append("email", "jaeho614a@gmail.com");
+    requestData.append("password", "jaeho614!");
 
     if (formData.profile_image) {
       requestData.append("profile_image", formData.profile_image);
     }
 
-    const response = await fetch(
-      "http://13.125.180.222/api/profile/users/mypage/",
-      {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: requestData,
-      }
-    );
+    // 임시 토큰 받아오기
+    const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
+
+    const response = await fetch("http://13.125.180.222/api/users/mypage/", {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: requestData,
+    });
 
     if (!response.ok) {
-      throw new Error("프로필 수정에 실패했습니다.");
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "프로필 수정에 실패했습니다.");
     }
 
     return await response.json();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import {
   fetchProfile,
@@ -37,8 +37,10 @@ const MyPage: React.FC = () => {
     {}
   );
   const [previewImage, setPreviewImage] = useState<string>("");
+  const isUpdatingRef = useRef(false);
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false);
 
-  // 컴포넌트 마운트 시 프로필 정보 로드
+  // 프로필 정보 로드
   useEffect(() => {
     dispatch(fetchProfile());
     return () => {
@@ -49,28 +51,52 @@ const MyPage: React.FC = () => {
   // 프로필 정보 로드 후 폼 데이터 설정
   useEffect(() => {
     if (profile) {
-      setFormData({
-        name: profile.name || "",
-        gender: profile.gender || "",
-        birth_date: profile.birth_date || "",
-        profile_image: null,
-      });
+      // 업데이트 중이 아니거나 초기 로드일 때만 폼 데이터 설정
+      if (!isUpdatingRef.current || !isInitialLoadComplete) {
+        setFormData({
+          name: profile.name || "",
+          gender: profile.gender || "",
+          birth_date: profile.birth_date || "",
+          profile_image: null,
+        });
 
-      // 프로필 이미지 설정 (있으면 DB 이미지, 없으면 기본 이미지)
-      const imageSrc = profile.profile_image
-        ? profile.profile_image
-        : "../../assets/profile-none.png";
-      setPreviewImage(imageSrc);
+        // 프로필 이미지 설정
+        if (profile.profile_image) {
+          // 서버에서 전체 URL을 제공하는 경우
+          if (profile.profile_image.startsWith("http")) {
+            setPreviewImage(profile.profile_image);
+          } else {
+            // 상대 경로인 경우 서버 URL과 결합
+            setPreviewImage(`http://13.125.180.222${profile.profile_image}`);
+          }
+        } else {
+          // 기본 이미지
+          setPreviewImage("../../assets/profile-none.png");
+        }
+
+        setIsInitialLoadComplete(true);
+      }
     }
-  }, [profile, previewImage]);
+  }, [profile, isInitialLoadComplete]);
 
-  // 수정 성공 시 메시지
+  // 이미지 업데이트
   useEffect(() => {
     if (success) {
       alert("프로필이 성공적으로 수정되었습니다!");
+      isUpdatingRef.current = false;
+
       dispatch(resetProfileState());
+
+      // previewImage 업데이트
+      if (profile && profile.profile_image) {
+        if (profile.profile_image.startsWith("http")) {
+          setPreviewImage(profile.profile_image);
+        } else {
+          setPreviewImage(`http://13.125.180.222${profile.profile_image}`);
+        }
+      }
     }
-  }, [success, dispatch]);
+  }, [success, dispatch, profile]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -95,7 +121,6 @@ const MyPage: React.FC = () => {
   ) => {
     const { name, value } = e.target;
 
-    // 값이 있을 때만 touched 상태로 설정
     if (value.trim()) {
       setTouchedFields(prev => ({
         ...prev,
@@ -106,18 +131,54 @@ const MyPage: React.FC = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (file) {
+      // 파일 크기 검사 (5MB 제한)
+      const maxSize = 5 * 1024 * 1024;
+
+      if (file.size > maxSize) {
+        alert("이미지 크기는 5MB 이하여야 합니다.");
+        e.target.value = "";
+        return;
+      }
+
+      // 파일 타입 검사
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+      ];
+
+      if (!allowedTypes.includes(file.type)) {
+        alert("지원되는 이미지 형식은 JPEG, PNG, GIF, WebP입니다.");
+        e.target.value = "";
+        return;
+      }
+
       setFormData(prev => ({
         ...prev,
         profile_image: file,
       }));
 
-      // 이미지 미리보기
+      //  이미지 미리보기
       const reader = new FileReader();
-      reader.onload = e => {
-        setPreviewImage(e.target?.result as string);
+
+      reader.onload = event => {
+        const result = event.target?.result;
+        if (result && typeof result === "string") {
+          setPreviewImage(result);
+        }
       };
+
+      reader.onerror = error => {
+        alert("이미지 파일을 읽는 중 오류가 발생했습니다.");
+      };
+
       reader.readAsDataURL(file);
+    } else {
+      // 파일이 선택되지 않았을 때는 미리보기 초기화하지 않음
+      console.log("❌ No file selected");
     }
   };
 
@@ -138,10 +199,13 @@ const MyPage: React.FC = () => {
       return;
     }
 
+    // 업데이트 시작
+    isUpdatingRef.current = true;
+
     dispatch(updateProfile(formData));
   };
 
-  // 폼이 비어있는지 확인하는 함수
+  // 폼이 비어있는지 확인
   const isFormEmpty = () => {
     return !formData.name || !formData.gender || !formData.birth_date;
   };
@@ -238,7 +302,7 @@ const MyPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setActiveTab("account")}
-                className={`w-full text-left px-4 py-2 rounded-md text-sm font-medium ${
+                className={`w-full text-left px-4 py-2 rounded-md text-sim font-medium ${
                   activeTab === "account"
                     ? "bg-blue-100 text-blue-700"
                     : "text-gray-600 hover:bg-gray-50"

@@ -1,6 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import FindPasswordInput from "../../components/mypage/accountmanagement/findPasswordInput";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import {
+  sendPasswordResetEmail,
+  resetPasswordResetState,
+  clearPasswordResetError,
+} from "../../store/findPasswordSlice";
 
 interface FindPasswordModalProps {
   isOpen: boolean;
@@ -11,11 +17,40 @@ const FindPasswordModal: React.FC<FindPasswordModalProps> = ({
   isOpen,
   onClose,
 }) => {
+  const dispatch = useAppDispatch();
+  const { loading, error, success, message } = useAppSelector(
+    state => state.findPassword
+  );
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [touched, setTouched] = useState(false);
 
-  // 이메일 유효성 검사 함수
+  // 모달 닫을 때 상태 초기화
+  const handleClose = useCallback(() => {
+    setEmail("");
+    setErrorMessage("");
+    setTouched(false);
+    dispatch(resetPasswordResetState());
+    onClose();
+  }, [dispatch, onClose]);
+
+  useEffect(() => {
+    if (success && message) {
+      alert(message);
+      setEmail("");
+      setErrorMessage("");
+      setTouched(false);
+      dispatch(resetPasswordResetState());
+      onClose();
+    }
+  }, [success, message, dispatch, onClose]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetPasswordResetState());
+    };
+  }, [dispatch]);
+
   const validateEmail = (email: string): string => {
     if (!email) {
       return "이메일을 입력해주세요.";
@@ -34,35 +69,31 @@ const FindPasswordModal: React.FC<FindPasswordModalProps> = ({
     const value = e.target.value;
     setEmail(value);
 
-    // 실시간 유효성 검사
-    const error = validateEmail(value);
-    setErrorMessage(error);
+    const validationError = validateEmail(value);
+    setErrorMessage(validationError);
+
+    // Redux 에러 클리어 (사용자가 다시 입력할 때)
+    if (error) {
+      dispatch(clearPasswordResetError());
+    }
   };
 
   const handleBlur = () => {
     setTouched(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const error = validateEmail(email);
-    setErrorMessage(error);
+    const validationError = validateEmail(email);
+    setErrorMessage(validationError);
     setTouched(true);
 
-    if (error) {
+    if (validationError) {
       return;
     }
 
-    console.log("이메일 전송:", email);
-    // 여기에 실제 비밀번호 재설정 로직 구현
-    alert("비밀번호 재설정 링크를 이메일로 보냈습니다.");
-
-    // 폼 초기화 및 모달 닫기
-    setEmail("");
-    setErrorMessage("");
-    setTouched(false);
-    onClose();
+    dispatch(sendPasswordResetEmail({ email }));
   };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -71,15 +102,11 @@ const FindPasswordModal: React.FC<FindPasswordModalProps> = ({
     }
   };
 
-  const handleClose = () => {
-    // 모달 닫을 때 상태 초기화
-    setEmail("");
-    setErrorMessage("");
-    setTouched(false);
-    onClose();
-  };
-
   if (!isOpen) return null;
+
+  // 표시할 에러 메시지 결정
+  const displayError = errorMessage || error;
+  const showError = touched && !!displayError;
 
   return createPortal(
     <div
@@ -125,29 +152,37 @@ const FindPasswordModal: React.FC<FindPasswordModalProps> = ({
               value={email}
               onChange={handleEmailChange}
               onBlur={handleBlur}
-              errorMessage={errorMessage}
-              showError={touched}
+              errorMessage={displayError}
+              showError={showError}
             />
           </div>
+
+          {/* API 에러 메시지 */}
+          {error && !errorMessage && (
+            <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
 
           {/* 버튼 */}
           <button
             type="submit"
-            disabled={!email.trim() || !!errorMessage}
+            disabled={!email.trim() || !!errorMessage || loading}
             className={`w-full py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-              !email.trim() || !!errorMessage
+              !email.trim() || !!errorMessage || loading
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                 : "bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             }`}
           >
-            이메일 보내기
+            {loading ? "이메일 전송 중..." : "이메일 보내기"}
           </button>
         </form>
 
-        {/* 닫기 버튼 (X) */}
+        {/* 닫기 버튼 */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+          disabled={loading}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
         >
           <svg
             className="w-6 h-6"

@@ -5,7 +5,7 @@ interface FindPasswordInputProps {
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  errorMessage?: string;
+  errorMessage?: string | null;
   showError?: boolean;
 }
 

@@ -25,7 +25,7 @@ const AccountManagement: React.FC = () => {
             <div className="relative">
               <input
                 type="email"
-                value="paul-lab@naver.com"
+                value="jaeho614a@gmail.com"
                 disabled
                 className="block w-[257px] px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed sm:text-sm"
               />
