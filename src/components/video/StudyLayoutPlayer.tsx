@@ -18,6 +18,7 @@ interface VideoPlayerProps {
   onEnded: () => void;
   onPlay: () => void; // ▶️ 재생 시작 이벤트 추가
   startTime?: number;
+  autoPlay?: boolean;
 }
 
 export const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -27,6 +28,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onEnded,
   onPlay,
   startTime = 0,
+  autoPlay = false,
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSentTimeRef = useRef(0);
@@ -208,6 +210,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     <div className="relative w-full">
       <video
         ref={videoRef}
+        src={`/public/video/${currentVideo}`} 
         onTimeUpdate={onVideoTimeUpdate}
         onLoadedMetadata={syncVideoDuration}
         onEnded={handleEnded}
@@ -218,6 +221,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onError={handleError}
         onLoadedData={handleLoadedData}
         controls={false}
+        autoPlay={autoPlay} 
         className="w-full aspect-video rounded-lg"
       >
         <source src={`/video/${currentVideo}`} type="video/mp4" />
@@ -419,6 +423,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     }
   }, [cachedProgress]);
 
+  //start타임 찾아
   useEffect(() => {
     if (Object.keys(cachedProgress).length > 0) {
       const chapterId = chapters[currentChapterIndex]?.id;
@@ -433,6 +438,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     }
   }, [currentChapterIndex]);
 
+  //currentChapterIndex체킹
   useEffect(() => {
     if (currentChapterIndex >= 0) {
       checkExistingChapterProgress(currentChapterIndex);
@@ -723,6 +729,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
               onEnded={handleVideoEnded}
               onPlay={handleVideoPlay}
               startTime={startTime}
+              autoPlay
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
