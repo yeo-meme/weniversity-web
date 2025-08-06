@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { WatchProgress, UpdateWatchProgressParams } from "../types/videoTypes";
+import type { WatchProgress, UpdateWatchProgressParams } from "../types/videoTypes";
 import { WatchProgressService } from "../services/WatchProgressService";
 
 export const useWatchProgress = (userId: string, chapterId: number) => {

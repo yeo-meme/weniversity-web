@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,useCallback } from "react";
 import { Play, Pause, Volume2, Settings, RotateCcw } from "lucide-react";
-import { WatchProgress, Chapter } from "../../types/videoTypes";
+import type { WatchProgress, Chapter } from "../../types/videoTypes";
 import { WatchProgressService } from "../../services/WatchProgressService";
 import { chaptersData } from "../../data/chapters";
 import { useWatchProgress } from "../../hooks/useWatchProgress";

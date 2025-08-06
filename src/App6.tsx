@@ -1,6 +1,7 @@
 // src/App.tsx
 import React, { useState } from 'react';
 import StudyPlayeringSystem from './components/video/StudyPlayer';
+import PlayeringSystem from './components/video/StudyLayoutPlayer';
 
 const App: React.FC = () => {
   const [showVideoSystem, setShowVideoSystem] = useState(false);
@@ -14,7 +15,7 @@ const App: React.FC = () => {
 
   if (showVideoSystem) {
     return (
-      <StudyPlayeringSystem
+      <PlayeringSystem
         onClose={() => setShowVideoSystem(false)}
         courseData={courseData}
         userId={currentUser}
