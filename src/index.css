@@ -73,6 +73,14 @@ button:focus-visible {
   }
 } */
 
+html {
+  overflow-y: scroll;
+}
+
 body {
   @apply font-pretendard;
+}
+
+input::placeholder {
+  @apply text-gray500;
 }
