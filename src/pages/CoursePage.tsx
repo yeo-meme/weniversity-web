@@ -1,21 +1,29 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import {
   fetchCourses,
   setActiveFilter,
   clearAllFilters,
   resetCourseState,
+  setCurrentPage,
 } from "../store/courseSlice";
 import CourseCard from "../components/course/CourseCard";
 import FilterButton from "../components/course/FilterButton";
+import Pagination from "../components/common/Pagination";
 import ResetIcon from "../assets/icon-reset.png";
 import DeleteIcon from "../assets/icon-X.png";
 import EmptyIcon from "../assets/icon-empty.png";
 
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { filteredCourses, filters, activeFilters, loading, error } =
-    useAppSelector(state => state.course);
+  const {
+    filteredCourses,
+    filters,
+    activeFilters,
+    pagination,
+    loading,
+    error,
+  } = useAppSelector(state => state.course);
 
   useEffect(() => {
     dispatch(fetchCourses());
@@ -23,6 +31,13 @@ const CoursePage: React.FC = () => {
       dispatch(resetCourseState());
     };
   }, [dispatch]);
+
+  // 현재 페이지에 표시할 강의들 계산
+  const paginatedCourses = useMemo(() => {
+    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+    const endIndex = startIndex + pagination.itemsPerPage;
+    return filteredCourses.slice(startIndex, endIndex);
+  }, [filteredCourses, pagination.currentPage, pagination.itemsPerPage]);
 
   const handleFilterChange = (
     filterType: keyof typeof activeFilters,
@@ -33,6 +48,12 @@ const CoursePage: React.FC = () => {
 
   const handleClearFilters = () => {
     dispatch(clearAllFilters());
+  };
+
+  const handlePageChange = (page: number) => {
+    dispatch(setCurrentPage(page));
+    // 페이지 변경 시 스크롤을 맨 위로 이동
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const hasActiveFilters = () => {
@@ -226,6 +247,18 @@ const CoursePage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900">
               강의 목록 ({filteredCourses.length}개)
             </h3>
+            <div className="text-sm text-gray-500">
+              {filteredCourses.length > 0 && (
+                <span>
+                  {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}-
+                  {Math.min(
+                    pagination.currentPage * pagination.itemsPerPage,
+                    filteredCourses.length
+                  )}{" "}
+                  / {filteredCourses.length}
+                </span>
+              )}
+            </div>
           </div>
 
           {error && (
@@ -240,11 +273,21 @@ const CoursePage: React.FC = () => {
               <p className="mt-6 text-gray-500">찾는 조건의 강의가 없습니다.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {filteredCourses.map(course => (
-                <CourseCard key={course.id} course={course} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {paginatedCourses.map(course => (
+                  <CourseCard key={course.id} course={course} />
+                ))}
+              </div>
+
+              {/* 페이지네이션 */}
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalItems={filteredCourses.length}
+                itemsPerPage={pagination.itemsPerPage}
+                onPageChange={handlePageChange}
+              />
+            </>
           )}
         </div>
       </div>

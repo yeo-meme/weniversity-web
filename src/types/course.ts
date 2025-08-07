@@ -7,7 +7,7 @@ export interface Course {
   image: string;
   tags: string[];
   category: string;
-  level: "초급" | "중급" | "고급";
+  level: "초급" | "중급" | "고급" | "실무";
   duration?: string;
   price?: number;
 }
@@ -18,6 +18,12 @@ export interface CourseFilters {
   levels: string[];
   formats: string[];
   prices: string[];
+}
+
+export interface PaginationState {
+  currentPage: number;
+  itemsPerPage: number;
+  totalItems: number;
 }
 
 export interface CourseState {
@@ -31,6 +37,7 @@ export interface CourseState {
     formats: string[];
     prices: string[];
   };
+  pagination: PaginationState;
   loading: boolean;
   error: string | null;
 }

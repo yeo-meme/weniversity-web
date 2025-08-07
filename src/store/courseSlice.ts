@@ -1,4 +1,3 @@
-// store/courseSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { Course, CourseState } from "../types/course";
@@ -13,7 +12,6 @@ export const fetchCourses = createAsyncThunk<Course[]>(
     //   throw new Error("코스 목록을 불러오는데 실패했습니다.");
     // }
     // return await response.json();
-
     // 더미 데이터
     return [
       {
@@ -85,6 +83,51 @@ export const fetchCourses = createAsyncThunk<Course[]>(
         category: "백엔드",
         level: "실무",
       },
+      // 더미 데이터 추가 (페이지네이션 테스트용)
+      {
+        id: "7",
+        title: "Vue.js 완벽 가이드",
+        instructor: "박개발 강사님",
+        instructorRole: "프론트엔드 전문가",
+        description: "Vue.js로 모던한 웹 애플리케이션을 개발해보세요!",
+        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
+        tags: ["VOD", "프론트엔드", "중급", "유료"],
+        category: "프론트엔드",
+        level: "중급",
+      },
+      {
+        id: "8",
+        title: "Node.js 백엔드 개발",
+        instructor: "김백엔드 강사님",
+        instructorRole: "백엔드 개발자",
+        description: "Node.js로 강력한 백엔드 서버를 구축해보세요!",
+        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
+        tags: ["부스트 커뮤니티", "백엔드", "실무", "무료"],
+        category: "백엔드",
+        level: "실무",
+      },
+      {
+        id: "9",
+        title: "데이터 사이언스 입문",
+        instructor: "이데이터 강사님",
+        instructorRole: "데이터 분석가",
+        description: "데이터 분석의 기초부터 실전까지!",
+        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
+        tags: ["KDC", "데이터 분석", "초급", "국비지원"],
+        category: "데이터 분석",
+        level: "초급",
+      },
+      {
+        id: "10",
+        title: "UI/UX 디자인 완성",
+        instructor: "최디자인 강사님",
+        instructorRole: "UX 디자이너",
+        description: "사용자 중심의 디자인을 배워보세요!",
+        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
+        tags: ["VOD", "디자인", "중급", "유료"],
+        category: "디자인",
+        level: "중급",
+      },
     ];
   }
 );
@@ -114,6 +157,11 @@ const initialState: CourseState = {
     formats: [],
     prices: [],
   },
+  pagination: {
+    currentPage: 1,
+    itemsPerPage: 6,
+    totalItems: 0,
+  },
   loading: false,
   error: null,
 };
@@ -125,6 +173,14 @@ const courseSlice = createSlice({
     resetCourseState: state => {
       state.loading = false;
       state.error = null;
+      state.pagination.currentPage = 1;
+    },
+    setCurrentPage: (state, action: PayloadAction<number>) => {
+      state.pagination.currentPage = action.payload;
+    },
+    setItemsPerPage: (state, action: PayloadAction<number>) => {
+      state.pagination.itemsPerPage = action.payload;
+      state.pagination.currentPage = 1; // 페이지당 아이템 수가 변경되면 첫 페이지로 이동
     },
     setActiveFilter: (
       state,
@@ -166,6 +222,9 @@ const courseSlice = createSlice({
         }
       }
 
+      // 필터가 변경되면 첫 페이지로 이동
+      state.pagination.currentPage = 1;
+
       // 필터 적용
       courseSlice.caseReducers.applyFilters(state);
     },
@@ -177,7 +236,9 @@ const courseSlice = createSlice({
         formats: [],
         prices: [],
       };
+      state.pagination.currentPage = 1;
       state.filteredCourses = state.courses;
+      state.pagination.totalItems = state.courses.length;
     },
     applyFilters: state => {
       let filtered = state.courses;
@@ -218,6 +279,7 @@ const courseSlice = createSlice({
       }
 
       state.filteredCourses = filtered;
+      state.pagination.totalItems = filtered.length;
     },
   },
   extraReducers: builder => {
@@ -230,6 +292,7 @@ const courseSlice = createSlice({
         state.loading = false;
         state.courses = action.payload;
         state.filteredCourses = action.payload;
+        state.pagination.totalItems = action.payload.length;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
         state.loading = false;
@@ -239,6 +302,11 @@ const courseSlice = createSlice({
   },
 });
 
-export const { resetCourseState, setActiveFilter, clearAllFilters } =
-  courseSlice.actions;
+export const {
+  resetCourseState,
+  setActiveFilter,
+  clearAllFilters,
+  setCurrentPage,
+  setItemsPerPage,
+} = courseSlice.actions;
 export default courseSlice.reducer;
