@@ -10,6 +10,7 @@ import CourseCard from "../components/course/CourseCard";
 import FilterButton from "../components/course/FilterButton";
 import ResetIcon from "../assets/icon-reset.png";
 import DeleteIcon from "../assets/icon-X.png";
+import EmptyIcon from "../assets/icon-empty.png";
 
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -131,6 +132,7 @@ const CoursePage: React.FC = () => {
             </div>
           </div>
         </div>
+
         {/* 필터 컨트롤 버튼들 */}
         <div className="flex items-center mt-8">
           {hasActiveFilters() && (
@@ -138,9 +140,11 @@ const CoursePage: React.FC = () => {
               onClick={handleClearFilters}
               className="border rounded-lg px-4 py-3 flex text-sm hover:text-blue-500"
             >
-              <img src={ResetIcon} alt="" className="mr-2" /> 필터 초기화
+              <img src={ResetIcon} alt="" className="mr-2" />
+              필터 초기화
             </button>
           )}
+
           {/* 선택된 필터 표시 */}
           {hasActiveFilters() && (
             <div className="ml-6">
@@ -231,8 +235,9 @@ const CoursePage: React.FC = () => {
           )}
 
           {filteredCourses.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500">조건에 맞는 강의가 없습니다.</p>
+            <div className="flex flex-col items-center justify-center text-center py-12">
+              <img src={EmptyIcon} alt="" />
+              <p className="mt-6 text-gray-500">찾는 조건의 강의가 없습니다.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

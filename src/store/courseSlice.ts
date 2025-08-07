@@ -192,7 +192,7 @@ const courseSlice = createSlice({
         );
       }
 
-      // 🔥 유형 필터 (subjects)
+      // 유형 필터
       if (state.activeFilters.subjects.length > 0) {
         filtered = filtered.filter(course =>
           state.activeFilters.subjects.some(subject =>
@@ -201,14 +201,14 @@ const courseSlice = createSlice({
         );
       }
 
-      // 🔥 난이도 필터 (levels)
+      // 난이도 필터
       if (state.activeFilters.levels.length > 0) {
         filtered = filtered.filter(course =>
           state.activeFilters.levels.includes(course.level)
         );
       }
 
-      // 🔥 가격 필터 (formats)
+      // 가격 필터
       if (state.activeFilters.formats.length > 0) {
         filtered = filtered.filter(course =>
           state.activeFilters.formats.some(format =>
