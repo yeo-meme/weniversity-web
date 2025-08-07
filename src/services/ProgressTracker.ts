@@ -7,9 +7,15 @@ import type {
   LocalProgressCache,
 } from '../types/progress.types'; 
 
+import  { convertCacheToWatchProgress } from '../utils/convertCacheToWatchProgress';  
+
+
+
+
 
 export class ProgressTracker {
   private static readonly STORAGE_KEY = "video_watch_progress";
+  private static readonly LOCAL_CACHE_KEY = "local_progress_cache";
 
   // 모든 진행률 데이터 가져오기
   private static getAllProgress(): Record<string, WatchProgress> {
@@ -21,6 +27,12 @@ export class ProgressTracker {
   private static saveAllProgress(data: Record<string, WatchProgress>): void {
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
   }
+
+  //  // 로컬 캐시(간단한 LocalCourseCache 형태) 불러오기
+  //  static getLocalCache(): LocalProgressCache {
+  //   const stored = localStorage.getItem(this.LOCAL_CACHE_KEY);
+  //   return stored ? JSON.parse(stored) : {};
+  // }
 
   // 🔥 1. 새 진행률 생성
   static createWatchProgress(params: CreateWatchProgressParams): WatchProgress {

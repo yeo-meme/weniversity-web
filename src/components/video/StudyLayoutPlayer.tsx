@@ -9,11 +9,16 @@ import {
 } from "lucide-react";
 import { ProgressCalculator } from "../../utils/progressCalculator";
 import { ProgressTracker } from "../../services/ProgressTracker";
-import { loadCache, updateCache } from "../../services/LocalProgressCache";
-import type { LocalProgressCache } from "../../services/LocalProgressCache";
-import type { ProgressCacheEntry } from "../../types/progress.types";
+import type { 
+  LocalProgressCache, 
+  LocalCourseCache,
+  LocalChapterCache,
+} from '../../types/progress.types';
 
-// import { VideoPlayer } from "../video/VideoPlayer"
+
+import type {SimpleProgressCache} from "../../services/SimpleProgressCache"
+import { loadCache, updateCache } from '../../services/SimpleProgressCache';
+
 
 interface VideoPlayerProps {
   currentVideo: string;
@@ -355,7 +360,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   const [cachedProgress, setCachedProgress] = useState<
     Record<number, WatchProgress>
   >({});
-  const [realtimeCache, setRealtimeCache] = useState<LocalProgressCache>({});
+  const [realtimeCache, setRealtimeCache] = useState<SimpleProgressCache>({});
 
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -408,15 +413,34 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     });
   };
 
-  //캐시로드 - 백업 로드
+  //기존 캐시로드 - 백업 로드
+  // useEffect(() => {
+  //   const savedRealtimeCache: LocalProgressCache = loadCache();
+  //   if (savedRealtimeCache && Object.keys(savedRealtimeCache).length > 0) {
+  //     setRealtimeCache(savedRealtimeCache);
+  //     console.log("📦 실시간 캐시 로드:", savedRealtimeCache);
+  //   }
+
+  //   // 2. ProgressTracker에서 DB 백업 데이터 로드
+  //   loadExistingProgress();
+  // }, [userId]);
+
+  //뉴캐시
   useEffect(() => {
-    const savedRealtimeCache: LocalProgressCache = loadCache();
+    // LocalStorage 전체 구조 로드 ✅
+    const savedRealtimeCache: SimpleProgressCache = loadCache();
     if (savedRealtimeCache && Object.keys(savedRealtimeCache).length > 0) {
       setRealtimeCache(savedRealtimeCache);
       console.log("📦 실시간 캐시 로드:", savedRealtimeCache);
+      
+      // 현재 코스의 진행률만 확인
+      const userCourseKey = `progress_${userId}_course${courseData?.id || 1}`;
+      const currentCourseCache = savedRealtimeCache[userCourseKey];
+      if (currentCourseCache) {
+        console.log("📚 현재 코스 캐시:", currentCourseCache);
+      }
     }
-
-    // 2. ProgressTracker에서 DB 백업 데이터 로드
+  
     loadExistingProgress();
   }, [userId]);
 
@@ -563,7 +587,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //   }
   // };
 
-  const getProgressFromCache = (chapterId: number): ProgressCacheEntry | WatchProgress | null => {
+  const getProgressFromCache = (chapterId: number): LocalChapterCache | WatchProgress | null => {
 
     const currentIndex = chapters.findIndex(ch => ch.id === chapterId);
     if (currentIndex !== -1 && chapterProgress[currentIndex]) {
@@ -571,25 +595,27 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       const chapter = chapters[currentIndex];
       
       // CacheEntry 타입변환
-      const realtimeProgress: ProgressCacheEntry = {
-        chapterId,
+      const realtimeProgress: LocalChapterCache = {
         currentTime,
-        totalDuration: chapter.durationSeconds,
-        watchedPercentage: (currentTime / chapter.durationSeconds) * 100,
-        isCompleted: false,
-        lastWatchedAt: new Date().toISOString()
+        totalDuration: chapter.durationSeconds,  // Optional이므로 있으면 추가
+        watchedPercentage: (currentTime / chapter.durationSeconds) * 100,  // Optional
+        isCompleted: false,  // Optional
+        lastUpdated: Date.now(),
+        isDirty: false
       };
       
       console.log(`🎮 현재 재생 중 진행률: 챕터 ${chapterId} - ${currentTime}초`);
       return realtimeProgress;
     }
   
-    // 1️실시간 캐시 확인 (LocalStorage)
-    const realtimeData = realtimeCache[chapterId];
-    if (realtimeData) {
-      console.log(`⚡ 실시간 캐시에서 발견: 챕터 ${chapterId}`);
-      return realtimeData;
-    }
+  // 1️⃣ 실시간 캐시 확인 - 구조 변경 ✅
+  const userCourseKey = `progress_${userId}_course${courseData?.id || 1}`;
+  const courseCache = realtimeCache[userCourseKey];
+  if (courseCache?.chapters?.[chapterId]) {
+    const chapterData = courseCache.chapters[chapterId];
+    console.log(`⚡ 실시간 캐시에서 발견: 챕터 ${chapterId}`);
+    return chapterData;
+  }
   
     // 2DB 캐시 확인 (ProgressTracker)
     const dbCached = cachedProgress[chapterId];
@@ -649,27 +675,38 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
         const watchedPercentage: number =
           videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0;
 
-        // 실시간 캐시에 저장
-        const realtimeEntry: ProgressCacheEntry = {
-          chapterId: currentChapter.id,
-          currentTime,
-          totalDuration: videoDuration,
-          watchedPercentage,
-          isCompleted: ProgressCalculator.isChapterCompleted(
-            currentTime,
-            videoDuration
-          ),
-          lastWatchedAt: new Date().toISOString(),
+
+          // 실시간 캐시 구조 변경 ✅
+      const userCourseKey = `progress_${userId}_course${courseData?.id || 1}`;
+      setRealtimeCache((prev: LocalProgressCache) => {
+        // 기존 코스 데이터가 없으면 생성
+        const existingCourse = prev[userCourseKey] || {
+          userId,
+          courseId: courseData?.id || 1,
+          chapterOrder: chapters.map(ch => ch.id),
+          chapters: {}
         };
 
-        setRealtimeCache((prev: LocalProgressCache) => ({
+        return {
           ...prev,
-          [currentChapter.id]: realtimeEntry,
-        }));
+          [userCourseKey]: {
+            ...existingCourse,
+            chapters: {
+              ...existingCourse.chapters,
+              [currentChapter.id]: {
+                currentTime,
+                totalDuration: videoDuration,  // Optional 필드
+                watchedPercentage,  // Optional 필드
+                isCompleted: ProgressCalculator.isChapterCompleted(currentTime, videoDuration),  // Optional
+                lastUpdated: now,
+                isDirty: true
+              }
+            }
+          }
+        };
+      });
 
-       
-
-        setLastSaveTime(now);
+      setLastSaveTime(now);
       }
     }
     //기존 프로그레스 데이터 캐시와 트래커 혼용사용 동시체크
