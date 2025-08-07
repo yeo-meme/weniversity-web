@@ -302,7 +302,7 @@ const MyPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setActiveTab("account")}
-                className={`w-full text-left px-4 py-2 rounded-md text-sim font-medium ${
+                className={`w-full text-left px-4 py-2 rounded-md text-sm font-medium ${
                   activeTab === "account"
                     ? "bg-blue-100 text-blue-700"
                     : "text-gray-600 hover:bg-gray-50"
