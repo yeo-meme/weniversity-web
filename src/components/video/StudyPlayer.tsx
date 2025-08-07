@@ -16,9 +16,10 @@ import {
   CloudSnow,
 } from "lucide-react";
 
-// ProgressTracker import
 import { ProgressTracker } from "../../services/ProgressTracker";
 import { ProgressCalculator } from '../../utils/progressCalculator';
+
+import NewFullPageUI from './StudyLayoutPlayer';
 
 // 챕터 데이터 타입
 interface Chapter {
@@ -99,7 +100,7 @@ interface VideoPlayerProps {
   startTime?: number;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({
+export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   currentVideo,
   onTimeUpdate,
   onLoadedMetadata,
@@ -348,12 +349,14 @@ interface StudyPlayerProps {
   userId?: string;
 }
 
-const StudyPlayer: React.FC<StudyPlayerProps> = ({
+export const StudyPlayer: React.FC<StudyPlayerProps> = ({
   onClose,
   courseData,
   userId = "user123",
 }) => {
   const STORAGE_KEY = "cachedProgress";
+  //test
+  const [showNewUI, setShowNewUI] = useState(false);
 
   //🏠 냉장고 (캐시) 만들기
   const [cachedProgress, setCachedProgress] = useState<Record<number, any>>({});
@@ -785,7 +788,17 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
   );
 
   return (
+    
     <div className="min-h-screen bg-gray-50">
+       <div className="w-full h-full">
+      {showNewUI ? (
+        <NewFullPageUI onClose={() => setShowNewUI(false)} />
+      ) : (
+        <VideoPlayer onOpenNewUI={() => setShowNewUI(true)} />
+      )}
+    </div>
+
+
       {/* 헤더 */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -1152,4 +1165,3 @@ const StudyPlayer: React.FC<StudyPlayerProps> = ({
   );
 };
 
-export default StudyPlayer;

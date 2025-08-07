@@ -1,7 +1,4 @@
-// src/services/WatchProgressService.ts
-// 타입들을 파일 내부에 직접 정의
 
-// 1. 필요한 타입들 정의
 interface Chapter {
   id: number;
   title: string;
@@ -124,6 +121,12 @@ export class WatchProgressService {
     chapterId, 
     courseId = 1 
   }: CreateWatchProgressParams): WatchProgress | null {
+    
+    if (!userId || !chapterId) {
+      console.error("❌ 유효하지 않은 userId 또는 chapterId", { userId, chapterId });
+      return null;
+    }
+    
     const chapter = chaptersData.find(c => c.id === chapterId);
     if (!chapter) {
       console.error(`Chapter ${chapterId} not found`);
