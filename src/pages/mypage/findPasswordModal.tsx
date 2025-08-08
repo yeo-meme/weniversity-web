@@ -157,13 +157,6 @@ const FindPasswordModal: React.FC<FindPasswordModalProps> = ({
             />
           </div>
 
-          {/* API 에러 메시지 */}
-          {error && !errorMessage && (
-            <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-3">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
-
           {/* 버튼 */}
           <button
             type="submit"

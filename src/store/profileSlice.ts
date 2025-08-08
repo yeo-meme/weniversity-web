@@ -10,7 +10,19 @@ export const fetchProfile = createAsyncThunk<UserProfile>(
   "profile/fetchProfile",
   async () => {
     // 임시 토큰 받아오기
-    const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
+    // const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
+    const user = await fetch("http://13.125.180.222/api/users/login/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: "jaeho614a@gmail.com",
+        password: "jaeho614!",
+      }),
+    });
+    const userData = await user.json();
+    const accessToken = userData.access;
 
     const response = await fetch("http://13.125.180.222/api/users/mypage/", {
       method: "GET",
@@ -43,7 +55,19 @@ export const updateProfile = createAsyncThunk<UserProfile, ProfileFormData>(
     }
 
     // 임시 토큰 받아오기
-    const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
+    // const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
+    const user = await fetch("http://13.125.180.222/api/users/login/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: "jaeho614a@gmail.com",
+        password: "jaeho614!",
+      }),
+    });
+    const userData = await user.json();
+    const accessToken = userData.access;
 
     const response = await fetch("http://13.125.180.222/api/users/mypage/", {
       method: "PUT",
