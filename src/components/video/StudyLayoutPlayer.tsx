@@ -423,6 +423,58 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //   loadExistingProgress();
   // }, [userId]);
 
+  // 4. 페이지 이탈 감지 (useEffect에 추가)
+useEffect(() => {
+  const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+    // 🔥 NEW: 페이지 나가기 전 마지막 진행률 저장
+    if (hasProgressData && currentChapter && isVideoPlaying) {
+      const currentProgress = getProgressFromCache(currentChapter.id);
+      if (currentProgress) {
+        // 동기적 fetch 사용 (페이지 이탈 시에는 async/await 안됨)
+        navigator.sendBeacon(
+          "http://localhost:8000/api/watch-progress/save/",
+          JSON.stringify({
+            userId,
+            courseId: courseData?.id || 1,
+            chapterId: currentChapter.id,
+            ...localChapterToWatchProgress(userId, courseData?.id || 1, currentChapter.id, currentProgress as LocalChapterCache)
+          })
+        );
+        console.log("✅ 페이지 이탈 시 진행률 저장");
+      }
+    }
+  };
+
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+}, [hasProgressData, currentChapter, isVideoPlaying, userId, courseData?.id]);
+
+
+
+  // 5. 탭 전환 감지
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      // 🔥 NEW: 탭이 숨겨질 때 진행률 저장
+      if (document.hidden && hasProgressData && currentChapter && isVideoPlaying) {
+        const currentProgress = getProgressFromCache(currentChapter.id);
+        if (currentProgress) {
+          ProgressTracker.saveProgress(
+            userId,
+            courseData?.id || 1,
+            currentChapter.id,
+            currentProgress as LocalChapterCache
+          ).then(() => {
+            console.log("✅ 탭 전환 시 진행률 저장 완료");
+          });
+        }
+      }
+    };
+  
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [hasProgressData, currentChapter, isVideoPlaying, userId, courseData?.id]);
+
+  
   //뉴캐시
   useEffect(() => {
     // LocalStorage 전체 구조 로드 ✅
@@ -887,16 +939,61 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
  
 
 
+  // 🎥 기존 기능 완료 로컬 비디오 메타데이터 로드 핸들러
+  // const onVideoReady = (videoDuration: number) => {
+  //   // setDuration(videoDuration);
+  //   console.log(`📊 비디오 메타데이터 로드: ${videoDuration}초`);
+  //   if (hasProgressData) {
+  //     ProgressTracker.updateWatchProgress(userId, currentChapter.id, {
+  //       totalDuration: videoDuration,
+  //     });
+  //   }
+  // };
+
   // 🎥 비디오 메타데이터 로드 핸들러
-  const onVideoReady = (videoDuration: number) => {
-    // setDuration(videoDuration);
-    console.log(`📊 비디오 메타데이터 로드: ${videoDuration}초`);
-    if (hasProgressData) {
-      ProgressTracker.updateWatchProgress(userId, currentChapter.id, {
-        totalDuration: videoDuration,
-      });
-    }
-  };
+const onVideoReady = (videoDuration: number) => {
+  console.log(`📊 비디오 메타데이터 로드: ${videoDuration}초`);
+  
+  if (hasProgressData) {
+    // realtimeCache 업데이트 (useEffect가 자동으로 로컬 저장)
+    // setRealtimeCache(prev => ({
+    //   ...prev,
+    //   [currentChapter.id]: {
+    //     ...prev[currentChapter.id],
+    //     totalDuration: videoDuration,
+    //   }
+    // }));
+
+    ProgressTracker.saveProgress(
+      userId,
+      courseData?.id || 1,  // courseId
+      currentChapter.id,     // chapterId
+      {
+        currentTime,
+        totalDuration: duration,
+        watchedPercentage: (currentTime / duration) * 100,
+        watchSpeed: 1.0,
+      }
+    ).then((result) => {
+      if (result) {
+        console.log("✅ 서버 저장 성공:", result);
+        
+        // 서버 저장 성공 시 dirty 플래그 해제
+        // setRealtimeCache((prev) => ({
+        //   ...prev,
+        //   [currentChapter.id]: {
+        //     ...prev[currentChapter.id],
+        //     isDirty: false
+        //   }
+        // }));
+      } else {
+        console.log("⚠️ 서버 저장 실패 - 로컬 캐시만 유지");
+      }
+    });
+  }
+};
+
+
   // 🎥 비디오 끝남 핸들러
   const handleVideoEnded = () => {
     console.log(`🏁 비디오 재생 완료: ${currentChapter.title}`);
@@ -909,7 +1006,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
         userId,
         chapters.length
       );
-      setProgressSummary(summary);
+      // setProgressSummary(summary);
     }
 
     if (currentChapterIndex < chapters.length - 1) {
@@ -924,25 +1021,55 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     }
   };
 
-  // 챕터 이동 클릭 핸들러
-  const handleChapterClick = (chapterId: number) => {
-    // saveProgressToLocalStorage();
+  // 로컬테스트 완료 : 챕터 이동 클릭 핸들러
+  // const handleChapterClick = (chapterId: number) => {
+  //   // saveProgressToLocalStorage();
 
-    const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
+  //   const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
 
-    if (chapterIndex === -1) {
-      console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
-      return;
+  //   if (chapterIndex === -1) {
+  //     console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
+  //     return;
+  //   }
+
+  //   const selectedChapter = chapters[chapterIndex];
+  //   console.log(`🎬 챕터 선택: ${selectedChapter.title}`);
+
+  //   //useEffect트리커 챕터변경감지
+  //   setCurrentChapterIndex(chapterIndex);
+  //   setCurrentTime(0);
+  //   setIsVideoPlaying(false);
+  // };
+  // 2.api 테스트 챕터 변경 - 이전 챕터 진행률 저장
+const handleChapterClick = async (chapterId: number) => {
+  // 🔥 NEW: 현재 챕터의 진행률을 서버에 저장
+  if (hasProgressData && currentChapter) {
+    const currentProgress = getProgressFromCache(currentChapter.id);
+    if (currentProgress) {
+      await ProgressTracker.saveProgress(
+        userId,
+        courseData?.id || 1,
+        currentChapter.id,
+        currentProgress as LocalChapterCache
+      );
+      console.log("✅ 챕터 변경 전 진행률 저장 완료");
     }
+  }
 
-    const selectedChapter = chapters[chapterIndex];
-    console.log(`🎬 챕터 선택: ${selectedChapter.title}`);
+  const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
+  if (chapterIndex === -1) {
+    console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
+    return;
+  }
 
-    //useEffect트리커 챕터변경감지
-    setCurrentChapterIndex(chapterIndex);
-    setCurrentTime(0);
-    setIsVideoPlaying(false);
-  };
+  const selectedChapter = chapters[chapterIndex];
+  console.log(`🎬 챕터 선택: ${selectedChapter.title}`);
+
+  setCurrentChapterIndex(chapterIndex);
+  setCurrentTime(0);
+  setIsVideoPlaying(false);
+};
+
 
   // const saveProgressToLocalStorage = () => {
   //   try {
@@ -972,6 +1099,39 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       console.log(`🔄 진행률 초기화 완료`);
     }
   };
+
+
+  // 6. 5분 체크포인트 저장 (기존 주기적 저장에 추가)
+  let lastCheckpointTime = 0;
+
+const saveCheckpoint = () => {
+  const now = Date.now();
+  if (now - lastCheckpointTime > 300000) { // 5분 = 300000ms
+    if (hasProgressData && currentChapter && isVideoPlaying) {
+      const currentProgress = getProgressFromCache(currentChapter.id);
+      if (currentProgress) {
+        ProgressTracker.saveProgress(
+          userId,
+          courseData?.id || 1,
+          currentChapter.id,
+          currentProgress as LocalChapterCache
+        ).then(() => {
+          console.log("✅ 5분 체크포인트 저장 완료");
+          lastCheckpointTime = now;
+        });
+      }
+    }
+  }
+};
+
+  if (now - lastSaveTime > 1000) {
+    // 기존 로컬 캐시 업데이트 코드...
+    
+    // 🔥 NEW: 5분 체크포인트 확인
+    saveCheckpoint();
+    
+    setLastSaveTime(now);
+  }
 
   return (
     <div className="flex h-screen bg-white">
