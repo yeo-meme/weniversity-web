@@ -15,9 +15,10 @@ import type {
   LocalChapterCache,
 } from "../../types/progress.types";
 
-import {localChapterToWatchProgress} from "../../utils/convertCacheToWatchProgress";
+import { localChapterToWatchProgress } from "../../utils/convertCacheToWatchProgress";
 import type { SimpleProgressCache } from "../../services/SimpleProgressCache";
 import { loadCache, updateCache } from "../../services/SimpleProgressCache";
+import { convertWatchProgressToCache } from "../../utils/convertCacheToWatchProgress";
 
 interface VideoPlayerProps {
   currentVideo: string;
@@ -411,7 +412,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     });
   };
 
-  //기존 캐시로드 - 백업 로드
+  //기존로컬 캐시로드 - 백업 로드
   // useEffect(() => {
   //   const savedRealtimeCache: LocalProgressCache = loadCache();
   //   if (savedRealtimeCache && Object.keys(savedRealtimeCache).length > 0) {
@@ -423,39 +424,85 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //   loadExistingProgress();
   // }, [userId]);
 
-  // 4. 페이지 이탈 감지 (useEffect에 추가)
-useEffect(() => {
-  const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-    // 🔥 NEW: 페이지 나가기 전 마지막 진행률 저장
-    if (hasProgressData && currentChapter && isVideoPlaying) {
-      const currentProgress = getProgressFromCache(currentChapter.id);
-      if (currentProgress) {
-        // 동기적 fetch 사용 (페이지 이탈 시에는 async/await 안됨)
-        navigator.sendBeacon(
-          "http://localhost:8000/api/watch-progress/save/",
-          JSON.stringify({
-            userId,
-            courseId: courseData?.id || 1,
-            chapterId: currentChapter.id,
-            ...localChapterToWatchProgress(userId, courseData?.id || 1, currentChapter.id, currentProgress as LocalChapterCache)
-          })
-        );
-        console.log("✅ 페이지 이탈 시 진행률 저장");
+  //api 조회 테스트
+  useEffect(() => {
+    async function fetchProgress() {
+      try {
+        // const res = await fetch(
+        //   `http://localhost:8000/api/watch-progress/${userId}/${courseData?.id || 1}/`
+        // );
+        const url = `http://localhost:8000/api/watch-progress/${userId}/${
+          courseData?.id || 1
+        }/`;
+        console.log("Fetching progress from URL:", url);
+
+        const res = await fetch(url);
+
+        if (!res.ok) throw new Error("서버 응답 에러");
+
+        const data = await res.json();
+        if (data && data.chapters) {
+          // chapters 배열을 적절히 realtimeCache 형태로 변환 필요
+          const formattedCache = convertWatchProgressToCache(data.chapters);
+          setRealtimeCache(formattedCache);
+          updateCache(formattedCache);
+          console.log(
+            "📦 서버에서 진행률 로드 및 캐시 저장 완료",
+            formattedCache
+          );
+        }
+      } catch (e) {
+        console.error("❌ 진행률 로드 실패", e);
+        // 필요시 로컬스토리지에서 로드하는 대체 로직도 여기에 작성 가능
       }
     }
-  };
 
-  window.addEventListener('beforeunload', handleBeforeUnload);
-  return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-}, [hasProgressData, currentChapter, isVideoPlaying, userId, courseData?.id]);
+    if (userId) {
+      fetchProgress();
+    }
+  }, [userId, courseData?.id]);
 
+  // 4. 페이지 이탈 감지 (useEffect에 추가)
+  useEffect(() => {
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+      // 🔥 NEW: 페이지 나가기 전 마지막 진행률 저장
+      if (hasProgressData && currentChapter && isVideoPlaying) {
+        const currentProgress = getProgressFromCache(currentChapter.id);
+        if (currentProgress) {
+          // 동기적 fetch 사용 (페이지 이탈 시에는 async/await 안됨)
+          navigator.sendBeacon(
+            "http://localhost:8000/api/watch-progress/save/",
+            JSON.stringify({
+              userId,
+              courseId: courseData?.id || 1,
+              chapterId: currentChapter.id,
+              ...localChapterToWatchProgress(
+                userId,
+                courseData?.id || 1,
+                currentChapter.id,
+                currentProgress as LocalChapterCache
+              ),
+            })
+          );
+          console.log("✅ 페이지 이탈 시 진행률 저장");
+        }
+      }
+    };
 
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasProgressData, currentChapter, isVideoPlaying, userId, courseData?.id]);
 
   // 5. 탭 전환 감지
   useEffect(() => {
     const handleVisibilityChange = () => {
       // 🔥 NEW: 탭이 숨겨질 때 진행률 저장
-      if (document.hidden && hasProgressData && currentChapter && isVideoPlaying) {
+      if (
+        document.hidden &&
+        hasProgressData &&
+        currentChapter &&
+        isVideoPlaying
+      ) {
         const currentProgress = getProgressFromCache(currentChapter.id);
         if (currentProgress) {
           ProgressTracker.saveProgress(
@@ -469,30 +516,30 @@ useEffect(() => {
         }
       }
     };
-  
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
   }, [hasProgressData, currentChapter, isVideoPlaying, userId, courseData?.id]);
 
-  
-  //뉴캐시
-  useEffect(() => {
-    // LocalStorage 전체 구조 로드 ✅
-    const savedRealtimeCache: SimpleProgressCache = loadCache();
-    if (savedRealtimeCache && Object.keys(savedRealtimeCache).length > 0) {
-      setRealtimeCache(savedRealtimeCache);
-      console.log("📦 실시간 캐시 로드:", savedRealtimeCache);
+  //로컬 테스트 완료
+  // useEffect(() => {
+  //   // LocalStorage 전체 구조 로드 ✅
+  //   const savedRealtimeCache: SimpleProgressCache = loadCache();
+  //   if (savedRealtimeCache && Object.keys(savedRealtimeCache).length > 0) {
+  //     setRealtimeCache(savedRealtimeCache);
+  //     console.log("📦 실시간 캐시 로드:", savedRealtimeCache);
 
-      // 현재 코스의 진행률만 확인
-      const userCourseKey = `progress_${userId}_course${courseData?.id || 1}`;
-      const currentCourseCache = savedRealtimeCache[userCourseKey];
-      if (currentCourseCache) {
-        console.log("📚 현재 코스 캐시:", currentCourseCache);
-      }
-    }
+  //     // 현재 코스의 진행률만 확인
+  //     const userCourseKey = `progress_${userId}_course${courseData?.id || 1}`;
+  //     const currentCourseCache = savedRealtimeCache[userCourseKey];
+  //     if (currentCourseCache) {
+  //       console.log("📚 현재 코스 캐시:", currentCourseCache);
+  //     }
+  //   }
 
-    loadExistingProgress();
-  }, [userId]);
+  //   loadExistingProgress();
+  // }, [userId]);
 
   // realtimeCache팔로우 저장
   useEffect(() => {
@@ -712,10 +759,7 @@ useEffect(() => {
   //   setIsVideoPlaying(true);
   // };
 
-  
-  
-  
-  //디비연결 테스트 : 일시정지시 
+  //디비연결 테스트 : 일시정지시
   const handleVideoPlay = () => {
     console.log(`🎬 비디오 재생 시작 - 챕터 ${currentChapter.id}`);
 
@@ -735,14 +779,13 @@ useEffect(() => {
         lastUpdated: raw?.lastUpdated ?? Date.now(),
         isDirty: raw?.isDirty ?? false,
       };
-      
+
       const newProgress = ProgressTracker.saveProgress(
         userId,
         courseData?.id || 1,
         currentChapter.id,
         localChapter
       );
-  
 
       if (newProgress) {
         setHasProgressData(true);
@@ -759,8 +802,7 @@ useEffect(() => {
     setIsVideoPlaying(true);
   };
 
-
-   // 🎥 로컬테스트 완료: 비디오 시간 업데이트 포즈시
+  // 🎥 로컬테스트 완료: 비디오 시간 업데이트 포즈시
   //  const handleVideoPause = (e) => {
   //   const video = e.target;
   //   const currentTime = video.currentTime;
@@ -776,9 +818,7 @@ useEffect(() => {
   //   });
   // };
 
-
-
-  //서버테스트 
+  //서버테스트
   const handleVideoPause = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget as HTMLVideoElement;
     const currentTime = video.currentTime;
@@ -788,12 +828,16 @@ useEffect(() => {
       console.warn("⚠️ 비디오 데이터가 유효하지 않음 - 저장 생략");
       return;
     }
-    
+
     console.log("⏸️ 일시정지 이벤트 발생");
     console.log("  📍 현재 시간:", currentTime.toFixed(1), "초");
     console.log("  📊 전체 길이:", duration.toFixed(1), "초");
-    console.log("  📈 진행률:", ((currentTime / duration) * 100).toFixed(1), "%");
-    
+    console.log(
+      "  📈 진행률:",
+      ((currentTime / duration) * 100).toFixed(1),
+      "%"
+    );
+
     // 1) 로컬 캐시 즉시 업데이트 (SimpleProgressCache 구조)
     // setRealtimeCache((prev) => ({
     //   ...prev,
@@ -808,31 +852,33 @@ useEffect(() => {
     // }));
 
     // 🔥 안전한 LocalChapterCache 객체 생성
-  const safeLocalChapter: LocalChapterCache = {
-    currentTime: Math.floor(currentTime), // 정수로 변환
-    totalDuration: Math.floor(duration),  // 정수로 변환
-    watchedPercentage: Math.min(100, (currentTime / duration) * 100), // 100% 초과 방지
-    isCompleted: (currentTime / duration) >= 0.9, // 90% 완료 체크
-    lastUpdated: Date.now(), // ✅ 현재 타임스탬프
-  };
-    
+    const safeLocalChapter: LocalChapterCache = {
+      currentTime: Math.floor(currentTime), // 정수로 변환
+      totalDuration: Math.floor(duration), // 정수로 변환
+      watchedPercentage: Math.min(100, (currentTime / duration) * 100), // 100% 초과 방지
+      isCompleted: currentTime / duration >= 0.9, // 90% 완료 체크
+      lastUpdated: Date.now(), // ✅ 현재 타임스탬프
+    };
+
     console.log("💾 로컬 캐시 업데이트 완료");
-    
+
     // 2) 서버에 저장 (ProgressTracker)
     ProgressTracker.saveProgress(
       userId,
       courseData?.id || 1,
       currentChapter.id,
       safeLocalChapter // ✅ 검증된 데이터 전달
-    ).then((result) => {
-      if (result) {
-        console.log("✅ 서버 저장 성공:", result);
-      } else {
-        console.log("⚠️ 서버 저장 실패 - 로컬 캐시만 유지");
-      }
-    }).catch((error) => {
-      console.error("❌ 서버 저장 중 오류:", error);
-    });
+    )
+      .then((result) => {
+        if (result) {
+          console.log("✅ 서버 저장 성공:", result);
+        } else {
+          console.log("⚠️ 서버 저장 실패 - 로컬 캐시만 유지");
+        }
+      })
+      .catch((error) => {
+        console.error("❌ 서버 저장 중 오류:", error);
+      });
   };
 
   // 🎥 로컬 :비디오 시간 업데이트 핸들러  1초 간격으로 진행률을 업데이트(진행률 데이터가 있을 때만 저장)
@@ -943,9 +989,6 @@ useEffect(() => {
     // }
   };
 
- 
-
-
   // 🎥 기존 기능 완료 로컬 비디오 메타데이터 로드 핸들러
   // const onVideoReady = (videoDuration: number) => {
   //   // setDuration(videoDuration);
@@ -958,49 +1001,53 @@ useEffect(() => {
   // };
 
   // 🎥 비디오 메타데이터 로드 핸들러
-const onVideoReady = (videoDuration: number) => {
-  console.log(`📊 비디오 메타데이터 로드: ${videoDuration}초`);
-  if (isNaN(videoDuration) || videoDuration <= 0) {
-    console.warn("⚠️ 비디오 길이가 유효하지 않음 - 저장 생략");
-    return;
-  }
+  const onVideoReady = (videoDuration: number) => {
+    console.log(`📊 비디오 메타데이터 로드: ${videoDuration}초`);
+    if (isNaN(videoDuration) || videoDuration <= 0) {
+      console.warn("⚠️ 비디오 길이가 유효하지 않음 - 저장 생략");
+      return;
+    }
 
-  if (hasProgressData) {
-    // realtimeCache 업데이트 (useEffect가 자동으로 로컬 저장)
-    // setRealtimeCache(prev => ({
-    //   ...prev,
-    //   [currentChapter.id]: {
-    //     ...prev[currentChapter.id],
-    //     totalDuration: videoDuration,
-    //   }
-    // }));
+    if (hasProgressData) {
+      // realtimeCache 업데이트 (useEffect가 자동으로 로컬 저장)
+      // setRealtimeCache(prev => ({
+      //   ...prev,
+      //   [currentChapter.id]: {
+      //     ...prev[currentChapter.id],
+      //     totalDuration: videoDuration,
+      //   }
+      // }));
 
-     // 🔥 안전한 LocalChapterCache 객체 생성
-     const safeLocalChapter: LocalChapterCache = {
-      currentTime: Math.floor(currentTime), // 현재 재생 시간
-      totalDuration: Math.floor(videoDuration), // 비디오 전체 길이
-      watchedPercentage: videoDuration > 0 ? Math.min(100, (currentTime / videoDuration) * 100) : 0,
-      isCompleted: false, // 메타데이터 로드 시점에는 완료 아님
-      lastUpdated: Date.now(), // ✅ 현재 타임스탬프
-    };
+      // 🔥 안전한 LocalChapterCache 객체 생성
+      const safeLocalChapter: LocalChapterCache = {
+        currentTime: Math.floor(currentTime), // 현재 재생 시간
+        totalDuration: Math.floor(videoDuration), // 비디오 전체 길이
+        watchedPercentage:
+          videoDuration > 0
+            ? Math.min(100, (currentTime / videoDuration) * 100)
+            : 0,
+        isCompleted: false, // 메타데이터 로드 시점에는 완료 아님
+        lastUpdated: Date.now(), // ✅ 현재 타임스탬프
+      };
 
-    ProgressTracker.saveProgress(
-      userId,
-      courseData?.id || 1,
-      currentChapter.id,
-      safeLocalChapter // ✅ 검증된 데이터 전달
-    ).then((result) => {
-      if (result) {
-        console.log("✅ 메타데이터 서버 저장 성공:", result);
-      } else {
-        console.log("⚠️ 메타데이터 서버 저장 실패");
-      }
-    }).catch((error) => {
-      console.error("❌ 메타데이터 서버 저장 중 오류:", error);
-    });
-  }
-};
-
+      ProgressTracker.saveProgress(
+        userId,
+        courseData?.id || 1,
+        currentChapter.id,
+        safeLocalChapter // ✅ 검증된 데이터 전달
+      )
+        .then((result) => {
+          if (result) {
+            console.log("✅ 메타데이터 서버 저장 성공:", result);
+          } else {
+            console.log("⚠️ 메타데이터 서버 저장 실패");
+          }
+        })
+        .catch((error) => {
+          console.error("❌ 메타데이터 서버 저장 중 오류:", error);
+        });
+    }
+  };
 
   // 🎥 비디오 끝남 핸들러
   const handleVideoEnded = () => {
@@ -1049,35 +1096,34 @@ const onVideoReady = (videoDuration: number) => {
   //   setIsVideoPlaying(false);
   // };
   // 2.api 테스트 챕터 변경 - 이전 챕터 진행률 저장
-const handleChapterClick = async (chapterId: number) => {
-  // 🔥 NEW: 현재 챕터의 진행률을 서버에 저장
-  if (hasProgressData && currentChapter) {
-    const currentProgress = getProgressFromCache(currentChapter.id);
-    if (currentProgress) {
-      await ProgressTracker.saveProgress(
-        userId,
-        courseData?.id || 1,
-        currentChapter.id,
-        currentProgress as LocalChapterCache
-      );
-      console.log("✅ 챕터 변경 전 진행률 저장 완료");
+  const handleChapterClick = async (chapterId: number) => {
+    // 🔥 NEW: 현재 챕터의 진행률을 서버에 저장
+    if (hasProgressData && currentChapter) {
+      const currentProgress = getProgressFromCache(currentChapter.id);
+      if (currentProgress) {
+        await ProgressTracker.saveProgress(
+          userId,
+          courseData?.id || 1,
+          currentChapter.id,
+          currentProgress as LocalChapterCache
+        );
+        console.log("✅ 챕터 변경 전 진행률 저장 완료");
+      }
     }
-  }
 
-  const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
-  if (chapterIndex === -1) {
-    console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
-    return;
-  }
+    const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
+    if (chapterIndex === -1) {
+      console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
+      return;
+    }
 
-  const selectedChapter = chapters[chapterIndex];
-  console.log(`🎬 챕터 선택: ${selectedChapter.title}`);
+    const selectedChapter = chapters[chapterIndex];
+    console.log(`🎬 챕터 선택: ${selectedChapter.title}`);
 
-  setCurrentChapterIndex(chapterIndex);
-  setCurrentTime(0);
-  setIsVideoPlaying(false);
-};
-
+    setCurrentChapterIndex(chapterIndex);
+    setCurrentTime(0);
+    setIsVideoPlaying(false);
+  };
 
   // const saveProgressToLocalStorage = () => {
   //   try {
@@ -1108,12 +1154,12 @@ const handleChapterClick = async (chapterId: number) => {
     }
   };
 
-
   // 6. 5분 체크포인트 저장 (기존 주기적 저장에 추가)
   let lastCheckpointTime = 0;
   const saveCheckpoint = () => {
     const now = Date.now();
-    if (now - lastCheckpointTime > 300000) { // 5분 = 300000ms
+    if (now - lastCheckpointTime > 300000) {
+      // 5분 = 300000ms
       if (hasProgressData && currentChapter && isVideoPlaying) {
         const currentProgress = getProgressFromCache(currentChapter.id);
         if (currentProgress) {
@@ -1130,17 +1176,16 @@ const handleChapterClick = async (chapterId: number) => {
       }
     }
   };
-  
+
   // onVideoProgress 내부에 체크포인트 저장 추가
   // if (now - lastSaveTime > 1000) {
   //   // 기존 로컬 캐시 업데이트 코드...
-    
+
   //   // 🔥 NEW: 5분 체크포인트 확인
   //   saveCheckpoint();
-    
+
   //   setLastSaveTime(now);
   // }
-
 
   return (
     <div className="flex h-screen bg-white">
