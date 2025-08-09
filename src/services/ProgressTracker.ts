@@ -14,15 +14,15 @@ export class ProgressTracker {
   private static readonly LOCAL_CACHE_KEY = "local_progress_cache";
 
   // 로컬: 모든 진행률 데이터 가져오기
-  // private static getAllProgress(): Record<string, WatchProgress> {
-  //   const stored = localStorage.getItem(this.STORAGE_KEY);
-  //   return stored ? JSON.parse(stored) : {};
-  // }
+  private static getAllProgress(): Record<string, WatchProgress> {
+    const stored = localStorage.getItem(this.STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  }
 
   // 로컬 : 진행률 데이터 저장
-  // private static saveAllProgress(data: Record<string, WatchProgress>): void {
-  //   localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
-  // }
+  private static saveAllProgress(data: Record<string, WatchProgress>): void {
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+  }
 
   // 🔥 로컬: 백업 저장 (기존 getAllProgress/saveAllProgress 활용)
   // private static saveToLocalBackup(userId: string, chapterId: number, progress: WatchProgress): void {
@@ -576,6 +576,15 @@ export class ProgressTracker {
         { forceComplete: true }
       );
     }
+  }
+
+  // 🔥 누락된 메서드 추가
+  private static saveToLocalBackup(userId: string, chapterId: number, progress: WatchProgress): void {
+    const allProgress = this.getAllProgress();
+    const key = `${userId}_${chapterId}`;
+    allProgress[key] = progress;
+    this.saveAllProgress(allProgress);
+    console.log(`💾 로컬 백업 저장 완료: ${key}`);
   }
 
   // 🔥 10. 실시간 진행률 업데이트 (비디오 재생 중 호출)
