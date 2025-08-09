@@ -614,41 +614,75 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     setCurrentTime(startTime);
   }, [startTime]);
 
-  const loadExistingProgress = () => {
+//api 테스트 : 초기로드
+  const loadExistingProgress = async () => {
+    // 1. 서버에서 먼저 로드
+    const serverData = await ProgressTracker.getCourseProgress(userId, courseData?.id || 1);
+    
+    // 2. 로컬 캐시와 병합
+    if (serverData && serverData.chapters) {
+      const formattedCache = convertWatchProgressToCache(serverData.chapters);
+      setRealtimeCache(formattedCache);
+      updateCache(formattedCache);
+    }
+    
+    // 3. UI 상태 업데이트
     const progressCache: Record<number, WatchProgress> = {};
     const userCompletedChapters = new Set<number>();
     const userChapterProgress: Record<number, number> = {};
-
+  
     chapters.forEach((chapter, index) => {
-      // const progress = cachedProgress[chapter.id];
-      const progress = ProgressTracker.getWatchProgress(userId, chapter.id);
+      const progress = getProgressFromCache(chapter.id);
       if (progress) {
-        progressCache[chapter.id] = progress;
+        progressCache[chapter.id] = progress as WatchProgress;
         if (progress.isCompleted) {
           userCompletedChapters.add(index);
         }
         userChapterProgress[index] = progress.currentTime;
       }
     });
-
+  
     setCachedProgress(progressCache);
     setCompletedChapters(userCompletedChapters);
     setChapterProgress(userChapterProgress);
-
-    // ✅ 새로고침 시 첫 번째 챕터의 시작 시간 설정
-    if (chapters.length > 0) {
-      const firstChapter = chapters[0];
-      const firstChapterProgress = progressCache[firstChapter.id];
-      if (firstChapterProgress?.currentTime > 0) {
-        console.log(
-          `🔄 [새로고침] 첫 번째 챕터 시작 시간 설정: ${firstChapterProgress.currentTime}초`
-        );
-        setStartTime(firstChapterProgress.currentTime);
-      }
-    }
-
-    console.log(`📈 진행률 캐시 완료:`, progressCache);
   };
+
+  //로컬테스트완료: 초기 로드
+  // const loadExistingProgress = () => {
+  //   const progressCache: Record<number, WatchProgress> = {};
+  //   const userCompletedChapters = new Set<number>();
+  //   const userChapterProgress: Record<number, number> = {};
+
+  //   chapters.forEach((chapter, index) => {
+  //     // const progress = cachedProgress[chapter.id];
+  //     const progress = ProgressTracker.getWatchProgress(userId, chapter.id);
+  //     if (progress) {
+  //       progressCache[chapter.id] = progress;
+  //       if (progress.isCompleted) {
+  //         userCompletedChapters.add(index);
+  //       }
+  //       userChapterProgress[index] = progress.currentTime;
+  //     }
+  //   });
+
+  //   setCachedProgress(progressCache);
+  //   setCompletedChapters(userCompletedChapters);
+  //   setChapterProgress(userChapterProgress);
+
+  //   // ✅ 새로고침 시 첫 번째 챕터의 시작 시간 설정
+  //   if (chapters.length > 0) {
+  //     const firstChapter = chapters[0];
+  //     const firstChapterProgress = progressCache[firstChapter.id];
+  //     if (firstChapterProgress?.currentTime > 0) {
+  //       console.log(
+  //         `🔄 [새로고침] 첫 번째 챕터 시작 시간 설정: ${firstChapterProgress.currentTime}초`
+  //       );
+  //       setStartTime(firstChapterProgress.currentTime);
+  //     }
+  //   }
+
+  //   console.log(`📈 진행률 캐시 완료:`, progressCache);
+  // };
 
   const checkExistingChapterProgress = (chapterIndex: number) => {
     const chapter = chapters[chapterIndex];
