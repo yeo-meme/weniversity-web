@@ -106,13 +106,13 @@ export interface WatchProgress {
   lastWatchedAt: string;
   completedAt: string | null;
 }
-
+//사용자가 동영상어디까지 사용자 개별 테이블 - 
 // 2. LocalStorage용 간소화된 타입
 export interface LocalChapterCache {
   currentTime: number;
   totalDuration: number; 
   watchedPercentage: number;  
-  isCompleted: boolean; 
+  isCompleted: boolean;  // ✅ 추가
   lastUpdated: number;
   isDirty: boolean;
 }

@@ -1,4 +1,4 @@
-// src/App.tsx
+// 사용자 동영상 - 시청률 진입점
 import React, { useState } from 'react';
 // import StudyPlayeringSystem from './components/video/StudyPlayer';
 import PlayeringSystem from './components/video/StudyLayoutPlayer';
