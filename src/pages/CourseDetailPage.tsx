@@ -13,17 +13,12 @@ import {
 import type { TabType } from "../types/courseDetail";
 import ExamImage from "../assets/exam.png";
 import ShareIcon from "../assets/icon-Share.png";
-import Step1 from "../assets/step-1.png";
-import Step2 from "../assets/step-2.png";
-import Step3 from "../assets/step-3.png";
-import Step4 from "../assets/step-4.png";
-import Step5 from "../assets/step-5.png";
-import DownIcon from "../assets/icon-down.png";
 import ExperienceTestimonials from "../components/courseDetail/ExperienceTestimonials";
 import CurriculumSection from "../components/courseDetail/CurriculumSection";
 import LearningSteps from "../components/courseDetail/LearningSteps";
 import InstructorSection from "../components/courseDetail/InstructorSection";
 import FAQSection from "../components/courseDetail/FAQSection";
+import LearningMethods from "../components/courseDetail/LearningMethods";
 
 interface TabInfo {
   key: TabType;
@@ -427,66 +422,7 @@ const CourseDetailPage: React.FC = () => {
             sectionRefs.current.overview = el;
           }}
         >
-          <div className="bg-slate-700 py-16 px-8">
-            <div className="text-center">
-              <div className="mb-16">
-                <p className="text-white text-4xl font-bold mb-4">
-                  대 AI 시대,
-                </p>
-                <p className="text-white text-4xl font-bold mb-8">
-                  개발을 어떻게 배우고 익혀야 할까요?
-                </p>
-
-                <div className="text-white text-2xl font-bold  leading-relaxed">
-                  <p className="mb-2">위니브는 단순한 문법 강의가 아닌</p>
-                  <p>'배우는 방법' 자체를 바꾸는 다섯 가지 방식을 제안합니다</p>
-                </div>
-              </div>
-
-              <ul className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                <li className="flex flex-col items-center">
-                  <div className="w-40 h-40 justify-center mb-6">
-                    <img src={Step1} alt="" />
-                  </div>
-                  <p className="text-white text-sm font-medium text-center">
-                    생성형 AI 기반 학습
-                  </p>
-                </li>
-                <li className="flex flex-col items-center">
-                  <div className="w-40 h-40 justify-center mb-6">
-                    <img src={Step2} alt="" />
-                  </div>
-                  <p className="text-white text-sm font-medium text-center">
-                    커뮤니티 학습
-                  </p>
-                </li>
-                <li className="flex flex-col items-center">
-                  <div className="w-40 h-40 justify-center mb-6">
-                    <img src={Step3} alt="" />
-                  </div>
-                  <p className="text-white text-sm font-medium text-center">
-                    맞춤형 온라인 VOD 강의
-                  </p>
-                </li>
-                <li className="flex flex-col items-center">
-                  <div className="w-40 h-40 justify-center mb-6">
-                    <img src={Step4} alt="" />
-                  </div>
-                  <p className="text-white text-sm font-medium text-center">
-                    전문가의 큐레이션
-                  </p>
-                </li>
-                <li className="flex flex-col items-center">
-                  <div className="w-40 h-40 justify-center mb-6">
-                    <img src={Step5} alt="" />
-                  </div>
-                  <p className="text-white text-sm font-medium text-center">
-                    바이브 코딩
-                  </p>
-                </li>
-              </ul>
-            </div>
-          </div>
+          <LearningMethods />
           <LearningSteps />
           <ExperienceTestimonials />
         </div>
