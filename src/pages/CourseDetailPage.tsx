@@ -18,9 +18,10 @@ import Step2 from "../assets/step-2.png";
 import Step3 from "../assets/step-3.png";
 import Step4 from "../assets/step-4.png";
 import Step5 from "../assets/step-5.png";
-import LearningSteps from "../components/courseDetail/learningSteps";
 import ExperienceTestimonials from "../components/courseDetail/ExperienceTestimonials";
 import CurriculumSection from "../components/courseDetail/CurriculumSection";
+import LearningSteps from "../components/courseDetail/LearningSteps";
+import InstructorSection from "../components/courseDetail/InstructorSection";
 
 interface TabInfo {
   key: TabType;
@@ -507,64 +508,9 @@ const CourseDetailPage: React.FC = () => {
           ref={el => {
             sectionRefs.current.instructor = el;
           }}
-          className="py-8 bg-yellow-300 h-[1300px]"
+          className="py-8"
         >
-          <div className="border-2 border-dashed border-blue-300 rounded-lg p-8">
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-bold mb-2">강사소개</h3>
-              <p className="text-blue-600 font-medium mb-4">
-                "{courseDetail?.instructor.bio}"
-              </p>
-            </div>
-
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-              <div className="w-32 h-32 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
-                <img
-                  src={courseDetail?.instructor.profileImage}
-                  alt="강사"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              <div className="flex-1 text-center md:text-left">
-                <h4 className="text-lg font-bold text-gray-900 mb-2">
-                  {courseDetail?.instructor.name}{" "}
-                  <span className="text-gray-500 font-normal">
-                    {courseDetail?.instructor.englishName}
-                  </span>
-                </h4>
-
-                <div className="space-y-1 text-sm text-gray-700 mb-4">
-                  {courseDetail?.instructor.currentPositions.map(
-                    (position, index) => (
-                      <p key={index}>
-                        <span className="text-blue-600">現</span> {position}
-                      </p>
-                    )
-                  )}
-                  {courseDetail?.instructor.previousPositions.map(
-                    (position, index) => (
-                      <p key={index}>
-                        <span className="text-gray-500">前</span> {position}
-                      </p>
-                    )
-                  )}
-                </div>
-
-                <div className="text-sm text-gray-600">
-                  <p className="font-medium mb-2">[강사 이력]</p>
-                  {courseDetail?.instructor.education.map((edu, index) => (
-                    <p key={index}>{edu}</p>
-                  ))}
-                  {courseDetail?.instructor.achievements.map(
-                    (achievement, index) => (
-                      <p key={index}>{achievement}</p>
-                    )
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <InstructorSection instructor={courseDetail.instructor} />
         </div>
 
         {/* FAQ */}
