@@ -18,10 +18,12 @@ import Step2 from "../assets/step-2.png";
 import Step3 from "../assets/step-3.png";
 import Step4 from "../assets/step-4.png";
 import Step5 from "../assets/step-5.png";
+import DownIcon from "../assets/icon-down.png";
 import ExperienceTestimonials from "../components/courseDetail/ExperienceTestimonials";
 import CurriculumSection from "../components/courseDetail/CurriculumSection";
 import LearningSteps from "../components/courseDetail/LearningSteps";
 import InstructorSection from "../components/courseDetail/InstructorSection";
+import FAQSection from "../components/courseDetail/FAQSection";
 
 interface TabInfo {
   key: TabType;
@@ -508,7 +510,7 @@ const CourseDetailPage: React.FC = () => {
           ref={el => {
             sectionRefs.current.instructor = el;
           }}
-          className="py-8"
+          className="mb-14 pb-10"
         >
           <InstructorSection instructor={courseDetail.instructor} />
         </div>
@@ -518,69 +520,9 @@ const CourseDetailPage: React.FC = () => {
           ref={el => {
             sectionRefs.current.faq = el;
           }}
-          className="py-8  bg-orange-300 h-[1300px]"
+          className="mb-80"
         >
-          <h3 className="text-xl font-bold mb-6">FAQ</h3>
-
-          <div className="space-y-4">
-            {faqData.map((faq, index) => (
-              <div
-                key={faq.id}
-                className="bg-white border border-gray-200 rounded-lg"
-              >
-                <button
-                  className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50"
-                  onClick={() => handleFAQToggle(faq.id)}
-                >
-                  <span className="font-medium text-gray-900">
-                    <span className="text-blue-600 mr-2">Q{index + 1}.</span>
-                    {faq.question}
-                  </span>
-                  <svg
-                    className={`w-5 h-5 text-gray-400 transition-transform ${
-                      faq.isExpanded ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-
-                {faq.isExpanded && faq.answer && (
-                  <div className="px-4 pb-4 text-sm text-gray-600 leading-relaxed">
-                    {faq.answer}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 수강 신청 */}
-        <div
-          ref={el => {
-            sectionRefs.current.apply = el;
-          }}
-          className="py-8 bg-red-300 h-[1300px]"
-        >
-          <h3 className="text-xl font-bold mb-4">수강 신청</h3>
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <p className="text-gray-700 mb-4">수강 신청을 진행하시겠습니까?</p>
-            <button
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
-              onClick={handleEnrollment}
-              disabled={enrollmentLoading}
-            >
-              {enrollmentLoading ? "처리 중..." : "수강 신청하기"}
-            </button>
-          </div>
+          <FAQSection faqData={faqData} onFAQToggle={handleFAQToggle} />
         </div>
       </div>
     </div>
