@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import closeIcon from "../../assets/icon-close.png";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
@@ -19,6 +19,32 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   onLogin,
   onLogout,
 }) => {
+  const [userInfo, setUserInfo] = useState({
+    email: "",
+    role: "",
+  });
+
+  // 로그인 상태 변경 시 사용자 정보 가져오기
+  useEffect(() => {
+    if (isLoggedIn) {
+      const email = localStorage.getItem("user_email") || "";
+      const role = localStorage.getItem("user_role") || "";
+      setUserInfo({ email, role });
+    } else {
+      setUserInfo({ email: "", role: "" });
+    }
+  }, [isLoggedIn]);
+
+  // 사용자 이름 표시 로직
+  const getUserDisplayName = () => {
+    if (userInfo.email) {
+      // 이메일에서 @ 앞부분을 사용자명으로 사용
+      const username = userInfo.email.split("@")[0];
+      return `${username}님`;
+    }
+    return "위니브 소울곰";
+  };
+
   return (
     <div className="min-[835px]:hidden ">
       <div
@@ -52,11 +78,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               />
             </div>
             <h2 className="mb-1 text-base font-semibold">
-              {isLoggedIn ? "위니브 소울곰" : "호기심 많은 개발자님"}
+              {isLoggedIn ? getUserDisplayName() : "호기심 많은 개발자님"}
             </h2>
             <p className="text-gray700 leading-[22px] text-center mb-6">
               {isLoggedIn ? (
-                "paul-lab@naver.com"
+                userInfo.email || "paul-lab@naver.com"
               ) : (
                 <>
                   위니버시티에 로그인 후<br />
@@ -96,7 +122,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           )}
         </article>
 
-        <nav className="w-full border-t border-b border-gray200 py-[16px]">
+        <nav className="w-full border-t border-b border-gray200 py-[8px]">
           <ul className="flex flex-col list-none">
             <li>
               <a
@@ -118,7 +144,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         </nav>
 
         {isLoggedIn && (
-          <div className="w-full border-b border-gray200  py-[16px]">
+          <div className="w-full border-b border-gray200  py-[8px]">
             <button
               className="block w-full text-left px-5 py-2.5 text-sm font-medium text-main-text hover:bg-gray-100 transition-colors"
               onClick={onLogout}
