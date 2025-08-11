@@ -953,56 +953,56 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   }, [hasProgressData, currentChapter, isVideoPlaying, userId, courseData?.id]);
 
   // 4. 탭 전환 감지
-  useEffect(() => {
-    console.log("👁️ [DEBUG] 탭 전환 감지 useEffect 등록");
+  // useEffect(() => {
+  //   console.log("👁️ [DEBUG] 탭 전환 감지 useEffect 등록");
 
-    const handleVisibilityChange = () => {
-      console.log("👁️ [DEBUG] 탭 가시성 변경 이벤트");
-      console.log("👁️ [DEBUG] document.hidden:", document.hidden);
-      console.log("👁️ [DEBUG] hasProgressData:", hasProgressData);
-      console.log("👁️ [DEBUG] currentChapter:", currentChapter?.id);
-      console.log("👁️ [DEBUG] isVideoPlaying:", isVideoPlaying);
+  //   const handleVisibilityChange = () => {
+  //     console.log("👁️ [DEBUG] 탭 가시성 변경 이벤트");
+  //     console.log("👁️ [DEBUG] document.hidden:", document.hidden);
+  //     console.log("👁️ [DEBUG] hasProgressData:", hasProgressData);
+  //     console.log("👁️ [DEBUG] currentChapter:", currentChapter?.id);
+  //     console.log("👁️ [DEBUG] isVideoPlaying:", isVideoPlaying);
 
-      // 🔥 NEW: 탭이 숨겨질 때 진행률 저장
-      if (
-        document.hidden &&
-        hasProgressData &&
-        currentChapter &&
-        isVideoPlaying
-      ) {
-        console.log("👁️ [DEBUG] 탭 숨김 조건 만족 - 진행률 저장 시작");
+  //     // 🔥 NEW: 탭이 숨겨질 때 진행률 저장
+  //     if (
+  //       document.hidden &&
+  //       hasProgressData &&
+  //       currentChapter &&
+  //       isVideoPlaying
+  //     ) {
+  //       console.log("👁️ [DEBUG] 탭 숨김 조건 만족 - 진행률 저장 시작");
 
-        const currentProgress = getProgressFromCache(currentChapter.id);
-        if (currentProgress) {
-          console.log("👁️ [DEBUG] 저장할 진행률:", currentProgress);
+  //       const currentProgress = getProgressFromCache(currentChapter.id);
+  //       if (currentProgress) {
+  //         console.log("👁️ [DEBUG] 저장할 진행률:", currentProgress);
 
-          ProgressTracker.saveProgress(
-            userId,
-            courseData?.id || 1,
-            currentChapter.id,
-            currentProgress as LocalChapterCache
-          )
-            .then(() => {
-              console.log("✅ 탭 전환 시 진행률 저장 완료");
-            })
-            .catch((error) => {
-              console.error("❌ [DEBUG] 탭 전환 시 저장 실패:", error);
-            });
-        } else {
-          console.log("👁️ [DEBUG] 저장할 진행률 없음");
-        }
-      } else {
-        console.log("👁️ [DEBUG] 탭 숨김 조건 불만족");
-      }
-    };
+  //         ProgressTracker.saveProgress(
+  //           userId,
+  //           courseData?.id || 1,
+  //           currentChapter.id,
+  //           currentProgress as LocalChapterCache
+  //         )
+  //           .then(() => {
+  //             console.log("✅ 탭 전환 시 진행률 저장 완료");
+  //           })
+  //           .catch((error) => {
+  //             console.error("❌ [DEBUG] 탭 전환 시 저장 실패:", error);
+  //           });
+  //       } else {
+  //         console.log("👁️ [DEBUG] 저장할 진행률 없음");
+  //       }
+  //     } else {
+  //       console.log("👁️ [DEBUG] 탭 숨김 조건 불만족");
+  //     }
+  //   };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+  //   document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    return () => {
-      console.log("🗑️ [DEBUG] 탭 전환 감지 이벤트 제거");
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [hasProgressData, currentChapter, isVideoPlaying, userId, courseData?.id]);
+  //   return () => {
+  //     console.log("🗑️ [DEBUG] 탭 전환 감지 이벤트 제거");
+  //     document.removeEventListener("visibilitychange", handleVisibilityChange);
+  //   };
+  // }, [hasProgressData, currentChapter, isVideoPlaying, userId, courseData?.id]);
 
   // 5. realtimeCache 저장
   useEffect(() => {
@@ -1361,10 +1361,17 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       totalDuration: Math.floor(duration), // 정수로 변환
       watchedPercentage: Math.min(100, (currentTime / duration) * 100), // 100% 초과 방지
       isCompleted: currentTime / duration >= 0.9, // 90% 완료 체크
-      lastUpdated: Date.now(), // ✅ 현재 타임스탬프
+      // lastUpdated: Date.now(), //
     };
 
-    console.log("💾 로컬 캐시 업데이트 완료");
+
+ // 🔍 전송 데이터 로깅
+ console.log("📤 -----에러체크----서버 전송 데이터:", {
+  userId,
+  courseId: courseData?.id || 1,
+  chapterId: currentChapter.id,
+  ...safeLocalChapter
+});
 
     // 2) 서버에 저장 (ProgressTracker)
     ProgressTracker.saveProgress(

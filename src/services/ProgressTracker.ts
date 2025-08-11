@@ -8,6 +8,8 @@ import type {
 } from "../types/progress.types";
 import { localChapterToWatchProgress } from "../utils/convertCacheToWatchProgress";
 import { convertCacheToWatchProgress } from "../utils/convertCacheToWatchProgress";
+import { toSeconds } from '../utils/time';
+
 
 export class ProgressTracker {
   // private static readonly STORAGE_KEY = "video_watch_progress";
@@ -33,95 +35,99 @@ export class ProgressTracker {
   // }
 
   /* 통합된 저장 로직 */
-  static async saveProgress(
-    userId: string,
-    courseId: number,
-    chapterId: number,
-    localChapter: LocalChapterCache,
-    options?: {
-      forceComplete?: boolean;
-      skipValidation?: boolean;
-    }
-  ): Promise<WatchProgress | null> {
-    try {
-      // 🔥 진행률 자동 계산 로직 추가
-      const watchedPercentage =
-        localChapter.totalDuration > 0
-          ? (localChapter.currentTime / localChapter.totalDuration) * 100
-          : 0;
+  // static async saveProgress(
+  //   userId: string,
+  //   courseId: number,
+  //   chapterId: number,
+  //   localChapter: LocalChapterCache,
+  //   options?: {
+  //     forceComplete?: boolean;
+  //     skipValidation?: boolean;
+  //   }
+  // ): Promise<WatchProgress | null> {
+  //   try {
 
-      // 🔥 완료 상태 자동 판단
-      const isCompleted =
-        options?.forceComplete ||
-        localChapter.isCompleted ||
-        watchedPercentage >= 90;
 
-      // LocalChapterCache를 WatchProgress로 변환
-      const progress = localChapterToWatchProgress(
-        userId,
-        courseId,
-        chapterId,
-        {
-          ...localChapter,
-          watchedPercentage,
-          isCompleted,
-          lastUpdated: Date.now(),
-        }
-      );
 
-      // 서버에 저장
-      const response = await fetch(
-        "http://localhost:8000/api/watch-progress/save/",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userId: progress.userId,
-            courseId: progress.courseId,
-            chapterId: progress.chapterId,
-            currentTime: progress.currentTime,
-            totalDuration: progress.totalDuration,
-            watchedPercentage: progress.watchedPercentage,
-            isCompleted: progress.isCompleted,
-            totalWatchTime: progress.totalWatchTime,
-            sessionCount: progress.sessionCount,
-            watchSpeed: progress.watchSpeed,
-            firstWatchedAt: progress.firstWatchedAt,
-            lastWatchedAt: progress.lastWatchedAt,
-            completedAt: progress.completedAt,
-          }),
-        }
-      );
+  //     // 🔥 진행률 자동 계산 로직 추가
+  //     const watchedPercentage =
+  //       localChapter.totalDuration > 0
+  //         ? (localChapter.currentTime / localChapter.totalDuration) * 100
+  //         : 0;
+          
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.statusText}`);
-      }
+  //     // 🔥 완료 상태 자동 판단
+  //     const isCompleted =
+  //       options?.forceComplete ||
+  //       localChapter.isCompleted ||
+  //       watchedPercentage >= 90;
 
-      const serverData = await response.json();
+  //     // LocalChapterCache를 WatchProgress로 변환
+  //     const progress = localChapterToWatchProgress(
+  //       userId,
+  //       courseId,
+  //       chapterId,
+  //       {
+  //         ...localChapter,
+  //         watchedPercentage,
+  //         isCompleted,
+  //         // lastUpdated: Date.now(),
+  //       }
+  //     );
 
-      // 🔥 로컬 스토리지에도 백업 저장
-      this.saveToLocalBackup(userId, chapterId, progress);
+  //     // 서버에 저장
+  //     const response = await fetch(
+  //       "http://localhost:8000/api/watch-progress/save/",
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           userId: progress.userId,
+  //           courseId: progress.courseId,
+  //           chapterId: progress.chapterId,
+  //           currentTime: progress.currentTime,
+  //           totalDuration: progress.totalDuration,
+  //           watchedPercentage: progress.watchedPercentage,
+  //           isCompleted: progress.isCompleted,
+  //           totalWatchTime: progress.totalWatchTime,
+  //           sessionCount: progress.sessionCount,
+  //           watchSpeed: progress.watchSpeed,
+  //           firstWatchedAt: progress.firstWatchedAt,
+  //           lastWatchedAt: progress.lastWatchedAt,
+  //           completedAt: progress.completedAt,
+  //         }),
+  //       }
+  //     );
 
-      console.log(
-        `💾 진행률 저장 완료: ${chapterId} - ${watchedPercentage.toFixed(1)}%`
-      );
-      return serverData;
-    } catch (error) {
-      console.error("❌ 서버 저장 실패:", error);
+  //     if (!response.ok) {
+  //       throw new Error(`Server error: ${response.statusText}`);
+  //     }
 
-      // 🔄 오프라인 대비: 로컬 백업만 저장
-      const progress = localChapterToWatchProgress(
-        userId,
-        courseId,
-        chapterId,
-        localChapter
-      );
-      this.saveToLocalBackup(userId, chapterId, progress);
-      console.log("📴 오프라인 모드: 로컬 백업 저장됨");
+  //     const serverData = await response.json();
 
-      return progress;
-    }
-  }
+  //     // 🔥 로컬 스토리지에도 백업 저장
+  //     this.saveToLocalBackup(userId, chapterId, progress);
+
+  //     console.log(
+  //       `💾 진행률 저장 완료: ${chapterId} - ${watchedPercentage.toFixed(1)}%`
+  //     );
+  //     return serverData;
+  //   } catch (error) {
+  //     console.error("❌ 서버 저장 실패:", error);
+
+  //     // 🔄 오프라인 대비: 로컬 백업만 저장
+  //     const progress = localChapterToWatchProgress(
+  //       userId,
+  //       courseId,
+  //       chapterId,
+  //       localChapter
+  //     );
+  //     this.saveToLocalBackup(userId, chapterId, progress);
+  //     console.log("📴 오프라인 모드: 로컬 백업 저장됨");
+
+  //     return progress;
+  //   }
+  // }
 
   //  // 로컬 캐시(간단한 LocalCourseCache 형태) 불러오기
   //  static getLocalCache(): LocalProgressCache {
@@ -364,52 +370,230 @@ export class ProgressTracker {
   // }
 
   //api 테스트
+  static async saveProgress(
+    userId: string,
+    courseId: number,
+    chapterId: number,
+    localChapter: LocalChapterCache
+  ): Promise<WatchProgress | null> {
+
+    try {
+      const progress = localChapterToWatchProgress(userId, courseId, chapterId, localChapter);
+      // 서버에 Upsert 요청 (create/update 구분 없음)
+      const response = await fetch(
+        "http://localhost:8000/api/watch-progress/save/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: progress.userId,
+            courseId: progress.courseId,
+            chapterId: progress.chapterId,
+            currentTime: progress.currentTime,
+            totalDuration: progress.totalDuration,
+            watchedPercentage: progress.watchedPercentage,
+            isCompleted: progress.isCompleted,
+            totalWatchTime: progress.totalWatchTime,
+            sessionCount: progress.sessionCount,
+            watchSpeed: progress.watchSpeed,
+            firstWatchedAt: progress.firstWatchedAt,
+            lastWatchedAt: progress.lastWatchedAt,
+            completedAt: progress.completedAt,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("❌ 서버 저장 실패:", error);
+    }
+  }
+
+  //통합api테스트
+
+  // 코스 전체 진행률 조회  /* API 조회 */
+  
+
+  //디버깅용
   // static async saveProgress(
   //   userId: string,
   //   courseId: number,
   //   chapterId: number,
-  //   localChapter: LocalChapterCache
+  //   localChapter: LocalChapterCache,
+  //   options?: {
+  //     forceComplete?: boolean;
+  //     skipValidation?: boolean;
+  //   }
   // ): Promise<WatchProgress | null> {
-
   //   try {
-  //     const progress = localChapterToWatchProgress(userId, courseId, chapterId, localChapter);
-  //     // 서버에 Upsert 요청 (create/update 구분 없음)
+  //     // 🔍 1. 입력 데이터 검증
+  //     console.log("🔍 [DEBUG] saveProgress 입력 데이터:");
+  //     console.log("  userId:", userId, typeof userId);
+  //     console.log("  courseId:", courseId, typeof courseId);
+  //     console.log("  chapterId:", chapterId, typeof chapterId);
+  //     console.log("  localChapter:", localChapter);
+  //     console.log("  options:", options);
+  
+  //     // 🔍 2. 진행률 계산 디버깅
+  //     const watchedPercentage =
+  //       localChapter.totalDuration > 0
+  //         ? (localChapter.currentTime / localChapter.totalDuration) * 100
+  //         : 0;
+      
+  //     console.log("🔍 [DEBUG] 진행률 계산:");
+  //     console.log("  currentTime:", localChapter.currentTime, typeof localChapter.currentTime);
+  //     console.log("  totalDuration:", localChapter.totalDuration, typeof localChapter.totalDuration);
+  //     console.log("  계산된 watchedPercentage:", watchedPercentage, typeof watchedPercentage);
+  
+  //     const isCompleted =
+  //       options?.forceComplete ||
+  //       localChapter.isCompleted ||
+  //       watchedPercentage >= 90;
+  
+  //     console.log("🔍 [DEBUG] 완료 상태:", isCompleted, typeof isCompleted);
+  
+  //     // 🔍 3. 변환 전 데이터 확인
+  //     const inputForConverter = {
+  //       ...localChapter,
+  //       watchedPercentage,
+  //       isCompleted,
+  //     };
+  //     console.log("🔍 [DEBUG] 컨버터 입력 데이터:", inputForConverter);
+  
+  //     // 🔍 4. 변환 후 데이터 확인
+  //     const progress = localChapterToWatchProgress(
+  //       userId,
+  //       courseId,
+  //       chapterId,
+  //       inputForConverter
+  //     );
+      
+  //     console.log("🔍 [DEBUG] 변환된 progress 데이터:");
+  //     console.log("  전체 객체:", progress);
+  //     console.log("  각 필드 타입 체크:");
+  //     console.log("    id:", progress.id, typeof progress.id);
+  //     console.log("    userId:", progress.userId, typeof progress.userId);
+  //     console.log("    courseId:", progress.courseId, typeof progress.courseId);
+  //     console.log("    chapterId:", progress.chapterId, typeof progress.chapterId);
+  //     console.log("    currentTime:", progress.currentTime, typeof progress.currentTime);
+  //     console.log("    totalDuration:", progress.totalDuration, typeof progress.totalDuration);
+  //     console.log("    watchedPercentage:", progress.watchedPercentage, typeof progress.watchedPercentage);
+  //     console.log("    isCompleted:", progress.isCompleted, typeof progress.isCompleted);
+  //     console.log("    totalWatchTime:", progress.totalWatchTime, typeof progress.totalWatchTime);
+  //     console.log("    sessionCount:", progress.sessionCount, typeof progress.sessionCount);
+  //     console.log("    watchSpeed:", progress.watchSpeed, typeof progress.watchSpeed);
+  //     console.log("    firstWatchedAt:", progress.firstWatchedAt, typeof progress.firstWatchedAt);
+  //     console.log("    lastWatchedAt:", progress.lastWatchedAt, typeof progress.lastWatchedAt);
+  //     console.log("    completedAt:", progress.completedAt, typeof progress.completedAt);
+  
+  //     // 🔍 5. 서버 전송 데이터 확인
+  //     const serverPayload = {
+  //       userId: progress.userId,
+  //       courseId: progress.courseId,
+  //       chapterId: progress.chapterId,
+  //       currentTime: progress.currentTime,
+  //       totalDuration: progress.totalDuration,
+  //       watchedPercentage: progress.watchedPercentage,
+  //       isCompleted: progress.isCompleted,
+  //       totalWatchTime: progress.totalWatchTime,
+  //       sessionCount: progress.sessionCount,
+  //       watchSpeed: progress.watchSpeed,
+  //       firstWatchedAt: progress.firstWatchedAt,
+  //       lastWatchedAt: progress.lastWatchedAt,
+  //       completedAt: progress.completedAt,
+  //     };
+  
+  //     console.log("🔍 [DEBUG] 서버 전송 페이로드:");
+  //     console.log("  JSON.stringify 전:", serverPayload);
+      
+  //     const jsonString = JSON.stringify(serverPayload);
+  //     console.log("  JSON.stringify 후:", jsonString);
+  //     console.log("  JSON 길이:", jsonString.length);
+  
+  //     // 🔍 6. toSeconds 함수 동작 확인
+  //     console.log("🔍 [DEBUG] toSeconds 함수 테스트:");
+  //     console.log("  toSeconds(localChapter.currentTime):", toSeconds(localChapter.currentTime));
+  //     console.log("  toSeconds(localChapter.totalDuration):", toSeconds(localChapter.totalDuration));
+  
+  //     // 서버에 저장
+  //     console.log("🔍 [DEBUG] 서버 요청 시작...");
   //     const response = await fetch(
   //       "http://localhost:8000/api/watch-progress/save/",
   //       {
   //         method: "POST",
   //         headers: { "Content-Type": "application/json" },
-  //         body: JSON.stringify({
-  //           userId: progress.userId,
-  //           courseId: progress.courseId,
-  //           chapterId: progress.chapterId,
-  //           currentTime: progress.currentTime,
-  //           totalDuration: progress.totalDuration,
-  //           watchedPercentage: progress.watchedPercentage,
-  //           isCompleted: progress.isCompleted,
-  //           totalWatchTime: progress.totalWatchTime,
-  //           sessionCount: progress.sessionCount,
-  //           watchSpeed: progress.watchSpeed,
-  //           firstWatchedAt: progress.firstWatchedAt,
-  //           lastWatchedAt: progress.lastWatchedAt,
-  //           completedAt: progress.completedAt,
-  //         }),
+  //         body: jsonString,
   //       }
   //     );
-
+  
+  //     console.log("🔍 [DEBUG] 서버 응답:");
+  //     console.log("  status:", response.status);
+  //     console.log("  statusText:", response.statusText);
+  //     console.log("  ok:", response.ok);
+  //     console.log("  headers:", Object.fromEntries(response.headers.entries()));
+  
   //     if (!response.ok) {
-  //       throw new Error(`Server error: ${response.statusText}`);
+  //       // 🔍 7. 에러 응답 상세 분석
+  //       const errorText = await response.text();
+  //       console.error("🔍 [DEBUG] 서버 에러 응답:");
+  //       console.error("  응답 텍스트:", errorText);
+        
+  //       try {
+  //         const errorJson = JSON.parse(errorText);
+  //         console.error("  에러 JSON:", errorJson);
+  //       } catch (parseError) {
+  //         console.error("  JSON 파싱 실패:", parseError);
+  //       }
+        
+  //       throw new Error(`Server error: ${response.status} ${response.statusText} - ${errorText}`);
   //     }
-  //     const data = await response.json();
-  //     return data;
+  
+  //     const serverData = await response.json();
+  //     console.log("🔍 [DEBUG] 서버 성공 응답:", serverData);
+  
+  //     // 로컬 스토리지에도 백업 저장
+  //     this.saveToLocalBackup(userId, chapterId, progress);
+  
+  //     console.log(`💾 진행률 저장 완료: ${chapterId} - ${watchedPercentage.toFixed(1)}%`);
+  //     return serverData;
+  
   //   } catch (error) {
   //     console.error("❌ 서버 저장 실패:", error);
+      
+  //     // 🔍 8. 에러 상세 분석
+  //     console.error("🔍 [DEBUG] 에러 분석:");
+  //     console.error("  에러 타입:", typeof error);
+  //     console.error("  에러 이름:", error.name);
+  //     console.error("  에러 메시지:", error.message);
+  //     console.error("  에러 스택:", error.stack);
+      
+  //     if (error instanceof TypeError) {
+  //       console.error("  TypeError 상세:", error);
+  //     }
+      
+  //     if (error instanceof SyntaxError) {
+  //       console.error("  SyntaxError 상세:", error);
+  //     }
+  
+  //     // 오프라인 대비: 로컬 백업만 저장
+  //     const progress = localChapterToWatchProgress(
+  //       userId,
+  //       courseId,
+  //       chapterId,
+  //       localChapter
+  //     );
+  //     this.saveToLocalBackup(userId, chapterId, progress);
+  //     console.log("📴 오프라인 모드: 로컬 백업 저장됨");
+  
+  //     return progress;
   //   }
   // }
-
-  //통합api테스트
-
-  // 코스 전체 진행률 조회  /* API 조회 */
+  
+  
   static async getCourseProgress(
     userId: string,
     courseId: number
