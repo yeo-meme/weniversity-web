@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Header from "./components/header/header.tsx";
 import HeroSection from "./components/hero/hero-section.tsx";
 import LoginPage from "./page/login/login.tsx";
