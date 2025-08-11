@@ -1,13 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logoImg from "../../assets/logo.png";
 import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";
 import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onLogin?: () => void;
+  onLogout?: () => void;
+  onGoToMain?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token =
+      localStorage.getItem("access_token") || localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -15,11 +27,42 @@ const Header: React.FC = () => {
   };
 
   const handleLogin = () => {
-    setIsLoggedIn(true);
+    if (onLogin) {
+      onLogin();
+    }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const token =
+        localStorage.getItem("access_token") || localStorage.getItem("token");
+
+      if (token) {
+        await fetch("http://13.125.180.222/api/users/logout/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+    } catch (error) {
+      // 에러 로그만 남기고 메시지 삭제
+    }
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("user_email");
+    localStorage.removeItem("user_role");
+    localStorage.removeItem("token");
+
     setIsLoggedIn(false);
+
+    if (onLogout) {
+      onLogout();
+    }
+
+    alert("로그아웃 되었습니다.");
   };
 
   const toggleMobileMenu = () => {
@@ -30,13 +73,25 @@ const Header: React.FC = () => {
     setIsMobileMenuOpen(false);
   };
 
+  useEffect(() => {
+    const token =
+      localStorage.getItem("access_token") || localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  });
+
   return (
     <>
       <header className="border-b border-gray200">
         <div className="flex items-center min-[835px]:justify-center min-[835px]:h-[70px] min-[835px]:px-4 max-[834px]:justify-between max-[834px]:w-full max-[834px]:h-14 max-[834px]:px-4 max-w-[1190px] max-[834px]:max-w-[calc(100%-32px)] mx-auto">
           <div className="min-[835px]:flex min-[835px]:items-center min-[835px]:w-full min-[835px]:justify-between max-[834px]:contents">
             <h1 className="min-[835px]:flex-shrink-0 min-[835px]:w-34 md:w-36 lg:w-40 xl:w-[202px]">
-              <a href="#">
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onGoToMain) onGoToMain();
+                }}
+              >
                 <img
                   src={logoImg}
                   alt="logo"
