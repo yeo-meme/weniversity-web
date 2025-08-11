@@ -421,6 +421,7 @@ const CourseDetailPage: React.FC = () => {
           ref={el => {
             sectionRefs.current.overview = el;
           }}
+          className="mb-20"
         >
           <LearningMethods />
           <LearningSteps />
@@ -432,7 +433,7 @@ const CourseDetailPage: React.FC = () => {
           ref={el => {
             sectionRefs.current.curriculum = el;
           }}
-          className="py-20"
+          className="pb-20"
         >
           <CurriculumSection
             schedule={courseDetail.schedule}
