@@ -34,6 +34,10 @@ const CoursePage: React.FC = () => {
 
   // 현재 페이지에 표시할 강의들 계산
   const paginatedCourses = useMemo(() => {
+    // filteredCourses가 배열인지 확인
+    if (!Array.isArray(filteredCourses)) {
+      return [];
+    }
     const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
     const endIndex = startIndex + pagination.itemsPerPage;
     return filteredCourses.slice(startIndex, endIndex);
@@ -59,9 +63,9 @@ const CoursePage: React.FC = () => {
   const hasActiveFilters = () => {
     return (
       !activeFilters.categories.includes("전체") ||
-      activeFilters.subjects.length > 0 ||
+      activeFilters.types.length > 0 ||
       activeFilters.levels.length > 0 ||
-      activeFilters.formats.length > 0
+      activeFilters.prices.length > 0
     );
   };
 
@@ -109,13 +113,13 @@ const CoursePage: React.FC = () => {
           <div className="flex items-center p-5 border-b border-gray-200">
             <h3 className="font-bold text-gray-700 mr-5 w-20">유형</h3>
             <div className="flex flex-wrap gap-2 overflow-x-auto custom-scrollbar">
-              {filters.subjects.map(subject => (
+              {filters.types.map(type => (
                 <FilterButton
-                  key={subject}
-                  label={subject}
-                  value={subject}
-                  isActive={activeFilters.subjects.includes(subject)}
-                  onClick={value => handleFilterChange("subjects", value)}
+                  key={type}
+                  label={type}
+                  value={type}
+                  isActive={activeFilters.types.includes(type)}
+                  onClick={value => handleFilterChange("types", value)}
                 />
               ))}
             </div>
@@ -141,13 +145,13 @@ const CoursePage: React.FC = () => {
           <div className="flex items-center p-5 border-b border-gray-200">
             <h3 className="font-bold text-gray-700 mr-5 w-20">가격</h3>
             <div className="flex flex-wrap gap-2">
-              {filters.formats.map(format => (
+              {filters.prices.map(price => (
                 <FilterButton
-                  key={format}
-                  label={format}
-                  value={format}
-                  isActive={activeFilters.formats.includes(format)}
-                  onClick={value => handleFilterChange("formats", value)}
+                  key={price}
+                  label={price}
+                  value={price}
+                  isActive={activeFilters.prices.includes(price)}
+                  onClick={value => handleFilterChange("prices", value)}
                 />
               ))}
             </div>
@@ -190,14 +194,14 @@ const CoursePage: React.FC = () => {
                   ))}
 
                 {/* 유형 필터 */}
-                {activeFilters.subjects.map(subject => (
+                {activeFilters.types.map(type => (
                   <span
-                    key={`subject-${subject}`}
+                    key={`type-${type}`}
                     className="inline-flex items-center text-sm rounded-md px-3 py-1 bg-slate-700 text-white"
                   >
-                    {subject}
+                    {type}
                     <button
-                      onClick={() => handleFilterChange("subjects", subject)}
+                      onClick={() => handleFilterChange("types", type)}
                       className="ml-2 hover:text-blue-600"
                     >
                       <img src={DeleteIcon} alt="" />
@@ -222,14 +226,14 @@ const CoursePage: React.FC = () => {
                 ))}
 
                 {/* 가격 필터 */}
-                {activeFilters.formats.map(format => (
+                {activeFilters.prices.map(price => (
                   <span
-                    key={`format-${format}`}
+                    key={`price-${price}`}
                     className="inline-flex items-center text-sm rounded-md px-3 py-1 bg-slate-700 text-white"
                   >
-                    {format}
+                    {price}
                     <button
-                      onClick={() => handleFilterChange("formats", format)}
+                      onClick={() => handleFilterChange("prices", price)}
                       className="ml-2 hover:text-blue-600"
                     >
                       <img src={DeleteIcon} alt="" />
@@ -245,20 +249,9 @@ const CoursePage: React.FC = () => {
         <div className="my-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">
-              강의 목록 ({filteredCourses.length}개)
+              강의 목록 (
+              {Array.isArray(filteredCourses) ? filteredCourses.length : 0}개)
             </h3>
-            <div className="text-sm text-gray-500">
-              {filteredCourses.length > 0 && (
-                <span>
-                  {(pagination.currentPage - 1) * pagination.itemsPerPage + 1}-
-                  {Math.min(
-                    pagination.currentPage * pagination.itemsPerPage,
-                    filteredCourses.length
-                  )}{" "}
-                  / {filteredCourses.length}
-                </span>
-              )}
-            </div>
           </div>
 
           {error && (
@@ -267,7 +260,7 @@ const CoursePage: React.FC = () => {
             </div>
           )}
 
-          {filteredCourses.length === 0 ? (
+          {!Array.isArray(filteredCourses) || filteredCourses.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-12">
               <img src={EmptyIcon} alt="" />
               <p className="mt-6 text-gray-500">찾는 조건의 강의가 없습니다.</p>
@@ -276,7 +269,7 @@ const CoursePage: React.FC = () => {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {paginatedCourses.map(course => (
-                  <CourseCard key={course.id} course={course} />
+                  <CourseCard key={course.course_id} course={course} />
                 ))}
               </div>
 

@@ -1,22 +1,21 @@
 export interface Course {
-  id: string;
+  course_id: string;
   title: string;
   instructor: string;
   instructorRole: string;
   description: string;
   image: string;
-  tags: string[];
+  type: string;
   category: string;
-  level: "초급" | "중급" | "고급" | "실무";
+  level: string;
   duration?: string;
   price?: number;
 }
 
 export interface CourseFilters {
   categories: string[];
-  subjects: string[];
+  types: string[];
   levels: string[];
-  formats: string[];
   prices: string[];
 }
 
@@ -32,14 +31,20 @@ export interface CourseState {
   filters: CourseFilters;
   activeFilters: {
     categories: string[];
-    subjects: string[];
+    types: string[];
     levels: string[];
-    formats: string[];
     prices: string[];
   };
   pagination: PaginationState;
   loading: boolean;
   error: string | null;
+}
+
+export interface ApiResponse {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: Course[];
 }
 
 export interface FilterOption {

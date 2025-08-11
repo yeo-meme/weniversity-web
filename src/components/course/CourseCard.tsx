@@ -3,7 +3,11 @@ import type { Course } from "../../types/course";
 // import HeartIconPicked from "../../assets/icon-heart-picked.png";
 import HeartIconHover from "../../assets/icon-heart-hover.png";
 import HeartIcon from "../../assets/icon-heart.png";
-import LectureImage from "../../assets/lecture-img.png";
+import BlueLectureImage from "../../assets/lecture-blue-img.png";
+import OrangeLectureImage from "../../assets/lecture-orange-img.png";
+import CharcoalLectureImage from "../../assets/lecture-charcoal-img.png";
+import GreenLectureImage from "../../assets/lecture-green-img.png";
+import PurpleLectureImage from "../../assets/lecture-purple-img.png";
 
 interface CourseCardProps {
   course: Course;
@@ -15,20 +19,41 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
     console.log(`${id} 강의를 선택했습니다.`);
   };
 
+  const getPriceLabel = (price?: number) => {
+    if (price === undefined) return "정보없음";
+    if (price === -1) return "국비지원";
+    if (price === 0) return "무료";
+    if (price > 0) return "유료";
+    return "정보없음";
+  };
+
+  const getTypeLabel = (type: string) => {
+    if (type === "vod") return "일반";
+    if (type === "boost") return "부스트 커뮤니티";
+  };
+
+  const getLectureImage = (category: string) => {
+    if (category === "프론트엔드") return OrangeLectureImage;
+    if (category === "백엔드") return GreenLectureImage;
+    if (category === "AI") return CharcoalLectureImage;
+    if (category === "데이터 분석") return BlueLectureImage;
+    return PurpleLectureImage;
+  };
+
   return (
     <div className="rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 course-card cursor-pointer">
-      {/* 코스 이미지 */}
       <div className="relative bg-python-gradient rounded-t-lg overflow-hidden">
         {/* 강의 이미지 */}
-        <img src={LectureImage} alt="강의이미지" />
+        <img src={getLectureImage(course.category)} alt="강의이미지" />
 
+        {/* 좋아요 이미지 */}
         <img
           src={isHovered ? HeartIconHover : HeartIcon}
           alt="좋아요"
           className="absolute top-4 right-4 transition-colors"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          onClick={() => getLike(course.id)}
+          onClick={() => getLike(course.course_id)}
         />
       </div>
 
@@ -36,22 +61,18 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
       <div className="p-4">
         {/* 태그들 */}
         <div className="flex gap-2 mb-3">
-          {course.tags.map((tag, index) => (
-            <span
-              key={index}
-              className={`px-3 py-1 rounded-md text-xs font-medium ${
-                index === 0
-                  ? "bg-gray-700 text-white"
-                  : index === 1
-                  ? "bg-blue-100 text-blue-600"
-                  : index === 2
-                  ? "bg-green-100 text-green-600"
-                  : "bg-yellow-100 text-yellow-600"
-              }`}
-            >
-              {tag}
-            </span>
-          ))}
+          <span className="px-3 py-1 rounded-md text-xs font-medium bg-gray-700 text-white">
+            {getTypeLabel(course.type)}
+          </span>
+          <span className="px-3 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700">
+            {course.category}
+          </span>
+          <span className="px-3 py-1 rounded-md text-xs font-medium bg-green-100 text-green-700">
+            {course.level}
+          </span>
+          <span className="px-3 py-1 rounded-md text-xs font-medium bg-yellow-100 text-yellow-700">
+            {getPriceLabel(course.price)}
+          </span>
         </div>
 
         {/* 코스 제목 */}

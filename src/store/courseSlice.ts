@@ -1,134 +1,23 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { Course, CourseState } from "../types/course";
+import type { CourseState, ApiResponse } from "../types/course";
 
 // 코스 목록 가져오기
-export const fetchCourses = createAsyncThunk<Course[]>(
+export const fetchCourses = createAsyncThunk<ApiResponse>(
   "course/fetchCourses",
   async () => {
-    // 실제 API 호출로 대체 예정
-    // const response = await fetch("http://13.125.180.222/api/courses/");
-    // if (!response.ok) {
-    //   throw new Error("코스 목록을 불러오는데 실패했습니다.");
-    // }
-    // return await response.json();
-    // 더미 데이터
-    return [
-      {
-        id: "1",
-        title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-        instructor: "김여밈 강사님",
-        instructorRole: "위니버 CPO",
-        description:
-          "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["부스트 커뮤니티", "백엔드", "초급", "무료"],
-        category: "프론트엔드",
-        level: "초급",
+    const response = await fetch("http://13.125.180.222/api/courses/", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
       },
-      {
-        id: "2",
-        title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-        instructor: "김여밈 강사님",
-        instructorRole: "위니버 CPO",
-        description:
-          "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["부스트 커뮤니티", "백엔드", "중급", "유료"],
-        category: "백엔드",
-        level: "중급",
-      },
-      {
-        id: "3",
-        title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-        instructor: "이혜민 강사님",
-        instructorRole: "위니버 CPO",
-        description:
-          "파이썬 디어상 문자가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸에 배자하고요.",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["부스트 커뮤니티", "AI", "초급", "국비지원"],
-        category: "AI",
-        level: "초급",
-      },
-      {
-        id: "4",
-        title: "견고한 리액트 부스트 커뮤니티 1기",
-        instructor: "이혜민 강사님",
-        instructorRole: "위니버 CTO",
-        description: "리액트로 현대적인 웹 애플리케이션을 만들어보세요!",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["VOD", "프론트엔드", "중급", "유료"],
-        category: "프론트엔드",
-        level: "중급",
-      },
-      {
-        id: "5",
-        title: "AI 머신러닝 기초 과정",
-        instructor: "최나영 강사님",
-        instructorRole: "데이터 사이언티스트",
-        description: "AI와 머신러닝의 기초부터 실무까지 배워보세요!",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["KDC", "AI", "실무", "국비지원"],
-        category: "AI",
-        level: "실무",
-      },
-      {
-        id: "6",
-        title: "풀스택 개발자 과정",
-        instructor: "최나영 강사님",
-        instructorRole: "시니어 개발자",
-        description: "프론트엔드부터 백엔드까지 모든 것을 배우는 과정입니다!",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["VOD", "백엔드", "실무", "무료"],
-        category: "백엔드",
-        level: "실무",
-      },
-      // 더미 데이터 추가 (페이지네이션 테스트용)
-      {
-        id: "7",
-        title: "Vue.js 완벽 가이드",
-        instructor: "박개발 강사님",
-        instructorRole: "프론트엔드 전문가",
-        description: "Vue.js로 모던한 웹 애플리케이션을 개발해보세요!",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["VOD", "프론트엔드", "중급", "유료"],
-        category: "프론트엔드",
-        level: "중급",
-      },
-      {
-        id: "8",
-        title: "Node.js 백엔드 개발",
-        instructor: "김백엔드 강사님",
-        instructorRole: "백엔드 개발자",
-        description: "Node.js로 강력한 백엔드 서버를 구축해보세요!",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["부스트 커뮤니티", "백엔드", "실무", "무료"],
-        category: "백엔드",
-        level: "실무",
-      },
-      {
-        id: "9",
-        title: "데이터 사이언스 입문",
-        instructor: "이데이터 강사님",
-        instructorRole: "데이터 분석가",
-        description: "데이터 분석의 기초부터 실전까지!",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["KDC", "데이터 분석", "초급", "국비지원"],
-        category: "데이터 분석",
-        level: "초급",
-      },
-      {
-        id: "10",
-        title: "UI/UX 디자인 완성",
-        instructor: "최디자인 강사님",
-        instructorRole: "UX 디자이너",
-        description: "사용자 중심의 디자인을 배워보세요!",
-        image: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        tags: ["VOD", "디자인", "중급", "유료"],
-        category: "디자인",
-        level: "중급",
-      },
-    ];
+    });
+
+    if (!response.ok) {
+      throw new Error("코스 목록을 불러오는데 실패했습니다.");
+    }
+
+    return await response.json();
   }
 );
 
@@ -145,21 +34,19 @@ const initialState: CourseState = {
       "디자인",
       "기타",
     ],
-    subjects: ["VOD", "부스트 커뮤니티"],
+    types: ["VOD", "부스트 커뮤니티"],
     levels: ["초급", "중급", "실무"],
-    formats: ["무료", "유료", "국비지원"],
-    prices: [],
+    prices: ["무료", "유료", "국비지원"],
   },
   activeFilters: {
     categories: ["전체"],
-    subjects: [],
+    types: [],
     levels: [],
-    formats: [],
     prices: [],
   },
   pagination: {
     currentPage: 1,
-    itemsPerPage: 6,
+    itemsPerPage: 9,
     totalItems: 0,
   },
   loading: false,
@@ -231,16 +118,23 @@ const courseSlice = createSlice({
     clearAllFilters: state => {
       state.activeFilters = {
         categories: ["전체"],
-        subjects: [],
+        types: [],
         levels: [],
-        formats: [],
         prices: [],
       };
       state.pagination.currentPage = 1;
-      state.filteredCourses = state.courses;
-      state.pagination.totalItems = state.courses.length;
+      state.filteredCourses = Array.isArray(state.courses) ? state.courses : [];
+      state.pagination.totalItems = Array.isArray(state.courses)
+        ? state.courses.length
+        : 0;
     },
     applyFilters: state => {
+      if (!Array.isArray(state.courses)) {
+        state.filteredCourses = [];
+        state.pagination.totalItems = 0;
+        return;
+      }
+
       let filtered = state.courses;
 
       // 카테고리 필터
@@ -254,12 +148,12 @@ const courseSlice = createSlice({
       }
 
       // 유형 필터
-      if (state.activeFilters.subjects.length > 0) {
-        filtered = filtered.filter(course =>
-          state.activeFilters.subjects.some(subject =>
-            course.tags.includes(subject)
-          )
-        );
+      if (state.activeFilters.types.length > 0) {
+        filtered = filtered.filter(course => {
+          const courseTypeLabel =
+            course.type === "vod" ? "VOD" : "부스트 커뮤니티";
+          return state.activeFilters.types.includes(courseTypeLabel);
+        });
       }
 
       // 난이도 필터
@@ -270,12 +164,17 @@ const courseSlice = createSlice({
       }
 
       // 가격 필터
-      if (state.activeFilters.formats.length > 0) {
-        filtered = filtered.filter(course =>
-          state.activeFilters.formats.some(format =>
-            course.tags.includes(format)
-          )
-        );
+      if (state.activeFilters.prices.length > 0) {
+        filtered = filtered.filter(course => {
+          let priceLabel = "";
+          if (course.price === undefined) priceLabel = "정보없음";
+          else if (course.price === -1) priceLabel = "국비지원";
+          else if (course.price === 0) priceLabel = "무료";
+          else if (course.price > 0) priceLabel = "유료";
+          else priceLabel = "정보없음";
+
+          return state.activeFilters.prices.includes(priceLabel);
+        });
       }
 
       state.filteredCourses = filtered;
@@ -290,9 +189,12 @@ const courseSlice = createSlice({
       })
       .addCase(fetchCourses.fulfilled, (state, action) => {
         state.loading = false;
-        state.courses = action.payload;
-        state.filteredCourses = action.payload;
-        state.pagination.totalItems = action.payload.length;
+
+        const courses = action.payload?.results || [];
+
+        state.courses = courses;
+        state.filteredCourses = courses;
+        state.pagination.totalItems = courses.length;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
         state.loading = false;
