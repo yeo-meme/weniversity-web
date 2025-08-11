@@ -1,4 +1,3 @@
-import React from "react";
 import Header from "./components/header/header.tsx";
 import HeroSection from "./components/hero/hero-section.tsx";
 import "./index.css";
