@@ -13,27 +13,10 @@ interface FormErrors {
   password?: string;
 }
 
-interface LoginResponse {
-  access?: string;
-  refresh?: string;
-  email?: string;
-  role?: string;
-  success?: boolean;
-  message?: string;
-  data?: {
-    token: string;
-    user: {
-      id: number;
-      email: string;
-      name: string;
-    };
-  };
-}
-
 const LoginPage: React.FC<{
   onLoginSuccess: () => void;
   onGoToMain: () => void;
-}> = ({ onLoginSuccess, onGoToMain }) => {
+}> = ({ onGoToMain }) => {
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -85,67 +68,10 @@ const LoginPage: React.FC<{
       return;
     }
 
-    try {
-      const response = await fetch("http://13.125.180.222/api/users/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+    // API 호출 대신 콘솔 로그 출력
+    console.log("로그인 시도:", formData);
 
-      const data: LoginResponse = await response.json();
-
-      if (response.ok && (data.access || (data.success && data.data))) {
-        console.log("로그인 성공:", data);
-
-        if (data.access) {
-          localStorage.setItem("access_token", data.access);
-          localStorage.setItem("refresh_token", data.refresh || "");
-          localStorage.setItem("user_email", data.email || "");
-          localStorage.setItem("user_role", data.role || "");
-
-          alert(`로그인 성공! 환영합니다, ${data.email}님!`);
-        } else if (data.data?.token) {
-          localStorage.setItem("token", data.data.token);
-
-          alert(`로그인 성공! 환영합니다, ${data.data?.user?.email}님!`);
-        }
-
-        onLoginSuccess();
-      } else {
-        const serverMessage = data.message || "로그인에 실패했습니다.";
-
-        if (
-          serverMessage.includes("이메일") ||
-          serverMessage.includes("email")
-        ) {
-          setErrors({
-            email: "* 이메일을 확인해주세요",
-          });
-        } else if (
-          serverMessage.includes("비밀번호") ||
-          serverMessage.includes("password")
-        ) {
-          setErrors({
-            password: "* 비밀번호를 확인해주세요",
-          });
-        } else {
-          setErrors({
-            email: "* 이메일을 확인해주세요",
-            password: "* 비밀번호를 확인해주세요",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("로그인 API 호출 중 오류:", error);
-      setErrors({
-        email: "* 네트워크 오류가 발생했습니다. 다시 시도해주세요.",
-      });
-    }
+    // TODO: 실제 API 연결 필요
   };
 
   const isFormValid =
@@ -183,11 +109,9 @@ const LoginPage: React.FC<{
             <div className="flex flex-col justify-center border-none p-0 m-0 mb-6">
               <div className="flex flex-col mb-5">
                 <label
-                  htmlFor="password"
+                  htmlFor="email"
                   className={`block text-sm font-medium mb-2 ${
-                    focusedField === "password"
-                      ? "text-primary"
-                      : "text-gray700"
+                    focusedField === "email" ? "text-primary" : "text-gray700"
                   }`}
                 >
                   이메일
