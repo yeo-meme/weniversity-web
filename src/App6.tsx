@@ -1,25 +1,29 @@
 // 사용자 동영상 - 시청률 진입점
-import React, { useState } from 'react';
+import React, { useState } from "react";
 // import StudyPlayeringSystem from './components/video/StudyPlayer';
-import PlayeringSystem from './components/video/StudyLayoutPlayer';
+import PlayeringSystem from "./components/video/StudyLayoutPlayer";
+import { testStore } from "./store/testStore";
+import { Provider } from "react-redux";
 
 const App: React.FC = () => {
   const [showVideoSystem, setShowVideoSystem] = useState(false);
-  const [currentUser, setCurrentUser] = useState('user123');
+  const [currentUser, setCurrentUser] = useState("user123");
 
   const courseData = {
     id: 1,
     title: "프로그래밍 기초 강의",
-    description: "변수, 연산자, 조건문, 반복문, 함수의 기본 개념을 학습합니다."
+    description: "변수, 연산자, 조건문, 반복문, 함수의 기본 개념을 학습합니다.",
   };
 
   if (showVideoSystem) {
     return (
-      <PlayeringSystem
-        onClose={() => setShowVideoSystem(false)}
-        courseData={courseData}
-        userId={currentUser}
-      />
+      <Provider store={testStore}>
+        <PlayeringSystem
+          onClose={() => setShowVideoSystem(false)}
+          courseData={courseData}
+          userId={currentUser}
+        />
+      </Provider>
     );
   }
 

@@ -30,6 +30,10 @@ import {
   selectChapterLoading,
   selectChapterInitialized,
 } from "../../store/slices/chapterSlice";
+import { useGetWatchProgressQuery } from '../../store/slices/testApiSlice';
+
+
+
 
 interface VideoPlayerProps {
   currentVideo: string;
@@ -367,6 +371,26 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   courseData,
   userId = "user123",
 }) => {
+  console.log(`⏳ StudyLayoutPlayer - 데이터 로딩 중...${userId},${courseData.id}`)
+  const { data, error, isLoading, isSuccess, isError } = useGetWatchProgressQuery({
+    userId,
+    courseId: courseData.id,
+  });
+
+  useEffect(() => {
+    if (isLoading) {
+      console.log('⏳ StudyLayoutPlayer - 데이터 로딩 중...');
+    }
+    if (isError) {
+      console.log('❌ StudyLayoutPlayer - 에러 발생:', error);
+    }
+    if (isSuccess && data) {
+      console.log('✅ StudyLayoutPlayer - 데이터 로딩 성공!');
+      console.log('📊 StudyLayoutPlayer - 받은 데이터:', data);
+    }
+  }, [data, error, isLoading, isSuccess, isError]);
+
+
   // 🔥 Redux 상태
   const dispatch = useAppDispatch();
 
