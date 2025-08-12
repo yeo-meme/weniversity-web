@@ -374,7 +374,11 @@ export class ProgressTracker {
     userId: string,
     courseId: number,
     chapterId: number,
-    localChapter: LocalChapterCache
+    localChapter: LocalChapterCache,
+    chapterOrder: number = 0,
+    videoOrder: number = 0,
+    chapterIndex: number = 0,  // 🔥 새로 추가
+    videoIndex: number = 0     // 🔥 새로 추가
   ): Promise<WatchProgress | null> {
 
     try {
@@ -399,6 +403,12 @@ export class ProgressTracker {
             firstWatchedAt: progress.firstWatchedAt,
             lastWatchedAt: progress.lastWatchedAt,
             completedAt: progress.completedAt,
+
+            chapterOrder: chapterOrder,
+            videoOrder: videoOrder,
+            chapterIndex: chapterIndex,  // 🔥 새로 추가
+            videoIndex: videoIndex,      // 🔥 새로 추가
+            updateLastWatched: true,
           }),
         }
       );
