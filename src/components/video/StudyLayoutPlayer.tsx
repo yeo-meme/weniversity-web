@@ -21,15 +21,26 @@ import { loadCache, updateCache } from "../../services/SimpleProgressCache";
 import { convertWatchProgressToCache } from "../../utils/convertCacheToWatchProgress";
 
 import { useAppDispatch, useAppSelector } from "../../store/store";
+// import {
+//   loadProgressFromServer,
+//   setCurrentChapterIndex,
+//   setChapterAndTime,
+//   selectCurrentChapterIndex,
+//   selectStartTime,
+//   selectChapterLoading,
+//   selectChapterInitialized,
+// } from "../../store/slices/chapterSlice";
+
+// 테스터 완료 임포트
+
+import { useDispatch, useSelector } from 'react-redux';
 import {
-  loadProgressFromServer,
+  setChapters,
+  setCourseTitle,
+  setDuration,
   setCurrentChapterIndex,
-  setChapterAndTime,
-  selectCurrentChapterIndex,
-  selectStartTime,
-  selectChapterLoading,
-  selectChapterInitialized,
-} from "../../store/slices/chapterSlice";
+  setStartTime
+} from '../../store/slices/playerSlice';
 import { useGetWatchProgressQuery } from '../../store/slices/testApiSlice';
 
 
@@ -371,58 +382,117 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   courseData,
   userId = "user123",
 }) => {
-  console.log(`⏳ StudyLayoutPlayer - 데이터 로딩 중...${userId},${courseData.id}`)
-  const { data, error, isLoading, isSuccess, isError } = useGetWatchProgressQuery({
-    userId,
-    courseId: courseData.id,
-  });
+  //------테스트 성공
+  const dispatch = useDispatch();
 
+  const videoId = 1;
+  // 1. RTK Query로 API 호출
+  const { data, error, isLoading } = useGetWatchProgressQuery({ userId, videoId });
+  
+  // 2. API 데이터가 들어오면 리덕스 상태 업데이트
   useEffect(() => {
-    if (isLoading) {
-      console.log('⏳ StudyLayoutPlayer - 데이터 로딩 중...');
+    if (data) {
+      // 🔥 API 응답 구조 상세 로깅
+      console.log('=== API Response Debug ===');
+      console.log('Full API Response:', data);
+      console.log('Response Type:', typeof data);
+      console.log('Response Keys:', Object.keys(data));
+  
+      // 🔥 chapters 배열 상세 확인
+      console.log('=== Chapters Debug ===');
+      console.log('Chapters Array:', data.chapters);
+      console.log('Chapters Type:', typeof data.chapters);
+      console.log('Chapters Length:', data.chapters?.length);
+      console.log('Is Array?:', Array.isArray(data.chapters));
+  
+      if (data.chapters && data.chapters.length > 0) {
+        console.log('First Chapter Sample:', data.chapters[0]);
+        console.log('First Chapter Keys:', Object.keys(data.chapters[0]));
+  
+        const firstChapter = data.chapters[0];
+        console.log('=== WatchProgress Structure Check ===');
+        console.log('userId:', firstChapter.userId);
+        console.log('courseId:', firstChapter.courseId);
+        console.log('chapterId:', firstChapter.chapterId);
+        console.log('videoId:', firstChapter.videoId);
+        console.log('chapterIndex:', firstChapter.chapterIndex);
+        console.log('videoIndex:', firstChapter.videoIndex);
+        console.log('currentTime:', firstChapter.currentTime);
+        console.log('totalDuration:', firstChapter.totalDuration);
+        console.log('watchedPercentage:', firstChapter.watchedPercentage);
+        console.log('isCompleted:', firstChapter.isCompleted);
+      }
+  
+      // 🔥 lastWatched 구조 확인
+      console.log('=== LastWatched Debug ===');
+      console.log('LastWatched:', data.lastWatched);
+      if (data.lastWatched) {
+        console.log('LastWatched Keys:', Object.keys(data.lastWatched));
+        console.log('lastChapterId:', data.lastWatched.lastChapterId);
+        console.log('lastVideoId:', data.lastWatched.lastVideoId);
+        console.log('lastChapterIndex:', data.lastWatched.lastChapterIndex);
+        console.log('lastVideoIndex:', data.lastWatched.lastVideoIndex);
+      }
+  
+      // 🔥 statistics 구조 확인
+      console.log('=== Statistics Debug ===');
+      console.log('Statistics:', data.statistics);
+      if (data.statistics) {
+        console.log('Statistics Keys:', Object.keys(data.statistics));
+        console.log('totalChapters:', data.statistics.totalChapters);
+        console.log('completedChapters:', data.statistics.completedChapters);
+        console.log('totalVideos:', data.statistics.totalVideos);
+        console.log('completedVideos:', data.statistics.completedVideos);
+        console.log('overallProgress:', data.statistics.overallProgress);
+        console.log('isCompleted:', data.statistics.isCompleted);
+      }
+  
+      // 🔥 CourseProgressResponse 인터페이스 호환성 체크
+      console.log('=== Interface Compatibility Check ===');
+      const hasRequiredFields = {
+        userId: !!data.userId,
+        courseId: !!data.courseId,
+        chapters: Array.isArray(data.chapters),
+        lastWatched: data.lastWatched !== undefined,
+        statistics: !!data.statistics
+      };
+      console.log('CourseProgressResponse 필드 존재 여부:', hasRequiredFields);
+  
+      const allFieldsPresent = Object.values(hasRequiredFields).every(Boolean);
+      console.log('모든 필수 필드 존재?:', allFieldsPresent);
+  
+      // 전체 강의 제목, 챕터 목록, 총 재생시간 등 상태 저장
+      dispatch(setCourseTitle(`강의 ${data.courseId} 제목`));
+      dispatch(setChapters(data.chapters));
+      dispatch(setDuration(data.chapters.reduce((acc, ch) => acc + ch.totalDuration, 0)));
+  
+      // 마지막 시청 위치 설정
+      if (data.lastWatched) {
+        dispatch(setCurrentChapterIndex(data.lastWatched.lastChapterIndex || 0));
+        dispatch(setStartTime(data.lastWatched.currentTime || 0));
+      } else {
+        dispatch(setCurrentChapterIndex(0));
+        dispatch(setStartTime(0));
+      }
     }
-    if (isError) {
-      console.log('❌ StudyLayoutPlayer - 에러 발생:', error);
-    }
-    if (isSuccess && data) {
-      console.log('✅ StudyLayoutPlayer - 데이터 로딩 성공!');
-      console.log('📊 StudyLayoutPlayer - 받은 데이터:', data);
-    }
-  }, [data, error, isLoading, isSuccess, isError]);
+  }, [data, dispatch]);
+  
+  // 3. 리덕스 상태에서 데이터 읽기 (변수명 유니크하게 변경)
+  const progressChapters = useSelector((state) => state.player.chapters);
+  const progressChapterIndex = useSelector((state) => state.player.currentChapterIndex);
+  const progressStartTime = useSelector((state) => state.player.startTime);
+  const progressCourseTitle = useSelector((state) => state.player.courseTitle);
+  
+  // 리덕스 상태 확인용 로그
+  console.log('Progress Chapters:', progressChapters);
+  console.log('Progress Chapter Index:', progressChapterIndex);
+  console.log('Progress Start Time:', progressStartTime);
+  console.log('Progress Course Title:', progressCourseTitle);
+  
+  // 현재 챕터
+  const progressCurrentChapter = progressChapters[progressChapterIndex] ?? null;
 
-
-  // 🔥 Redux 상태
-  const dispatch = useAppDispatch();
-
-  // 🔧 셀렉터 함수들이 undefined 반환하는 경우 대비
-  const currentChapterIndexRe = useAppSelector(selectCurrentChapterIndex) || 0;
-  const startTimeRe = useAppSelector(selectStartTime) || 0;
-  const isChapterLoadingRe = useAppSelector(selectChapterLoading) || false;
-  const isInitializedRe = useAppSelector(selectChapterInitialized) || false;
-
-  const chapters = courseData?.chapters || [];
-
-  const currentChapterRe =
-    chapters && chapters.length > 0 ? chapters[currentChapterIndexRe] : null;
-
-  // 🔍 디버깅 로그
-  console.log("🔍 currentChapterRe 확인:", {
-    currentChapterIndexRe,
-    chapters길이: chapters?.length,
-    currentChapterRe: currentChapterRe,
-  });
-
-  // 🔍 디버깅용 로그 추가
-  console.log("🔍 Redux 상태 확인:", {
-    currentChapterIndexRe,
-    startTimeRe,
-    isChapterLoadingRe,
-    isInitializedRe,
-    전체상태: useAppSelector((state: any) => state),
-  });
-
-  // 🔥 Redux → 로컬 상태 동기화 (한 번만)
-const [isReduxSynced, setIsReduxSynced] = useState(false);
+  //------테스트 성공 
 
 
   //DB 백업 캐시
@@ -453,6 +523,8 @@ const [isReduxSynced, setIsReduxSynced] = useState(false);
   );
 
   // UI용 변수들
+
+  const currentChapterIndexRe = 2;
   const courseTitle = courseData?.title || "프로그래밍 기초 강의";
   const currentChapter = chapters[currentChapterIndexRe];
   const totalDuration = chapters.reduce(
