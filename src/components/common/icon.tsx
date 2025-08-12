@@ -1,5 +1,3 @@
-import React from "react";
-
 export const VideoIcon: React.FC = () => (
   <svg
     width="20"

@@ -1,4 +1,3 @@
-import React from "react";
 import HeroBanner from "./hero-banner.tsx";
 import ProfileCard from "./profile-card.tsx";
 
