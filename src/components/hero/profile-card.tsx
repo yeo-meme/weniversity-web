@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
@@ -9,6 +9,32 @@ interface ProfileCardProps {
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
+  const [userInfo, setUserInfo] = useState({
+    email: "",
+    role: "",
+  });
+
+  // 로그인 상태 변경 시 사용자 정보 가져오기
+  useEffect(() => {
+    if (isLoggedIn) {
+      const email = localStorage.getItem("user_email") || "";
+      const role = localStorage.getItem("user_role") || "";
+      setUserInfo({ email, role });
+    } else {
+      setUserInfo({ email: "", role: "" });
+    }
+  }, [isLoggedIn]);
+
+  // 사용자 이름 표시 로직
+  const getUserDisplayName = () => {
+    if (userInfo.email) {
+      // 이메일에서 @ 앞부분을 사용자명으로 사용
+      const username = userInfo.email.split("@")[0];
+      return `${username}님`;
+    }
+    return "위니브 소울곰";
+  };
+
   if (isLoggedIn) {
     return (
       <article className="flex flex-col justify-center items-center w-[290px] p-8 box-border bg-white border border-gray200 rounded-[10px] text-center max-[834px]:hidden">
@@ -16,13 +42,15 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
           <img
             className="w-full h-full object-cover"
             src={profileImg}
-            alt="위니브 소울곰 프로필"
+            alt="사용자 프로필"
           />
         </div>
         <h3 className="mb-4 text-main-text text-base font-semibold">
-          위니브 소울곰
+          {getUserDisplayName()}
         </h3>
-        <p className="text-sm text-gray500 mb-6">paul-lab@naver.com</p>
+        <p className="text-sm text-gray500 mb-6">
+          {userInfo.email || "paul-lab@naver.com"}
+        </p>
 
         <ul className="flex flex-col justify-center items-start gap-4 list-none">
           <li>

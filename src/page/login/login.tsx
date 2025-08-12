@@ -34,6 +34,93 @@ const LoginPage: React.FC<{
   onLoginSuccess: () => void;
   onGoToMain: () => void;
 }> = ({ onLoginSuccess, onGoToMain }) => {
+  const API_BASE_URL =
+    import.meta.env.VITE_API_BASE_URL || "http://13.125.180.222";
+
+  const refreshToken = async (): Promise<string | null> => {
+    try {
+      const refresh = localStorage.getItem("refresh_token");
+      if (!refresh) return null;
+
+      const response = await fetch(`${API_BASE_URL}/api/users/refresh/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          refresh: refresh,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.access) {
+          localStorage.setItem("access_token", data.access);
+          return data.access;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error("토큰 갱신 오류:", error);
+      return null;
+    }
+  };
+
+  // 로그아웃 함수
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        await fetch(`${API_BASE_URL}/api/users/logout/`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      }
+    } catch (error) {
+      // 에러 로그만 남기고 메시지 삭제
+    } finally {
+      // 토큰 삭제
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("user_role");
+    }
+  };
+
+  const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
+    let token = localStorage.getItem("access_token");
+
+    const makeRequest = async (authToken: string) => {
+      return fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+    };
+
+    if (token) {
+      let response = await makeRequest(token);
+
+      if (response.status === 401) {
+        const newToken = await refreshToken();
+        if (newToken) {
+          response = await makeRequest(newToken);
+        } else {
+          await handleLogout();
+          throw new Error("인증이 만료되었습니다. 다시 로그인해주세요.");
+        }
+      }
+      return response;
+    }
+
+    throw new Error("로그인이 필요합니다.");
+  };
+
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -86,7 +173,7 @@ const LoginPage: React.FC<{
     }
 
     try {
-      const response = await fetch("http://13.125.180.222/api/users/login/", {
+      const response = await fetch(`${API_BASE_URL}/api/users/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

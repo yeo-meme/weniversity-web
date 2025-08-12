@@ -6,6 +6,7 @@ import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
 
 interface HeaderProps {
+  isLoggedIn: boolean;
   onLogin?: () => void;
   onLogout?: () => void;
   onGoToMain?: () => void;
@@ -38,25 +39,16 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
         localStorage.getItem("access_token") || localStorage.getItem("token");
 
       if (token) {
-        const response = await fetch(
-          "http://13.125.180.222/api/users/logout/",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          console.log("서버 로그아웃 성공");
-        } else {
-          console.warn("서버 로그아웃 실패, 로컬 정리만 진행");
-        }
+        await fetch("http://13.125.180.222/api/users/logout/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
       }
     } catch (error) {
-      console.error("로그아웃 API 호출 중 오류:", error);
+      // 에러 로그만 남기고 메시지 삭제
     }
 
     localStorage.removeItem("access_token");
