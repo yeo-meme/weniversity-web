@@ -30,6 +30,7 @@ export interface LastWatched {
   lastChapterIndex: number;
   lastVideoIndex: number;
   lastWatchedAt: string;
+  currentTime: number; 
 }
 
 //사용자가 동영상어디까지 사용자 개별 테이블 - 
@@ -76,15 +77,15 @@ export interface UpdateWatchProgressParams {
 }
 
 
-export interface LastWatched {
-  lastChapterId: number;
-  lastVideoId: number;
-  lastChapterOrder: number;
-  lastVideoOrder: number;
-  lastChapterIndex: number;
-  lastVideoIndex: number;
-  lastWatchedAt: string; // ISO 형식
-}
+// export interface LastWatched {
+//   lastChapterId: number;
+//   lastVideoId: number;
+//   lastChapterOrder: number;
+//   lastVideoOrder: number;
+//   lastChapterIndex: number;
+//   lastVideoIndex: number;
+//   lastWatchedAt: string; // ISO 형식
+// }
 
 export interface CourseProgressStatistics {
   totalChapters: number;
