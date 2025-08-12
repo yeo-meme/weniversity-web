@@ -1,15 +1,20 @@
 export interface Course {
   course_id: string;
   title: string;
-  instructor: string;
-  instructorRole: string;
-  description: string;
+  instructors: Instructors[];
   image: string;
   type: string;
   category: string;
   level: string;
   duration?: string;
   price?: number;
+  description: string;
+}
+
+export interface Instructors {
+  name: string;
+  profile_image: string;
+  affiliation: string;
 }
 
 export interface CourseFilters {

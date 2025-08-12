@@ -26,22 +26,26 @@ const CoursePage: React.FC = () => {
   } = useAppSelector(state => state.course);
 
   useEffect(() => {
-    dispatch(fetchCourses());
+    dispatch(
+      fetchCourses({
+        page: pagination.currentPage,
+        categories: activeFilters.categories,
+        types: activeFilters.types,
+        levels: activeFilters.levels,
+        prices: activeFilters.prices,
+      })
+    );
+  }, [dispatch, activeFilters, pagination.currentPage]);
+
+  useEffect(() => {
     return () => {
       dispatch(resetCourseState());
     };
   }, [dispatch]);
 
-  // 현재 페이지에 표시할 강의들 계산
   const paginatedCourses = useMemo(() => {
-    // filteredCourses가 배열인지 확인
-    if (!Array.isArray(filteredCourses)) {
-      return [];
-    }
-    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
-    const endIndex = startIndex + pagination.itemsPerPage;
-    return filteredCourses.slice(startIndex, endIndex);
-  }, [filteredCourses, pagination.currentPage, pagination.itemsPerPage]);
+    return Array.isArray(filteredCourses) ? filteredCourses : [];
+  }, [filteredCourses]);
 
   const handleFilterChange = (
     filterType: keyof typeof activeFilters,
@@ -56,7 +60,6 @@ const CoursePage: React.FC = () => {
 
   const handlePageChange = (page: number) => {
     dispatch(setCurrentPage(page));
-    // 페이지 변경 시 스크롤을 맨 위로 이동
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -69,7 +72,7 @@ const CoursePage: React.FC = () => {
     );
   };
 
-  if (loading) {
+  if (loading && pagination.currentPage === 1) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -249,9 +252,11 @@ const CoursePage: React.FC = () => {
         <div className="my-8">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">
-              강의 목록 (
-              {Array.isArray(filteredCourses) ? filteredCourses.length : 0}개)
+              강의 목록 ({pagination.totalItems}개)
             </h3>
+            {loading && pagination.currentPage > 1 && (
+              <div className="text-sm text-gray-500">로딩 중...</div>
+            )}
           </div>
 
           {error && (
@@ -276,7 +281,7 @@ const CoursePage: React.FC = () => {
               {/* 페이지네이션 */}
               <Pagination
                 currentPage={pagination.currentPage}
-                totalItems={filteredCourses.length}
+                totalItems={pagination.totalItems}
                 itemsPerPage={pagination.itemsPerPage}
                 onPageChange={handlePageChange}
               />

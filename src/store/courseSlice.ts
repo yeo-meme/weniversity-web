@@ -2,24 +2,87 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { CourseState, ApiResponse } from "../types/course";
 
-// 코스 목록 가져오기
-export const fetchCourses = createAsyncThunk<ApiResponse>(
-  "course/fetchCourses",
-  async () => {
-    const response = await fetch("http://13.125.180.222/api/courses/", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+interface FetchCoursesParams {
+  page?: number;
+  categories?: string[];
+  types?: string[];
+  levels?: string[];
+  prices?: string[];
+}
 
-    if (!response.ok) {
-      throw new Error("코스 목록을 불러오는데 실패했습니다.");
-    }
+// URL 파라미터 생성 함수
+const buildQueryParams = (params: FetchCoursesParams): string => {
+  const queryParams = new URLSearchParams();
 
-    return await response.json();
+  // 페이지 파라미터
+  const page = params.page || 1;
+  queryParams.append("page", page.toString());
+
+  // 카테고리 필터 (전체가 아닌 경우만)
+  if (
+    params.categories &&
+    params.categories.length > 0 &&
+    !params.categories.includes("전체")
+  ) {
+    queryParams.append("category", params.categories.join(","));
   }
-);
+
+  // 유형 필터
+  if (params.types && params.types.length > 0) {
+    const apiTypes = params.types.map(type =>
+      type === "VOD" ? "vod" : type === "부스트 커뮤니티" ? "boost" : type
+    );
+    queryParams.append("type", apiTypes.join(","));
+  }
+
+  // 난이도 필터
+  if (params.levels && params.levels.length > 0) {
+    queryParams.append("level", params.levels.join(","));
+  }
+
+  // 가격 필터
+  if (params.prices && params.prices.length > 0) {
+    const apiTypes = params.prices.map(price =>
+      price === "무료" ? "free" : price === "유료" ? "paid" : "gov"
+    );
+    queryParams.append("price_type", apiTypes.join(","));
+  }
+
+  return queryParams.toString();
+};
+
+// 코스 목록 가져오기
+export const fetchCourses = createAsyncThunk<
+  ApiResponse,
+  FetchCoursesParams | undefined
+>("course/fetchCourses", async (params, { getState }) => {
+  const state = getState() as { course: CourseState };
+  const { activeFilters } = state.course;
+  const requestParams = params || {
+    page: 1,
+    categories: activeFilters.categories,
+    types: activeFilters.types,
+    levels: activeFilters.levels,
+    prices: activeFilters.prices,
+  };
+
+  const baseUrl = "http://13.125.180.222/api/courses/";
+  const queryString = buildQueryParams(requestParams);
+  const url = `${baseUrl}?${queryString}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("코스 목록을 불러오는데 실패했습니다.");
+  }
+
+  return await response.json();
+});
 
 const initialState: CourseState = {
   courses: [],
@@ -67,7 +130,7 @@ const courseSlice = createSlice({
     },
     setItemsPerPage: (state, action: PayloadAction<number>) => {
       state.pagination.itemsPerPage = action.payload;
-      state.pagination.currentPage = 1; // 페이지당 아이템 수가 변경되면 첫 페이지로 이동
+      state.pagination.currentPage = 1;
     },
     setActiveFilter: (
       state,
@@ -82,15 +145,12 @@ const courseSlice = createSlice({
         if (value === "전체") {
           state.activeFilters.categories = ["전체"];
         } else {
-          // '전체'가 선택되어 있다면 제거하고 새로운 값 추가
           if (state.activeFilters.categories.includes("전체")) {
             state.activeFilters.categories = [value];
           } else {
-            // 이미 선택된 값이면 제거, 아니면 추가
             const index = state.activeFilters.categories.indexOf(value);
             if (index > -1) {
               state.activeFilters.categories.splice(index, 1);
-              // 아무것도 선택되지 않았다면 '전체' 선택
               if (state.activeFilters.categories.length === 0) {
                 state.activeFilters.categories = ["전체"];
               }
@@ -109,11 +169,7 @@ const courseSlice = createSlice({
         }
       }
 
-      // 필터가 변경되면 첫 페이지로 이동
       state.pagination.currentPage = 1;
-
-      // 필터 적용
-      courseSlice.caseReducers.applyFilters(state);
     },
     clearAllFilters: state => {
       state.activeFilters = {
@@ -123,62 +179,6 @@ const courseSlice = createSlice({
         prices: [],
       };
       state.pagination.currentPage = 1;
-      state.filteredCourses = Array.isArray(state.courses) ? state.courses : [];
-      state.pagination.totalItems = Array.isArray(state.courses)
-        ? state.courses.length
-        : 0;
-    },
-    applyFilters: state => {
-      if (!Array.isArray(state.courses)) {
-        state.filteredCourses = [];
-        state.pagination.totalItems = 0;
-        return;
-      }
-
-      let filtered = state.courses;
-
-      // 카테고리 필터
-      if (
-        !state.activeFilters.categories.includes("전체") &&
-        state.activeFilters.categories.length > 0
-      ) {
-        filtered = filtered.filter(course =>
-          state.activeFilters.categories.includes(course.category)
-        );
-      }
-
-      // 유형 필터
-      if (state.activeFilters.types.length > 0) {
-        filtered = filtered.filter(course => {
-          const courseTypeLabel =
-            course.type === "vod" ? "VOD" : "부스트 커뮤니티";
-          return state.activeFilters.types.includes(courseTypeLabel);
-        });
-      }
-
-      // 난이도 필터
-      if (state.activeFilters.levels.length > 0) {
-        filtered = filtered.filter(course =>
-          state.activeFilters.levels.includes(course.level)
-        );
-      }
-
-      // 가격 필터
-      if (state.activeFilters.prices.length > 0) {
-        filtered = filtered.filter(course => {
-          let priceLabel = "";
-          if (course.price === undefined) priceLabel = "정보없음";
-          else if (course.price === -1) priceLabel = "국비지원";
-          else if (course.price === 0) priceLabel = "무료";
-          else if (course.price > 0) priceLabel = "유료";
-          else priceLabel = "정보없음";
-
-          return state.activeFilters.prices.includes(priceLabel);
-        });
-      }
-
-      state.filteredCourses = filtered;
-      state.pagination.totalItems = filtered.length;
     },
   },
   extraReducers: builder => {
@@ -190,16 +190,19 @@ const courseSlice = createSlice({
       .addCase(fetchCourses.fulfilled, (state, action) => {
         state.loading = false;
 
-        const courses = action.payload?.results || [];
+        const response = action.payload;
+        const courses = response?.results || [];
 
         state.courses = courses;
         state.filteredCourses = courses;
-        state.pagination.totalItems = courses.length;
+        state.pagination.totalItems = response?.count || 0;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
         state.loading = false;
         state.error =
           action.error.message || "코스 목록을 불러오는데 실패했습니다.";
+        state.courses = [];
+        state.filteredCourses = [];
       });
   },
 });
@@ -211,4 +214,5 @@ export const {
   setCurrentPage,
   setItemsPerPage,
 } = courseSlice.actions;
+
 export default courseSlice.reducer;

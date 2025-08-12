@@ -84,17 +84,17 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
             <img
-              src={course.image}
+              src={course.instructors[0].profile_image}
               alt="강사"
               className="w-full h-full object-cover"
             />
           </div>
           <div className="flex items-center">
             <p className="text-sm font-medium text-gray-900">
-              {course.instructor}
+              {course.instructors[0].name}
             </p>
             <p className="ml-2 text-xs text-gray-500">
-              {course.instructorRole}
+              {course.instructors[0].affiliation}
             </p>
           </div>
         </div>
