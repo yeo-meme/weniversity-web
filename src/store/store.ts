@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { apiSlice } from '../api/apiSlice'
-import chapterReducer from '../api/chapterSlice'
+import { apiSlice } from '../store/slices/apiSlice'
+import chapterReducer from "../store/slices/chapterSlice";
 import { useDispatch, useSelector } from 'react-redux'
 
 export const store = configureStore({

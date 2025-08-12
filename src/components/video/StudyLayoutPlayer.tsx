@@ -29,7 +29,7 @@ import {
   selectStartTime,
   selectChapterLoading,
   selectChapterInitialized,
-} from "../../api/chapterSlice";
+} from "../../store/slices/chapterSlice";
 
 interface VideoPlayerProps {
   currentVideo: string;
