@@ -5,15 +5,13 @@ import {
   fetchCourseDetail,
   setActiveTab,
   toggleChapterExpansion,
-  shareCourse,
-  enrollCourse,
   resetCourseDetailState,
 } from "../store/courseDetailSlice";
 import type { TabType } from "../types/courseDetail";
 import ExamImage from "../assets/exam.png";
 import ShareIcon from "../assets/icon-Share.png";
 import ExperienceTestimonials from "../components/courseDetail/ExperienceTestimonials";
-// import CurriculumSection from "../components/courseDetail/CurriculumSection";
+import CurriculumSection from "../components/courseDetail/CurriculumSection";
 import LearningSteps from "../components/courseDetail/LearningSteps";
 import InstructorSection from "../components/courseDetail/InstructorSection";
 import FAQSection from "../components/courseDetail/FAQSection";
@@ -28,19 +26,13 @@ const CourseDetailPage: React.FC = () => {
   // const { id } = useParams<{ id: string }>();
   const id = "1"; // 임시 아이디
   const dispatch = useAppDispatch();
-  const {
-    courseDetail,
-    activeTab,
-    loading,
-    error,
-    shareLoading,
-    enrollmentLoading,
-  } = useAppSelector(state => state.courseDetail);
+  const { courseDetail, activeTab, loading, error } = useAppSelector(
+    state => state.courseDetail
+  );
 
   // 각 섹션의 ref
   const sectionRefs = useRef<{ [key in TabType]: HTMLDivElement | null }>({
     overview: null,
-    schedule: null,
     curriculum: null,
     instructor: null,
     faq: null,
@@ -160,7 +152,6 @@ const CourseDetailPage: React.FC = () => {
     (tabKey: TabType) => {
       dispatch(setActiveTab(tabKey));
 
-      // 프로그래밍적 스크롤 시작
       isScrollingProgrammatically.current = true;
 
       // 해당 섹션으로 스크롤
@@ -172,7 +163,7 @@ const CourseDetailPage: React.FC = () => {
           behavior: "smooth",
         });
 
-        // 스크롤 완료 후 플래그 해제 (약간의 지연 후)
+        // 스크롤 완료 후 플래그 해제
         setTimeout(() => {
           isScrollingProgrammatically.current = false;
         }, 1000);
@@ -181,20 +172,16 @@ const CourseDetailPage: React.FC = () => {
     [dispatch]
   );
 
-  const handleChapterToggle = (chapterId: string) => {
+  const handleChapterToggle = (chapterId: number) => {
     dispatch(toggleChapterExpansion(chapterId));
   };
 
   const handleShareCourse = () => {
-    if (id) {
-      dispatch(shareCourse(id));
-    }
+    alert("공유하기 기능은 개발중입니다.");
   };
 
   const handleEnrollment = () => {
-    if (id) {
-      dispatch(enrollCourse(id));
-    }
+    alert("수강신청 기능은 개발중입니다.");
   };
 
   if (loading) {
@@ -374,18 +361,16 @@ const CourseDetailPage: React.FC = () => {
                 <button
                   className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-3 disabled:opacity-50"
                   onClick={handleEnrollment}
-                  disabled={enrollmentLoading}
                 >
-                  {enrollmentLoading ? "처리 중..." : "수강신청 하기"}
+                  수강신청 하기
                 </button>
 
                 <button
                   className="flex justify-center items-center w-full border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors disabled:opacity-50"
                   onClick={handleShareCourse}
-                  disabled={shareLoading}
                 >
                   <img src={ShareIcon} alt="" className="mr-2" />
-                  {shareLoading ? "처리 중..." : "공유하기"}
+                  공유하기
                 </button>
 
                 {error && (
@@ -434,7 +419,7 @@ const CourseDetailPage: React.FC = () => {
         </div>
 
         {/* 커리큘럼 */}
-        {/* <div
+        <div
           ref={el => {
             sectionRefs.current.curriculum = el;
           }}
@@ -444,7 +429,7 @@ const CourseDetailPage: React.FC = () => {
             chapters={courseDetail.chapters}
             onChapterToggle={handleChapterToggle}
           />
-        </div> */}
+        </div>
 
         {/* 강사 소개 */}
         <div

@@ -1,17 +1,17 @@
-export interface CourseLesson {
-  id: string;
-  title: string;
-  duration: string;
-  isCompleted: boolean;
-  isActive?: boolean;
-  videoUrl?: string;
-}
-
 export interface CourseChapter {
   chapter_id: number;
   order_index: number;
   title: string;
   isExpanded?: boolean;
+  videos: CourseVideos[];
+}
+
+export interface CourseVideos {
+  video_id: number;
+  title: string;
+  order_index: number;
+  duration: number;
+  video_file: string;
 }
 
 export interface CourseInstructor {
@@ -55,7 +55,6 @@ export interface CourseDetailInfo {
 
 export type TabType =
   | "overview"
-  | "schedule"
   | "curriculum"
   | "instructor"
   | "faq"
