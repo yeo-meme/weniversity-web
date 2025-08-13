@@ -1,13 +1,17 @@
+import React, { useMemo } from "react";
 import QueteIcon from "../../assets/icon-quote.png";
 
-const ExperienceTestimonials = () => {
-  const testimonials = [
-    "파이썬, 유튜브로 몇 번 시작했지만 끝까지 해본 적 없어요.",
-    "실무에 쓸 수 있는 결과물을 하나 만들고 싶은데 어떻게 시작해야 할지 모르겠어요.",
-    "AI 시대라는데 뭘 어떻게 배워야 하는지 막막해요.",
-    "혼자 공부하면 자꾸 포기하게 돼서 동기부여가 필요해요.",
-    "퇴근하고 책 펴는 것도 버거운데 혼자서는 도저히 못 하겠어요.",
-  ];
+const ExperienceTestimonials: React.FC = () => {
+  const testimonials = useMemo(
+    () => [
+      "파이썬, 유튜브로 몇 번 시작했지만 끝까지 해본 적 없어요.",
+      "실무에 쓸 수 있는 결과물을 하나 만들고 싶은데 어떻게 시작해야 할지 모르겠어요.",
+      "AI 시대라는데 뭘 어떻게 배워야 하는지 막막해요.",
+      "혼자 공부하면 자꾸 포기하게 돼서 동기부여가 필요해요.",
+      "퇴근하고 책 펴는 것도 버거운데 혼자서는 도저히 못 하겠어요.",
+    ],
+    []
+  );
 
   return (
     <div className="bg-blue-100 py-16 px-8">
@@ -49,4 +53,4 @@ const ExperienceTestimonials = () => {
   );
 };
 
-export default ExperienceTestimonials;
+export default React.memo(ExperienceTestimonials);

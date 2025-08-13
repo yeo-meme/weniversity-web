@@ -1,3 +1,4 @@
+import React, { useMemo } from "react";
 import type { CourseInstructor } from "../../types/courseDetail";
 
 interface InstructorSectionProps {
@@ -7,21 +8,28 @@ interface InstructorSectionProps {
 const InstructorSection: React.FC<InstructorSectionProps> = ({
   instructor,
 }) => {
-  const instructorData = [
-    [
-      "주식회사 위니브 대표",
-      "바울랩(학원, 연구원, 출판사 3사) 대표",
-      "제주코딩베이스캠프 운영진",
-      "제주앱 고리좀배이스캠프 운영진",
-    ],
-    ["제주스타트업협회 부회장", "신한금융그룹 신한데이터시스템 정보보안 담당"],
-    ["제주대학교"],
-    [
-      "믹스웨어 개발 기조 강의 발표라마",
-      "멋쟁이사자처럼 테킷(TECHIT) 프론트엔드 스쿨 1~9기 주강사",
-      "EST 백엔드 스쿨",
-    ],
-  ];
+  const instructorData = useMemo(
+    () => ({
+      current: [
+        "주식회사 위니브 대표",
+        "바울랩(학원, 연구원, 출판사 3사) 대표",
+        "제주코딩베이스캠프 운영진",
+        "제주앱 고리좀배이스캠프 운영진",
+      ],
+      previous: [
+        "제주스타트업협회 부회장",
+        "신한금융그룹 신한데이터시스템 정보보안 담당",
+      ],
+      education: ["제주대학교"],
+      achievements: [
+        "믹스웨어 개발 기조 강의 발표라마",
+        "멋쟁이사자처럼 테킷(TECHIT) 프론트엔드 스쿨 1~9기 주강사",
+        "EST 백엔드 스쿨",
+      ],
+    }),
+    []
+  );
+
   return (
     <div className="flex flex-col items-center">
       <div className="text-center mb-6">
@@ -49,12 +57,12 @@ const InstructorSection: React.FC<InstructorSectionProps> = ({
           </p>
 
           <div className="mb-6 space-y-2 text-gray-700">
-            {instructorData[0].map((position, index) => (
+            {instructorData.current.map((position, index) => (
               <p key={index}>
                 <span className="mr-2 text-blue-600">現</span> {position}
               </p>
             ))}
-            {instructorData[1].map((position, index) => (
+            {instructorData.previous.map((position, index) => (
               <p key={index}>
                 <span className="mr-2 text-gray-500">前</span> {position}
               </p>
@@ -65,10 +73,10 @@ const InstructorSection: React.FC<InstructorSectionProps> = ({
             <p className="mb-2 text-base text-gray-900 font-bold">
               [강사 이력]
             </p>
-            {instructorData[2].map((edu, index) => (
+            {instructorData.education.map((edu, index) => (
               <p key={index}>{edu}</p>
             ))}
-            {instructorData[3].map((achievement, index) => (
+            {instructorData.achievements.map((achievement, index) => (
               <p key={index}>{achievement}</p>
             ))}
           </div>
@@ -78,4 +86,4 @@ const InstructorSection: React.FC<InstructorSectionProps> = ({
   );
 };
 
-export default InstructorSection;
+export default React.memo(InstructorSection);

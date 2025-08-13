@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Step1 from "../../assets/step-1.png";
 import Step2 from "../../assets/step-2.png";
 import Step3 from "../../assets/step-3.png";
@@ -6,33 +6,36 @@ import Step4 from "../../assets/step-4.png";
 import Step5 from "../../assets/step-5.png";
 
 const LearningMethods: React.FC = () => {
-  const learningMethods = [
-    {
-      id: 1,
-      image: Step1,
-      title: "생성형 AI 기반 학습",
-    },
-    {
-      id: 2,
-      image: Step2,
-      title: "커뮤니티 학습",
-    },
-    {
-      id: 3,
-      image: Step3,
-      title: "맞춤형 온라인 VOD 강의",
-    },
-    {
-      id: 4,
-      image: Step4,
-      title: "전문가의 큐레이션",
-    },
-    {
-      id: 5,
-      image: Step5,
-      title: "바이브 코딩",
-    },
-  ];
+  const learningMethods = useMemo(
+    () => [
+      {
+        id: 1,
+        image: Step1,
+        title: "생성형 AI 기반 학습",
+      },
+      {
+        id: 2,
+        image: Step2,
+        title: "커뮤니티 학습",
+      },
+      {
+        id: 3,
+        image: Step3,
+        title: "맞춤형 온라인 VOD 강의",
+      },
+      {
+        id: 4,
+        image: Step4,
+        title: "전문가의 큐레이션",
+      },
+      {
+        id: 5,
+        image: Step5,
+        title: "바이브 코딩",
+      },
+    ],
+    []
+  );
 
   return (
     <div className="bg-slate-700 py-16 px-8">
@@ -66,4 +69,4 @@ const LearningMethods: React.FC = () => {
   );
 };
 
-export default LearningMethods;
+export default React.memo(LearningMethods);
