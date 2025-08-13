@@ -89,7 +89,7 @@ const LoginPage: React.FC<{
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users/login/`, {
+      const response = await fetch(`/api/users/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
