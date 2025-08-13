@@ -40,24 +40,27 @@ import {
   setDuration,
   setCurrentChapterIndex,
   setStartTime,
-} from "../../store/slices/progressSlice"; // 🔥 progressSlice로 변경
+} from "../../store/slices/progressSlice"; 
 
-import { 
+import {
   useGetWatchProgressAllQuery,
   useGetWatchProgressQuery,
   useCreateWatchProgressMutation,
   useCreateNextVideoMutation,
-  useGetChapterProgressQuery
+  useGetChapterProgressQuery,
 } from "../../store/slices/testApiSlice";
 
-import type { 
-  CourseProgressResponse, 
-  WatchProgress, 
-  LastWatched, 
+import type {
+  CourseProgressResponse,
+  WatchProgress,
+  LastWatched,
   CourseProgressStatistics,
   Chapter,
   PlayerState,
 } from "../../store/slices/testApiSlice";
+
+import {useGetCoursesQuery } from "../../store/api/courseApiSlice";
+
 
 interface VideoPlayerProps {
   currentVideo: string;
@@ -399,83 +402,133 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
 }) => {
   //------테스트 성공
   const dispatch = useDispatch();
+
+   // 4. 리덕스 상태에서 데이터 읽기
+   const chapters = useSelector((state) => state.progress.chapters);
+   const currentChapterIndex = useSelector(
+     (state) => state.progress.currentChapterIndex
+   );
+   const startTime = useSelector((state) => state.progress.startTime);
+   const courseTitle = useSelector((state) => state.progress.courseTitle);
+ 
+   // 현재 챕터
+   const currentChapter = chapters[currentChapterIndex] ?? null;
+
+   
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
+  const { data, error } = useGetWatchProgressQuery({
+    userId: "user123",
+    videoId: 1,
+  });
+  const { dataC, errorC, isLoadingC } = useGetCoursesQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    pollingInterval: 0, // disable polling
+    skip: false,
+  });
 
-  const { data, error } = useGetWatchProgressQuery({ userId: 'user123', videoId: 1 });
-// 서버에서 받은 data가 있을 때
-console.log('서버 응답 data:', data);
-const serverVideoId = data?.videoId; // 서버 데이터에 맞게 키 확인하세요
+  useEffect(() => {
+    if (errorC) {
+      console.error("🔥 /api/courses/ 요청 에러:", errorC);
+    }
+  }, [errorC]);
 
+    // aws
+    useEffect(() => {
+      if (dataC) {
+        console.log("📚 aws /api/courses/ 응답 데이터:", data);
+      }
+    }, [dataC]);
+
+
+
+  // 로딩 중
+  if (isLoadingC) return <div>⏳ 로딩 중...</div>;
+
+  // 오류 처리
+  if (error) {
+    console.error("❌ /api/courses/ 호출 오류:", error);
+    return <div>오류 발생</div>;
+  }
+
+
+  // 서버에서 받은 data가 있을 때
+  console.log("서버 응답 data:", data);
+  const serverVideoId = data?.videoId; // 서버 데이터에 맞게 키 확인하세요
+  console.log("서버 응답 serverVideoId:", serverVideoId);
   // 🔥 2. 뮤테이션 훅들
   const [createWatchProgress] = useCreateWatchProgressMutation();
   const [createNextVideo] = useCreateNextVideoMutation();
+
+  useEffect(() => {
+    if (data?.chapters) {
+      dispatch(setChapters(data.chapters));
+      dispatch(setCourseTitle(data.courseTitle || ""));
+    }
+  }, [data, dispatch]);
 
   //최신
   // 🔥 3. API 데이터가 들어오면 리덕스 상태 업데이트
   useEffect(() => {
     if (data) {
-      console.log('🔥 === 전체 코스 데이터 처리 시작 ===');
-      console.log('전체 API 응답:', data);
-      console.log('전체 chapters 개수:', data.chapters?.length);
-      
+      console.log("🔥 === 전체 코스 데이터 처리 시작 ===");
+      console.log("전체 API 응답:", data);
+      console.log("전체 chapters 개수:", data.chapters?.length);
+
       // 챕터별 그룹화
       const chapterGroups = {};
-      data.chapters?.forEach(item => {
+      data.chapters?.forEach((item) => {
         const key = item.chapterId;
         if (!chapterGroups[key]) {
           chapterGroups[key] = [];
         }
         chapterGroups[key].push(item);
       });
-      
-      console.log('챕터별 그룹:', chapterGroups);
-      console.log('총 챕터 수:', Object.keys(chapterGroups).length);
-      
+
+      console.log("챕터별 그룹:", chapterGroups);
+      console.log("총 챕터 수:", Object.keys(chapterGroups).length);
+
       // Redux용 Chapter 배열로 변환
       // const transformedChapters = transformToChapters(data);
       // console.log('변환된 chapters:', transformedChapters);
-      
+
       // 전체 강의 제목, 챕터 목록, 총 재생시간 등 상태 저장
-      dispatch(setCourseTitle(`강의 ${data.courseId} - 전체 ${data.statistics?.totalVideos || 0}개 비디오`));
+      dispatch(
+        setCourseTitle(
+          `강의 ${data.courseId} - 전체 ${
+            data.statistics?.totalVideos || 0
+          }개 비디오`
+        )
+      );
       // dispatch(setChapters(transformedChapters));
       // dispatch(setDuration(transformedChapters.reduce((acc, ch) => acc + ch.totalDuration, 0)));
 
       // 최초 챕터 인덱스와 시작 시간을 마지막 시청 위치로 설정
       if (data.lastWatched) {
         // lastWatched 정보로 현재 위치 찾기
-        const lastVideoIndex = transformedChapters.findIndex(ch => 
-          ch.chapterId === data.lastWatched.lastChapterId && 
-          ch.videoId === data.lastWatched.lastVideoId
+        const lastVideoIndex = transformedChapters.findIndex(
+          (ch) =>
+            ch.chapterId === data.lastWatched.lastChapterId &&
+            ch.videoId === data.lastWatched.lastVideoId
         );
-        
+
         const chapterArrayIndex = lastVideoIndex >= 0 ? lastVideoIndex : 0;
-        console.log('🔥 마지막 시청 위치로 설정:', chapterArrayIndex);
+        console.log("🔥 마지막 시청 위치로 설정:", chapterArrayIndex);
         dispatch(setCurrentChapterIndex(chapterArrayIndex));
         dispatch(setStartTime(data.lastWatched.currentTime || 0));
       } else {
-        console.log('🔥 첫 번째 비디오로 설정');
+        console.log("🔥 첫 번째 비디오로 설정");
         dispatch(setCurrentChapterIndex(0));
         dispatch(setStartTime(0));
       }
-      
-      console.log('🔥 === 전체 코스 데이터 처리 완료 ===\n');
+
+      console.log("🔥 === 전체 코스 데이터 처리 완료 ===\n");
     }
   }, [data, dispatch]);
 
-
-  // 4. 리덕스 상태에서 데이터 읽기
-  const chapters = useSelector((state) => state.progress.chapters);
-  const currentChapterIndex = useSelector((state) => state.progress.currentChapterIndex);
-  const startTime = useSelector((state) => state.progress.startTime);
-  const courseTitle = useSelector((state) => state.progress.courseTitle);
-
-    // 현재 챕터
-    const currentChapter = chapters[currentChapterIndex] ?? null;
-
-
-    // 🔥 5. 시청 진행률 생성/업데이트 함수
+ 
+  // 🔥 5. 시청 진행률 생성/업데이트 함수
   const handleCreateOrUpdateProgress = async () => {
     if (!currentChapter) return;
 
@@ -488,17 +541,20 @@ const serverVideoId = data?.videoId; // 서버 데이터에 맞게 키 확인하
         videoId: currentChapter.videoId,
         currentTime: startTime + Math.random() * 60, // 시뮬레이션
         totalDuration: currentChapter.totalDuration || 400,
-        watchedPercentage: Math.min(100, ((startTime + 60) / (currentChapter.totalDuration || 400)) * 100),
+        watchedPercentage: Math.min(
+          100,
+          ((startTime + 60) / (currentChapter.totalDuration || 400)) * 100
+        ),
         isCompleted: false,
         totalWatchTime: startTime + 60,
-        watchSpeed: 1.0
+        watchSpeed: 1.0,
       }).unwrap();
 
-      console.log('Progress updated:', result);
-      alert(`시청 진행률이 ${result.created ? '생성' : '업데이트'}되었습니다!`);
+      console.log("Progress updated:", result);
+      alert(`시청 진행률이 ${result.created ? "생성" : "업데이트"}되었습니다!`);
     } catch (error) {
-      console.error('Error updating progress:', error);
-      alert('진행률 업데이트 중 오류가 발생했습니다.');
+      console.error("Error updating progress:", error);
+      alert("진행률 업데이트 중 오류가 발생했습니다.");
     } finally {
       setIsUpdating(false);
     }
@@ -515,14 +571,16 @@ const serverVideoId = data?.videoId; // 서버 데이터에 맞게 키 확인하
         courseId: courseId,
         chapterId: currentChapter.chapterId, // 같은 챕터 유지
         totalDuration: 400,
-        watchSpeed: 1.0
+        watchSpeed: 1.0,
       }).unwrap();
 
-      console.log('New video created:', result);
-      alert(`새로운 비디오가 생성되었습니다! (비디오 ID: ${result.progress.videoId})`);
+      console.log("New video created:", result);
+      alert(
+        `새로운 비디오가 생성되었습니다! (비디오 ID: ${result.progress.videoId})`
+      );
     } catch (error) {
-      console.error('Error creating next video:', error);
-      alert('새 비디오 생성 중 오류가 발생했습니다.');
+      console.error("Error creating next video:", error);
+      alert("새 비디오 생성 중 오류가 발생했습니다.");
     } finally {
       setIsCreating(false);
     }
@@ -530,14 +588,14 @@ const serverVideoId = data?.videoId; // 서버 데이터에 맞게 키 확인하
 
   // 🔥 7. 챕터의 현재 비디오 인덱스 정보 표시
   const getChapterVideoInfo = (chapter) => {
-    if (!chapter) return '';
+    if (!chapter) return "";
     return `챕터 ${chapter.chapterIndex} - 비디오 ${chapter.videoIndex}`;
   };
 
   // 🔥 8. 챕터별 비디오 개수 계산
   const getChapterVideoCounts = () => {
     const chapterCounts = {};
-    chapters.forEach(chapter => {
+    chapters.forEach((chapter) => {
       const chapterId = chapter.chapterId;
       chapterCounts[chapterId] = (chapterCounts[chapterId] || 0) + 1;
     });
@@ -545,7 +603,6 @@ const serverVideoId = data?.videoId; // 서버 데이터에 맞게 키 확인하
   };
 
   const chapterVideoCounts = getChapterVideoCounts();
-
 
   // const { data, error, isLoading, } = useGetWatchProgressQuery({
   //   userId: "abc123",
@@ -1928,16 +1985,16 @@ const serverVideoId = data?.videoId; // 서버 데이터에 맞게 키 확인하
 
         {/* 비디오 플레이어 영역 */}
         <div className="flex-1 bg-black relative">
-      <VideoPlayer
-      currentVideo={`../../../public/video/video${serverVideoId}.mp4`}
-        onTimeUpdate={onVideoProgress}
-        onLoadedMetadata={onVideoReady}
-        onEnded={handleVideoEnded}
-        onPlay={handleVideoPlay}
-        onPause={handleVideoPause}
-        startTime={startTime}
-        autoPlay
-      />
+          <VideoPlayer
+            currentVideo={`../../../public/video/video${serverVideoId}.mp4`}
+            onTimeUpdate={onVideoProgress}
+            onLoadedMetadata={onVideoReady}
+            onEnded={handleVideoEnded}
+            onPlay={handleVideoPlay}
+            onPause={handleVideoPause}
+            startTime={startTime}
+            autoPlay
+          />
 
           {/* <VideoPlayer
             // currentVideo={currentChapterRe.videoFile}
