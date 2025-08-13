@@ -1,19 +1,17 @@
 import React from "react";
-import type { CourseChapter, CourseSchedule } from "../../types/courseDetail";
+import type { CourseChapter } from "../../types/courseDetail";
 import PlayIcon from "../../assets/icon-play.png";
 import DownIcon from "../../assets/icon-down.png";
 import CheckFillIcon from "../../assets/icon-Check-fill.png";
 import CheckEmptyIcon from "../../assets/icon-Check-empty.png";
 
 interface CurriculumSectionProps {
-  schedule: CourseSchedule;
-  curriculumData: CourseChapter[];
+  chapters: CourseChapter[];
   onChapterToggle: (chapterId: string) => void;
 }
 
 const CurriculumSection: React.FC<CurriculumSectionProps> = ({
-  schedule,
-  curriculumData,
+  chapters,
   onChapterToggle,
 }) => {
   return (
@@ -21,13 +19,12 @@ const CurriculumSection: React.FC<CurriculumSectionProps> = ({
       <div className="flex flex-col justify-center items-center mb-10">
         <h3 className="text-xl font-bold mb-2">커리큘럼</h3>
         <p className="text-blue-600 font-medium">
-          {schedule.coursePeriod.duration}, 총{" "}
-          {schedule.coursePeriod.totalHours}
+          {chapters.chapters.course_duedate}, 총 {chapters.chapters.course_time}
         </p>
       </div>
 
       <ul>
-        {curriculumData.map((section, o) => (
+        {chapters.map((section, o) => (
           <li key={section.id}>
             <div
               className={`bg-gray-100 border border-gray-200 w-full flex items-center justify-start p-4 text-left ${

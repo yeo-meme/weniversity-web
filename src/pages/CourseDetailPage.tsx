@@ -5,7 +5,6 @@ import {
   fetchCourseDetail,
   setActiveTab,
   toggleChapterExpansion,
-  toggleFAQExpansion,
   shareCourse,
   enrollCourse,
   resetCourseDetailState,
@@ -14,7 +13,7 @@ import type { TabType } from "../types/courseDetail";
 import ExamImage from "../assets/exam.png";
 import ShareIcon from "../assets/icon-Share.png";
 import ExperienceTestimonials from "../components/courseDetail/ExperienceTestimonials";
-import CurriculumSection from "../components/courseDetail/CurriculumSection";
+// import CurriculumSection from "../components/courseDetail/CurriculumSection";
 import LearningSteps from "../components/courseDetail/LearningSteps";
 import InstructorSection from "../components/courseDetail/InstructorSection";
 import FAQSection from "../components/courseDetail/FAQSection";
@@ -186,10 +185,6 @@ const CourseDetailPage: React.FC = () => {
     dispatch(toggleChapterExpansion(chapterId));
   };
 
-  const handleFAQToggle = (faqId: string) => {
-    dispatch(toggleFAQExpansion(faqId));
-  };
-
   const handleShareCourse = () => {
     if (id) {
       dispatch(shareCourse(id));
@@ -201,10 +196,6 @@ const CourseDetailPage: React.FC = () => {
       dispatch(enrollCourse(id));
     }
   };
-
-  // 데이터는 slice에서 관리
-  const curriculumData = courseDetail?.curriculum || [];
-  const faqData = courseDetail?.faqs || [];
 
   if (loading) {
     return (
@@ -230,6 +221,24 @@ const CourseDetailPage: React.FC = () => {
     );
   }
 
+  const formatDateRange = (dateStr: string) => {
+    const days = ["일", "월", "화", "수", "목", "금", "토"];
+    const startDate = new Date(dateStr);
+    const endDate = new Date(startDate);
+
+    endDate.setMonth(endDate.getMonth() + 1); // 개시일로 부터 +1개월
+
+    const format = (date: Date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      const dayName = days[date.getDay()];
+      return `${y}.${m}.${d}(${dayName})`;
+    };
+
+    return `${format(startDate)} ~ ${format(endDate)}`;
+  };
+
   return (
     <div className="min-h-screen">
       {/* 강의 소개 이미지 */}
@@ -238,25 +247,22 @@ const CourseDetailPage: React.FC = () => {
       </div>
 
       {/* 강의 기본 정보 섹션 */}
-      <div className="shadow-sm">
+      <div>
         <div className="max-w-7xl mx-auto">
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-8">
             <div>
               {/* 강의 태그 정보 */}
               <div className="mb-4">
                 <div className="flex flex-wrap gap-2">
-                  {courseDetail?.tags.map((tag, index) => (
-                    <span
-                      key={index}
-                      className={`p-2 ${
-                        index === 0
-                          ? "bg-gray-600 text-white"
-                          : "bg-blue-100 text-blue-600"
-                      }  rounded-md text-xs`}
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                  <span className="p-2 bg-gray-700 text-white rounded-md text-xs">
+                    {courseDetail.type === "vod" ? "일반" : "부스트 커뮤니티"}
+                  </span>
+                  <span className="p-2 bg-blue-100 text-blue-700 rounded-md text-xs">
+                    {courseDetail.category}
+                  </span>
+                  <span className="p-2 bg-green-100 text-green-700 rounded-md text-xs">
+                    {courseDetail.level}
+                  </span>
                 </div>
               </div>
 
@@ -271,37 +277,34 @@ const CourseDetailPage: React.FC = () => {
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden">
                   <img
-                    src={courseDetail.instructor.profileImage}
+                    src={courseDetail.instructors[0].profile_image}
                     alt="강사"
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">
-                    {courseDetail.instructor.name}
+                    {courseDetail.instructors[0].name}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {courseDetail.instructor.role}
+                    {courseDetail.instructors[0].affiliation}
                   </p>
                 </div>
               </div>
 
               {/* 교육 일정 */}
-              <div className="p-8">
+              <div className="p-8 bg-gray-100 rounded-lg">
                 <h4 className="font-semibold text-gray-900 mb-3">교육 일정</h4>
                 <div className="text-sm space-y-1">
                   <p>
                     <strong className="text-gray-400 mr-4">모집 기간</strong>
-                    {courseDetail.schedule.recruitmentPeriod.start} ~{" "}
-                    {courseDetail.schedule.recruitmentPeriod.end}
+                    {formatDateRange(courseDetail.course_duedate)}
                   </p>
                   <p>
                     <strong className="text-gray-400 mr-4">교육 기간</strong>
-                    {courseDetail.schedule.coursePeriod.start} ~{" "}
-                    {courseDetail.schedule.coursePeriod.end} |{" "}
-                    {courseDetail.schedule.coursePeriod.duration},{" "}
-                    {courseDetail.schedule.coursePeriod.totalHours} |{" "}
-                    {courseDetail.schedule.coursePeriod.schedule}
+                    {`${formatDateRange(
+                      courseDetail.course_time
+                    )} | 5일, 총 30시간 | 10:00 ~ 17:00`}
                   </p>
                 </div>
               </div>
@@ -312,50 +315,52 @@ const CourseDetailPage: React.FC = () => {
               <div className="sticky top-4">
                 <h3 className="font-bold mb-4">강의 정보</h3>
                 <div className="text-center mb-6">
-                  <div className="mt-8 py-4 border-t border-b border-gray-300 text-sm space-y-4">
+                  <div className="mt-8 py-4 border-t border-b border-gray-300 text-sm space-y-3">
                     <div className="flex">
-                      <span className="text-left w-28 mr-4 text-gray-600">
+                      <span className="text-left w-28 mr-3 text-gray-600">
                         교육 유형
                       </span>
-                      <span className="font-medium">{courseDetail.type}</span>
+                      <span className="font-medium">
+                        {courseDetail.type === "vod"
+                          ? "일반"
+                          : "부스트 커뮤니티"}
+                      </span>
                     </div>
                     <div className="flex">
-                      <span className="text-left w-28 mr-4 text-gray-600">
+                      <span className="text-left w-28 mr-3 text-gray-600">
                         주제
                       </span>
                       <span className="font-medium">
-                        {courseDetail.subject}
+                        {courseDetail.category} 개발
                       </span>
                     </div>
                     <div className="flex">
-                      <span className="text-left w-28 mr-4 text-gray-600">
+                      <span className="text-left w-28 mr-3 text-gray-600">
                         난이도
                       </span>
                       <span className="font-medium">{courseDetail.level}</span>
                     </div>
                     <div className="flex">
-                      <span className="text-left w-28 mr-4 text-gray-600">
+                      <span className="text-left w-28 mr-3 text-gray-600">
                         커리큘럼
                       </span>
                       <span className="font-medium">
-                        {courseDetail.totalLessons}개 수업
+                        {courseDetail.chapters.length}개 수업
                       </span>
                     </div>
                     <div className="flex">
-                      <span className="text-left w-28 mr-4 text-gray-600">
-                        수업 시간
+                      <span className="text-left w-28 mr-3 text-gray-600">
+                        소요 시간
                       </span>
                       <span className="font-medium">
-                        {courseDetail.totalDuration}
+                        {courseDetail.chapters.length} 시간
                       </span>
                     </div>
                     <div className="flex">
-                      <span className="text-left w-28 mr-4 text-gray-600">
+                      <span className="text-left w-28 mr-3 text-gray-600">
                         수강 기간
                       </span>
-                      <span className="font-medium">
-                        {courseDetail.validityPeriod}
-                      </span>
+                      <span className="font-medium">6개월</span>
                     </div>
                   </div>
                 </div>
@@ -429,18 +434,17 @@ const CourseDetailPage: React.FC = () => {
         </div>
 
         {/* 커리큘럼 */}
-        <div
+        {/* <div
           ref={el => {
             sectionRefs.current.curriculum = el;
           }}
           className="pb-20"
         >
           <CurriculumSection
-            schedule={courseDetail.schedule}
-            curriculumData={curriculumData}
+            chapters={courseDetail.chapters}
             onChapterToggle={handleChapterToggle}
           />
-        </div>
+        </div> */}
 
         {/* 강사 소개 */}
         <div
@@ -449,7 +453,7 @@ const CourseDetailPage: React.FC = () => {
           }}
           className="mb-14 pb-10"
         >
-          <InstructorSection instructor={courseDetail.instructor} />
+          <InstructorSection instructor={courseDetail.instructors[0]} />
         </div>
 
         {/* FAQ */}
@@ -459,7 +463,7 @@ const CourseDetailPage: React.FC = () => {
           }}
           className="mb-80"
         >
-          <FAQSection faqData={faqData} onFAQToggle={handleFAQToggle} />
+          <FAQSection />
         </div>
       </div>
     </div>

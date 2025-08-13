@@ -10,185 +10,92 @@ import type {
 export const fetchCourseDetail = createAsyncThunk<CourseDetailInfo, string>(
   "courseDetail/fetchCourseDetail",
   async (courseId: string) => {
-    // 실제 API 호출로 대체 예정
-    // const response = await fetch(`http://13.125.180.222/api/courses/${courseId}/`);
-    // if (!response.ok) {
-    //   throw new Error("강의 상세 정보를 불러오는데 실패했습니다.");
-    // }
-    // return await response.json();
+    const response = await fetch(
+      `http://13.125.180.222/api/courses/${courseId}/`
+    );
+
+    if (!response.ok) {
+      throw new Error("강의 상세 정보를 불러오는데 실패했습니다.");
+    }
+    // console.log(await response.json());
+    return await response.json();
 
     // 더미 데이터
-    return {
-      id: courseId,
-      title: "견고한 파이썬 부스트 커뮤니티 1기 (디스코드 커뮤니티)",
-      subtitle: "파이썬과 백엔드의 세계로 떠나는 여행",
-      description:
-        "파이썬은 어려운 언어가 아닙니다! 커뮤니티에서 함께 소통하며 백엔드의 세계를 몸소 체험하고, 실무 프로젝트를 통해 성장해보세요.",
-      instructor: {
-        id: "instructor_1",
-        name: "이호준",
-        englishName: "Hojun Lee",
-        profileImage: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-        role: "주식회사 위니브 CPO",
-        currentPositions: [
-          "주식회사 위니브 대표",
-          "바울랩(학원, 연구원, 출판사 3사) 대표",
-          "제주코딩베이스캠프 운영진",
-          "제주앱 고리좀배이스캠프 운영진",
-        ],
-        previousPositions: [
-          "제주스타트업협회 부회장",
-          "신한금융그룹 신한데이터시스템 정보보안 담당",
-        ],
-        education: ["제주대학교"],
-        achievements: [
-          "믹스웨어 개발 기조 강의 발표라마",
-          "멋쟁이사자처럼 테킷(TECHIT) 프론트엔드 스쿨 1~9기 주강사",
-          "EST 백엔드 스쿨",
-        ],
-        bio: "부트캠프 수료율 100%의 비결을 수강생들 한명 '진심'입니다.",
-      },
-      category: "백엔드",
-      level: "초급",
-      type: "부스트 커뮤니티",
-      subject: "백엔드 개발",
-      price: 200000,
-      currency: "KRW",
-      thumbnailImage: "http://13.125.180.222/media/profiles/lion_XanRGlS.jpg",
-      bannerImage: "",
-      totalLessons: 52,
-      totalDuration: "142시간 18분",
-      validityPeriod: "6개월",
-      tags: ["부스트 커뮤니티", "백엔드", "초급", "무료"],
-      schedule: {
-        recruitmentPeriod: {
-          start: "2023-01-08",
-          end: "2023-01-08",
-        },
-        coursePeriod: {
-          start: "2024-01-08",
-          end: "2024-01-12",
-          duration: "5일",
-          totalHours: "30시간",
-          schedule: "10:00 ~ 17:00",
-        },
-      },
-      curriculum: [
-        {
-          id: "chapter_1",
-          title: "Chapter00. 들어가기 전",
-          isExpanded: true,
-          lessons: [
-            {
-              id: "lesson_1_1",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: true,
-            },
-            {
-              id: "lesson_1_2",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: true,
-            },
-            {
-              id: "lesson_1_3",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: true,
-            },
-          ],
-        },
-        {
-          id: "chapter_2",
-          title: "Chapter00. 들어가기 전",
-          isExpanded: true,
-          lessons: [
-            {
-              id: "lesson_2_1",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: true,
-            },
-            {
-              id: "lesson_2_2",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: true,
-            },
-            {
-              id: "lesson_2_3",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: false,
-            },
-            {
-              id: "lesson_2_4",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: false,
-              isActive: true,
-            },
-            {
-              id: "lesson_2_5",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: false,
-            },
-            {
-              id: "lesson_2_6",
-              title: "1. 연상과 구문",
-              duration: "12:00",
-              isCompleted: false,
-            },
-          ],
-        },
-      ],
-      faqs: [
-        {
-          id: "faq_1",
-          question: "프로그래밍이 처음인데 괜찮을까요?",
-          answer:
-            "영상을 반복적으로 학습하며 따라오면 가능합니다. 프로그래밍 경험이 한 번이라도 있다면 더 원활하게 수업을 들을 수 있습니다. 가능하면 1 ~ 2시간 간단한 기초 강의라도 유튜브에서 보고 오시는 것을 권해드립니다.",
-          isExpanded: false,
-        },
-        {
-          id: "faq_2",
-          question: "교육은 꼭 정해진 시간에만 수강할 수 있나요?",
-          answer:
-            "아닙니다. 영상 강의는 언제든지 자신의 속도에 맞춰 학습할 수 있습니다. 또한 강의가 끝나도 1년간은 지속해서 들을 수 있습니다. 다만 매주 화요일 라이브 세션은 정해진 시간에 진행됩니다.",
-          isExpanded: false,
-        },
-        {
-          id: "faq_3",
-          question: "필수 참여 시간은 어떻게 되나요?",
-          answer:
-            "주간 줌 라이브 강의가 매주 저녁 8 ~ 10시 실시간 진행됩니다. 첫날 오리엔테이션은 꼭 참석할 수 있도록 해주세요.",
-          isExpanded: false,
-        },
-        {
-          id: "faq_4",
-          question: "코딩테스트는 어느레벨까지 진행하나요?",
-          answer:
-            "4주차 마지막 라이브 세션에서 코딩 테스트 전략, 문제 분석, 문제 풀이를 다룹니다. 가장 어려운 문제를 Lv5라고 했을 Lv0 ~ Lv2까지 쉬운 문제 풀이와 함께 합격 전략을 다룹니다.",
-          isExpanded: false,
-        },
-        {
-          id: "faq_5",
-          question: "결제는 어떻게 진행하나요?",
-          answer: "위니버시티의 강의 결제를 통해 가능합니다.",
-          isExpanded: false,
-        },
-        {
-          id: "faq_6",
-          question: "멘토님은 항상 상주하시나요?",
-          answer: "평일 10시 ~ 11시, 4시 ~ 5시 상주합니다.",
-          isExpanded: false,
-        },
-      ],
-      enrollmentCount: 1247,
-      rating: 4.8,
-    };
+    // return {
+    //   curriculum: [
+    //     {
+    //       id: "chapter_1",
+    //       title: "Chapter00. 들어가기 전",
+    //       isExpanded: true,
+    //       lessons: [
+    //         {
+    //           id: "lesson_1_1",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: true,
+    //         },
+    //         {
+    //           id: "lesson_1_2",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: true,
+    //         },
+    //         {
+    //           id: "lesson_1_3",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: true,
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       id: "chapter_2",
+    //       title: "Chapter00. 들어가기 전",
+    //       isExpanded: true,
+    //       lessons: [
+    //         {
+    //           id: "lesson_2_1",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: true,
+    //         },
+    //         {
+    //           id: "lesson_2_2",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: true,
+    //         },
+    //         {
+    //           id: "lesson_2_3",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: false,
+    //         },
+    //         {
+    //           id: "lesson_2_4",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: false,
+    //           isActive: true,
+    //         },
+    //         {
+    //           id: "lesson_2_5",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: false,
+    //         },
+    //         {
+    //           id: "lesson_2_6",
+    //           title: "1. 연상과 구문",
+    //           duration: "12:00",
+    //           isCompleted: false,
+    //         },
+    //       ],
+    //     },
+    //   ],
+    //   enrollmentCount: 1247,
+    //   rating: 4.8,
+    // };
   }
 );
 
@@ -257,14 +164,6 @@ const courseDetailSlice = createSlice({
         );
         if (chapter) {
           chapter.isExpanded = !chapter.isExpanded;
-        }
-      }
-    },
-    toggleFAQExpansion: (state, action: PayloadAction<string>) => {
-      if (state.courseDetail) {
-        const faq = state.courseDetail.faqs.find(f => f.id === action.payload);
-        if (faq) {
-          faq.isExpanded = !faq.isExpanded;
         }
       }
     },
@@ -340,7 +239,6 @@ const courseDetailSlice = createSlice({
 export const {
   setActiveTab,
   toggleChapterExpansion,
-  toggleFAQExpansion,
   setActiveLesson,
   resetCourseDetailState,
   clearError,

@@ -1,5 +1,3 @@
-// types/courseDetail.ts
-
 export interface CourseLesson {
   id: string;
   title: string;
@@ -10,23 +8,18 @@ export interface CourseLesson {
 }
 
 export interface CourseChapter {
-  id: string;
+  chapter_id: number;
+  order_index: number;
   title: string;
-  lessons: CourseLesson[];
   isExpanded?: boolean;
 }
 
 export interface CourseInstructor {
-  id: string;
+  instructor_id: string;
   name: string;
-  englishName?: string;
-  profileImage: string;
-  role: string;
-  currentPositions: string[];
-  previousPositions: string[];
-  education: string[];
-  achievements: string[];
-  bio?: string;
+  english_name: string;
+  profile_image: string;
+  affiliation: string;
 }
 
 export interface CourseFAQ {
@@ -36,40 +29,25 @@ export interface CourseFAQ {
   isExpanded?: boolean;
 }
 
-export interface CourseSchedule {
-  recruitmentPeriod: {
-    start: string;
-    end: string;
-  };
-  coursePeriod: {
-    start: string;
-    end: string;
-    duration: string;
-    totalHours: string;
-    schedule: string;
-  };
-}
-
 export interface CourseDetailInfo {
   id: string;
   title: string;
   subtitle?: string;
   description: string;
-  instructor: CourseInstructor;
+  instructors: CourseInstructor[];
   category: string;
-  level: "초급" | "중급" | "고급" | "실무";
-  type: string; // 부스트 커뮤니티, VOD, KDC 등
-  subject: string; // 백엔드 개발, 프론트엔드 등
+  level: "초급" | "중급" | "실무";
+  type: string;
   price: number;
   currency: string;
   thumbnailImage: string;
   bannerImage?: string;
   totalLessons: number;
   totalDuration: string;
-  validityPeriod: string; // 수강 기간
-  tags: string[];
-  schedule: CourseSchedule;
-  curriculum: CourseChapter[];
+  validityPeriod: string;
+  course_duedate: string;
+  course_time: string;
+  chapters: CourseChapter[];
   faqs: CourseFAQ[];
   enrollmentCount?: number;
   rating?: number;
