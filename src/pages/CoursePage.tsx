@@ -74,11 +74,6 @@ const CoursePage: React.FC = () => {
     [dispatch]
   );
 
-  // 초기 로딩 상태
-  if (loading && pagination.currentPage === 1) {
-    return <div>로딩중..</div>;
-  }
-
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

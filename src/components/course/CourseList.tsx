@@ -3,6 +3,7 @@ import CourseCard from "./CourseCard";
 import Pagination from "../common/Pagination";
 import EmptyIcon from "../../assets/icon-empty.png";
 import type { Course, PaginationState } from "../../types/course";
+import CourseCardSkeleton from "./CourseCardSkeleton";
 
 interface CourseListProps {
   courses: Course[];
@@ -29,14 +30,19 @@ const ErrorState = memo<{ error: string }>(({ error }) => (
 
 ErrorState.displayName = "ErrorState";
 
-const CourseGrid = memo<{ courses: Course[] }>(({ courses }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-    {courses.map((course: Course) => (
-      <CourseCard key={course.course_id} course={course} />
-    ))}
-  </div>
-));
-
+const CourseGrid = memo<{ courses: Course[]; loading: boolean }>(
+  ({ courses, loading }) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      {loading
+        ? Array.from({ length: courses.length || 9 }).map((_, index) => (
+            <CourseCardSkeleton key={`skeleton-${index}`} />
+          ))
+        : courses.map((course: Course) => (
+            <CourseCard key={course.course_id} course={course} />
+          ))}
+    </div>
+  )
+);
 CourseGrid.displayName = "CourseGrid";
 
 const CourseList: React.FC<CourseListProps> = memo(
@@ -47,9 +53,6 @@ const CourseList: React.FC<CourseListProps> = memo(
           <h3 className="text-lg font-semibold text-gray-900">
             강의 목록 ({pagination.totalItems}개)
           </h3>
-          {loading && pagination.currentPage > 1 && (
-            <div className="text-sm text-gray-500">로딩 중...</div>
-          )}
         </div>
 
         {error && <ErrorState error={error} />}
@@ -58,7 +61,7 @@ const CourseList: React.FC<CourseListProps> = memo(
           <EmptyState />
         ) : (
           <>
-            <CourseGrid courses={courses} />
+            <CourseGrid courses={courses} loading={loading} />
             <Pagination
               currentPage={pagination.currentPage}
               totalItems={pagination.totalItems}
