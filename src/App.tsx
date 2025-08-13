@@ -8,7 +8,7 @@ function App() {
     <>
       <Header />
       <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
-        <HeroSection />
+        {/* <HeroSection /> */}
         <CoursePage />
         <div className="mt-4 flex gap-4"></div>
       </main>
