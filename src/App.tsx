@@ -1,5 +1,5 @@
 import Header from "./components/header/header.tsx";
-import HeroSection from "./components/hero/hero-section.tsx";
+// import HeroSection from "./components/hero/hero-section.tsx";
 import "./index.css";
 import CoursePage from "./pages/CoursePage.tsx";
 
