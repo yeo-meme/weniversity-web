@@ -98,7 +98,7 @@ export interface CourseProgressStatistics {
 
 export interface CourseProgressResponse {
   userId: string;
-  courseId: number;
+  videoId: number;
   chapters: WatchProgress[];           // WatchProgress 배열
   lastWatched: LastWatched | null;     // 마지막 시청 위치
   statistics: CourseProgressStatistics; // 통계

@@ -33,19 +33,31 @@ import { useAppDispatch, useAppSelector } from "../../store/store";
 
 // 테스터 완료 임포트
 
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from "react-redux";
 import {
   setChapters,
   setCourseTitle,
-  setIsInitialized,
+  setDuration,
   setCurrentChapterIndex,
-  setCurrentTime,        // 🔥 추가
-  setHasProgressData, 
-} from '../../store/slices/playerSlice';
-import { useGetWatchProgressQuery } from '../../store/slices/testApiSlice';
+  setStartTime,
+} from "../../store/slices/progressSlice"; // 🔥 progressSlice로 변경
 
+import { 
+  useGetWatchProgressAllQuery,
+  useGetWatchProgressQuery,
+  useCreateWatchProgressMutation,
+  useCreateNextVideoMutation,
+  useGetChapterProgressQuery
+} from "../../store/slices/testApiSlice";
 
-
+import type { 
+  CourseProgressResponse, 
+  WatchProgress, 
+  LastWatched, 
+  CourseProgressStatistics,
+  Chapter,
+  PlayerState,
+} from "../../store/slices/testApiSlice";
 
 interface VideoPlayerProps {
   currentVideo: string;
@@ -78,20 +90,20 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const [isReady, setIsReady] = useState(false);
 
   //tartTime 변경 감지
-  useEffect(() => {
-    console.log(`🔄 VideoPlayer startTime 변경: ${startTime.toFixed(1)}초`);
-    setCurrentTime(startTime);
-    // dispatch(setCurrentTime(currentTime));
-    setIsReady(true); // 준비 완료
-  }, [startTime]);
+  // useEffect(() => {
+  //   console.log(`🔄 VideoPlayer startTime 변경: ${startTime.toFixed(1)}초`);
+  //   setCurrentTime(startTime);
+  //   // dispatch(setCurrentTime(currentTime));
+  //   setIsReady(true); // 준비 완료
+  // }, [startTime]);
 
-  //비디오 변경 시 초기화
-  useEffect(() => {
-    console.log(`🎬 비디오 변경: ${currentVideo}`);
-    setCurrentTime(startTime);
-    setDuration(0);
-    setIsPaused(true);
-  }, [currentVideo, startTime]);
+  // //비디오 변경 시 초기화
+  // useEffect(() => {
+  //   console.log(`🎬 비디오 변경: ${currentVideo}`);
+  //   setCurrentTime(startTime);
+  //   setDuration(0);
+  //   setIsPaused(true);
+  // }, [currentVideo, startTime]);
 
   //이벤트 리스너 등록만 담당 (한 번만)
   // useEffect(() => {
@@ -167,10 +179,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     const current = video.currentTime;
 
     // setCurrentTime(current); // UI 상태 업데이트
-    // dispatch(setCurrentTime(startTime)); 
+    // dispatch(setCurrentTime(startTime));
     const now = Date.now();
     if (now - lastSentTimeRef.current > 500) {
-      onTimeUpdate(current, video.duration); // 부모에 전달
+      // onTimeUpdate(current, video.duration); // 부모에 전달
       lastSentTimeRef.current = now; // 4. 시간 갱신
     }
   };
@@ -183,10 +195,10 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
     if (startTime > 0) {
       video.currentTime = startTime;
-      setCurrentTime(startTime);
+      // setCurrentTime(startTime);
       console.log(`🎥 시작 지점: ${startTime.toFixed(1)}초`);
     } else {
-      setCurrentTime(0); // 명시적 초기화
+      // setCurrentTime(0); // 명시적 초기화
     }
     onLoadedMetadata(duration);
   };
@@ -293,7 +305,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
             <div
               className="h-full bg-blue-500 rounded-full transition-all duration-50"
               style={{
-                width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`,
+                width: `${duration > 0 ? (0 / duration) * 100 : 0}%`,
               }}
             />
           </div>
@@ -387,140 +399,293 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
 }) => {
   //------테스트 성공
   const dispatch = useDispatch();
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
-  const videoId = 1;
-  
-  const { data, error, isLoading } = useGetWatchProgressQuery({
-    userId: 'abc123',
-    videoId: 10
-  });
-  // 2. API 데이터가 들어오면 리덕스 상태 업데이트
+
+  const { data, error } = useGetWatchProgressQuery({ userId: 'user123', videoId: 1 });
+// 서버에서 받은 data가 있을 때
+console.log('서버 응답 data:', data);
+const serverVideoId = data?.videoId; // 서버 데이터에 맞게 키 확인하세요
+
+  // 🔥 2. 뮤테이션 훅들
+  const [createWatchProgress] = useCreateWatchProgressMutation();
+  const [createNextVideo] = useCreateNextVideoMutation();
+
+  //최신
+  // 🔥 3. API 데이터가 들어오면 리덕스 상태 업데이트
   useEffect(() => {
     if (data) {
-      // 🔥 API 응답 구조 상세 로깅
-      console.log('=== API Response Debug ===');
-      console.log('Full API Response:', data);
-      console.log('Response Type:', typeof data);
-      console.log('Response Keys:', Object.keys(data));
-  
-      // 🔥 chapters 배열 상세 확인
-      console.log('=== Chapters Debug ===');
-      console.log('Chapters Array:', data.chapters);
-      console.log('Chapters Type:', typeof data.chapters);
-      console.log('Chapters Length:', data.chapters?.length);
-      console.log('Is Array?:', Array.isArray(data.chapters));
-  
-      if (data.chapters && data.chapters.length > 0) {
-        console.log('First Chapter Sample:', data.chapters[0]);
-        console.log('First Chapter Keys:', Object.keys(data.chapters[0]));
-  
-        const firstChapter = data.chapters[0];
-        console.log('=== WatchProgress Structure Check ===');
-        console.log('userId:', firstChapter.userId);
-        console.log('courseId:', firstChapter.courseId);
-        console.log('chapterId:', firstChapter.chapterId);
-        console.log('videoId:', firstChapter.videoId);
-        console.log('chapterIndex:', firstChapter.chapterIndex);
-        console.log('videoIndex:', firstChapter.videoIndex);
-        console.log('currentTime:', firstChapter.currentTime);
-        console.log('totalDuration:', firstChapter.totalDuration);
-        console.log('watchedPercentage:', firstChapter.watchedPercentage);
-        console.log('isCompleted:', firstChapter.isCompleted);
-      }
-  
-      // 🔥 lastWatched 구조 확인
-      console.log('=== LastWatched Debug ===');
-      console.log('LastWatched:', data.lastWatched);
-      if (data.lastWatched) {
-        console.log('LastWatched Keys:', Object.keys(data.lastWatched));
-        console.log('lastChapterId:', data.lastWatched.lastChapterId);
-        console.log('lastVideoId:', data.lastWatched.lastVideoId);
-        console.log('lastChapterIndex:', data.lastWatched.lastChapterIndex);
-        console.log('lastVideoIndex:', data.lastWatched.lastVideoIndex);
-      }
-  
-      // 🔥 statistics 구조 확인
-      console.log('=== Statistics Debug ===');
-      console.log('Statistics:', data.statistics);
-      if (data.statistics) {
-        console.log('Statistics Keys:', Object.keys(data.statistics));
-        console.log('totalChapters:', data.statistics.totalChapters);
-        console.log('completedChapters:', data.statistics.completedChapters);
-        console.log('totalVideos:', data.statistics.totalVideos);
-        console.log('completedVideos:', data.statistics.completedVideos);
-        console.log('overallProgress:', data.statistics.overallProgress);
-        console.log('isCompleted:', data.statistics.isCompleted);
-      }
-  
-      // 🔥 CourseProgressResponse 인터페이스 호환성 체크
-      console.log('=== Interface Compatibility Check ===');
-      const hasRequiredFields = {
-        userId: !!data.userId,
-        courseId: !!data.courseId,
-        chapters: Array.isArray(data.chapters),
-        lastWatched: data.lastWatched !== undefined,
-        statistics: !!data.statistics
-      };
-      console.log('CourseProgressResponse 필드 존재 여부:', hasRequiredFields);
-  
-      const allFieldsPresent = Object.values(hasRequiredFields).every(Boolean);
-      console.log('모든 필수 필드 존재?:', allFieldsPresent);
-  
+      console.log('🔥 === 전체 코스 데이터 처리 시작 ===');
+      console.log('전체 API 응답:', data);
+      console.log('전체 chapters 개수:', data.chapters?.length);
+      
+      // 챕터별 그룹화
+      const chapterGroups = {};
+      data.chapters?.forEach(item => {
+        const key = item.chapterId;
+        if (!chapterGroups[key]) {
+          chapterGroups[key] = [];
+        }
+        chapterGroups[key].push(item);
+      });
+      
+      console.log('챕터별 그룹:', chapterGroups);
+      console.log('총 챕터 수:', Object.keys(chapterGroups).length);
+      
+      // Redux용 Chapter 배열로 변환
+      // const transformedChapters = transformToChapters(data);
+      // console.log('변환된 chapters:', transformedChapters);
+      
       // 전체 강의 제목, 챕터 목록, 총 재생시간 등 상태 저장
-      dispatch(setCourseTitle(`강의 ${data.courseId} 제목`));
-      dispatch(setChapters(data.chapters));
-      // dispatch(setDuration(data.chapters.reduce((acc, ch) => acc + ch.totalDuration, 0)));
-  
-      // 마지막 시청 위치 설정
+      dispatch(setCourseTitle(`강의 ${data.courseId} - 전체 ${data.statistics?.totalVideos || 0}개 비디오`));
+      // dispatch(setChapters(transformedChapters));
+      // dispatch(setDuration(transformedChapters.reduce((acc, ch) => acc + ch.totalDuration, 0)));
+
+      // 최초 챕터 인덱스와 시작 시간을 마지막 시청 위치로 설정
       if (data.lastWatched) {
-        // dispatch(setCurrentChapterIndex(data.lastWatched.lastChapterIndex || 0));
-        // dispatch(setStartTime(data.lastWatched.currentTime || 0));
+        // lastWatched 정보로 현재 위치 찾기
+        const lastVideoIndex = transformedChapters.findIndex(ch => 
+          ch.chapterId === data.lastWatched.lastChapterId && 
+          ch.videoId === data.lastWatched.lastVideoId
+        );
+        
+        const chapterArrayIndex = lastVideoIndex >= 0 ? lastVideoIndex : 0;
+        console.log('🔥 마지막 시청 위치로 설정:', chapterArrayIndex);
+        dispatch(setCurrentChapterIndex(chapterArrayIndex));
+        dispatch(setStartTime(data.lastWatched.currentTime || 0));
       } else {
-        // dispatch(setCurrentChapterIndex(0));
-        // dispatch(setStartTime(0));
+        console.log('🔥 첫 번째 비디오로 설정');
+        dispatch(setCurrentChapterIndex(0));
+        dispatch(setStartTime(0));
       }
+      
+      console.log('🔥 === 전체 코스 데이터 처리 완료 ===\n');
     }
   }, [data, dispatch]);
-  
+
+
+  // 4. 리덕스 상태에서 데이터 읽기
+  const chapters = useSelector((state) => state.progress.chapters);
+  const currentChapterIndex = useSelector((state) => state.progress.currentChapterIndex);
+  const startTime = useSelector((state) => state.progress.startTime);
+  const courseTitle = useSelector((state) => state.progress.courseTitle);
+
+    // 현재 챕터
+    const currentChapter = chapters[currentChapterIndex] ?? null;
+
+
+    // 🔥 5. 시청 진행률 생성/업데이트 함수
+  const handleCreateOrUpdateProgress = async () => {
+    if (!currentChapter) return;
+
+    setIsUpdating(true);
+    try {
+      const result = await createWatchProgress({
+        userId: userId,
+        courseId: courseId,
+        chapterId: currentChapter.chapterId,
+        videoId: currentChapter.videoId,
+        currentTime: startTime + Math.random() * 60, // 시뮬레이션
+        totalDuration: currentChapter.totalDuration || 400,
+        watchedPercentage: Math.min(100, ((startTime + 60) / (currentChapter.totalDuration || 400)) * 100),
+        isCompleted: false,
+        totalWatchTime: startTime + 60,
+        watchSpeed: 1.0
+      }).unwrap();
+
+      console.log('Progress updated:', result);
+      alert(`시청 진행률이 ${result.created ? '생성' : '업데이트'}되었습니다!`);
+    } catch (error) {
+      console.error('Error updating progress:', error);
+      alert('진행률 업데이트 중 오류가 발생했습니다.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // 🔥 6. 새로운 비디오 순차 생성 함수
+  const handleCreateNextVideo = async () => {
+    if (!currentChapter) return;
+
+    setIsCreating(true);
+    try {
+      const result = await createNextVideo({
+        userId: userId,
+        courseId: courseId,
+        chapterId: currentChapter.chapterId, // 같은 챕터 유지
+        totalDuration: 400,
+        watchSpeed: 1.0
+      }).unwrap();
+
+      console.log('New video created:', result);
+      alert(`새로운 비디오가 생성되었습니다! (비디오 ID: ${result.progress.videoId})`);
+    } catch (error) {
+      console.error('Error creating next video:', error);
+      alert('새 비디오 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  // 🔥 7. 챕터의 현재 비디오 인덱스 정보 표시
+  const getChapterVideoInfo = (chapter) => {
+    if (!chapter) return '';
+    return `챕터 ${chapter.chapterIndex} - 비디오 ${chapter.videoIndex}`;
+  };
+
+  // 🔥 8. 챕터별 비디오 개수 계산
+  const getChapterVideoCounts = () => {
+    const chapterCounts = {};
+    chapters.forEach(chapter => {
+      const chapterId = chapter.chapterId;
+      chapterCounts[chapterId] = (chapterCounts[chapterId] || 0) + 1;
+    });
+    return chapterCounts;
+  };
+
+  const chapterVideoCounts = getChapterVideoCounts();
+
+
+  // const { data, error, isLoading, } = useGetWatchProgressQuery({
+  //   userId: "abc123",
+  //   videoId: 10,
+  // });
+  // 2. API 데이터가 들어오면 리덕스 상태 업데이트
+  // useEffect(() => {
+  //   if (data) {
+  //     // 🔥 API 응답 구조 상세 로깅
+  //     console.log("=== API Response Debug ===");
+  //     console.log("Full API Response:", data);
+  //     console.log("Response Type:", typeof data);
+  //     console.log("Response Keys:", Object.keys(data));
+
+  //     // 🔥 chapters 배열 상세 확인
+  //     console.log("=== Chapters Debug ===");
+  //     console.log("Chapters Array:", data.chapters);
+  //     console.log("Chapters Type:", typeof data.chapters);
+  //     console.log("Chapters Length:", data.chapters?.length);
+  //     console.log("Is Array?:", Array.isArray(data.chapters));
+
+  //     if (data.chapters && data.chapters.length > 0) {
+  //       console.log("First Chapter Sample:", data.chapters[0]);
+  //       console.log("First Chapter Keys:", Object.keys(data.chapters[0]));
+
+  //       const firstChapter = data.chapters[0];
+  //       console.log("=== WatchProgress Structure Check ===");
+  //       console.log("userId:", firstChapter.userId);
+  //       console.log("courseId:", firstChapter.courseId);
+  //       console.log("chapterId:", firstChapter.chapterId);
+  //       console.log("videoId:", firstChapter.videoId);
+  //       console.log("chapterIndex:", firstChapter.chapterIndex);
+  //       console.log("videoIndex:", firstChapter.videoIndex);
+  //       console.log("currentTime:", firstChapter.currentTime);
+  //       console.log("totalDuration:", firstChapter.totalDuration);
+  //       console.log("watchedPercentage:", firstChapter.watchedPercentage);
+  //       console.log("isCompleted:", firstChapter.isCompleted);
+  //     }
+
+  //     // 🔥 lastWatched 구조 확인
+  //     console.log("=== LastWatched Debug ===");
+  //     console.log("LastWatched:", data.lastWatched);
+  //     if (data.lastWatched) {
+  //       console.log("LastWatched Keys:", Object.keys(data.lastWatched));
+  //       console.log("lastChapterId:", data.lastWatched.lastChapterId);
+  //       console.log("lastVideoId:", data.lastWatched.lastVideoId);
+  //       console.log("lastChapterIndex:", data.lastWatched.lastChapterIndex);
+  //       console.log("lastVideoIndex:", data.lastWatched.lastVideoIndex);
+  //     }
+
+  //     // 🔥 statistics 구조 확인
+  //     console.log("=== Statistics Debug ===");
+  //     console.log("Statistics:", data.statistics);
+  //     if (data.statistics) {
+  //       console.log("Statistics Keys:", Object.keys(data.statistics));
+  //       console.log("totalChapters:", data.statistics.totalChapters);
+  //       console.log("completedChapters:", data.statistics.completedChapters);
+  //       console.log("totalVideos:", data.statistics.totalVideos);
+  //       console.log("completedVideos:", data.statistics.completedVideos);
+  //       console.log("overallProgress:", data.statistics.overallProgress);
+  //       console.log("isCompleted:", data.statistics.isCompleted);
+  //     }
+
+  //     // 🔥 CourseProgressResponse 인터페이스 호환성 체크
+  //     console.log("=== Interface Compatibility Check ===");
+  //     const hasRequiredFields = {
+  //       userId: !!data.userId,
+  //       courseId: !!data.courseId,
+  //       chapters: Array.isArray(data.chapters),
+  //       lastWatched: data.lastWatched !== undefined,
+  //       statistics: !!data.statistics,
+  //     };
+  //     console.log("CourseProgressResponse 필드 존재 여부:", hasRequiredFields);
+
+  //     const allFieldsPresent = Object.values(hasRequiredFields).every(Boolean);
+  //     console.log("모든 필수 필드 존재?:", allFieldsPresent);
+
+  //     // 전체 강의 제목, 챕터 목록, 총 재생시간 등 상태 저장
+  //     dispatch(setCourseTitle(`강의 ${data.courseId} 제목`));
+  //     dispatch(setChapters(data.chapters));
+  //     // dispatch(setDuration(data.chapters.reduce((acc, ch) => acc + ch.totalDuration, 0)));
+
+  //     // 마지막 시청 위치 설정
+  //     if (data.lastWatched) {
+  //       // dispatch(setCurrentChapterIndex(data.lastWatched.lastChapterIndex || 0));
+  //       // dispatch(setStartTime(data.lastWatched.currentTime || 0));
+  //     } else {
+  //       // dispatch(setCurrentChapterIndex(0));
+  //       // dispatch(setStartTime(0));
+  //     }
+  //   }
+  // }, [data, dispatch]);
+
   // 3. 리덕스 상태에서 데이터 읽기 (변수명 유니크하게 변경)
-  const progressChapters = useSelector((state) => state.player.chapters);
-  const progressChapterIndex = useSelector((state) => state.player.currentChapterIndex);
-  const progressStartTime = useSelector((state) => state.player.startTime);
-  const progressCourseTitle = useSelector((state) => state.player.courseTitle);
-  const progressCurrentTime = useSelector(state => state.player.currentTime);
+  // const progressChapters = useSelector((state) => state.player.chapters);
+  // const progressChapterIndex = useSelector(
+  //   (state) => state.player.currentChapterIndex
+  // );
+  // const progressStartTime = useSelector((state) => state.player.startTime);
+  // const progressCourseTitle = useSelector((state) => state.player.courseTitle);
+  // const progressCurrentTime = useSelector((state) => state.player.currentTime);
 
+  // // 리덕스 상태 확인용 로그
 
-  // 리덕스 상태 확인용 로그
-  
- 
-  // 🔥 Redux Progress State (progress_ 접두사로 통일)
-  const progress_currentTime = useSelector(state => state.player.currentTime);
-  const progress_currentVideoIndex = useSelector(state => state.player.currentVideoIndex);
-  const progress_isInitialized = useSelector(state => state.player.isInitialized);
-  const progress_hasProgressData = useSelector(state => state.player.hasProgressData);
-  const progress_isVideoPlaying = useSelector(state => state.player.isVideoPlaying);
-  const progress_lastSaveTime = useSelector(state => state.player.lastSaveTime);
+  // // 🔥 Redux Progress State (progress_ 접두사로 통일)
+  // const progress_currentTime = useSelector((state) => state.player.currentTime);
+  // const progress_currentVideoIndex = useSelector(
+  //   (state) => state.player.currentVideoIndex
+  // );
+  // const progress_isInitialized = useSelector(
+  //   (state) => state.player.isInitialized
+  // );
+  // const progress_hasProgressData = useSelector(
+  //   (state) => state.player.hasProgressData
+  // );
+  // const progress_isVideoPlaying = useSelector(
+  //   (state) => state.player.isVideoPlaying
+  // );
+  // const progress_lastSaveTime = useSelector(
+  //   (state) => state.player.lastSaveTime
+  // );
 
-  // 🔴 기존 useState들 (아직 Redux로 변경 안한 것들)
-  // const [cachedProgress, setCachedProgress] = useState<Record<number, WatchProgress>>({});
-  // const [realtimeCache, setRealtimeCache] = useState<SimpleProgressCache>({});
-  // const [duration, setDuration] = useState(0);
-  // const [completedChapters, setCompletedChapters] = useState(new Set<number>());
-  // const [chapterProgress, setChapterProgress] = useState<Record<number, number>>({});
-  // const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set([1, 2]));
+  // // 🔴 기존 useState들 (아직 Redux로 변경 안한 것들)
+  // // const [cachedProgress, setCachedProgress] = useState<Record<number, WatchProgress>>({});
+  // // const [realtimeCache, setRealtimeCache] = useState<SimpleProgressCache>({});
+  // // const [duration, setDuration] = useState(0);
+  // // const [completedChapters, setCompletedChapters] = useState(new Set<number>());
+  // // const [chapterProgress, setChapterProgress] = useState<Record<number, number>>({});
+  // // const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set([1, 2]));
 
-  
-  console.log('Progress Chapters:', progressChapters);
-  console.log('Progress Chapter Index:', progressChapterIndex);
-  console.log('Progress Start Time:', progressStartTime);
-  console.log('Progress Course Title:', progressCourseTitle);
-  console.log('Progress progressCurrentTime:', progressCurrentTime);
-  
+  // console.log("Progress Chapters:", progressChapters);
+  // console.log("Progress Chapter Index:", progressChapterIndex);
+  // console.log("Progress Start Time:", progressStartTime);
+  // console.log("Progress Course Title:", progressCourseTitle);
+  // console.log("Progress progressCurrentTime:", progressCurrentTime);
+
   // 현재 챕터
-  const progressCurrentChapter = progressChapters[progressChapterIndex] ?? null;
+  // const progressCurrentChapter = progressChapters[progressChapterIndex] ?? null;
 
-  //------테스트 성공 
-
+  //------테스트 성공
 
   //DB 백업 캐시
   const [cachedProgress, setCachedProgress] = useState<
@@ -552,21 +717,21 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   // UI용 변수들
 
   const currentChapterIndexRe = 2;
-  const courseTitle = courseData?.title || "프로그래밍 기초 강의";
-  const currentChapter = chapters[currentChapterIndexRe];
-  const totalDuration = chapters.reduce(
-    (acc, chapter) => acc + chapter.durationSeconds,
-    0
-  );
+  // const courseTitle = courseData?.title || "프로그래밍 기초 강의";
+  // const currentChapter = chapters[currentChapterIndexRe];
+  // const totalDuration = chapters.reduce(
+  //   (acc, chapter) => acc + chapter.durationSeconds,
+  //   0
+  // );
 
   // 🔍 초기 상태 로그 (컴포넌트 렌더링 시마다 실행)
-  console.log("🔍 [초기 상태 확인]");
-  console.log("  📋 chapters.length:", chapters.length);
-  // console.log("  📋 currentChapterIndex:", currentChapterIndex);
-  console.log("  📋 currentChapter:", currentChapter);
-  console.log("  📋 currentChapter?.id:", currentChapter?.id);
-  console.log("  📋 currentChapter?.title:", currentChapter?.title);
-  console.log("  📋 userId:", userId);
+  // console.log("🔍 [초기 상태 확인]");
+  // console.log("  📋 chapters.length:", chapters.length);
+  // // console.log("  📋 currentChapterIndex:", currentChapterIndex);
+  // console.log("  📋 currentChapter:", currentChapter);
+  // console.log("  📋 currentChapter?.id:", currentChapter?.id);
+  // console.log("  📋 currentChapter?.title:", currentChapter?.title);
+  // console.log("  📋 userId:", userId);
 
   // 🆕 챕터 그룹 토글 함수
   const toggleGroup = (groupId: number) => {
@@ -588,10 +753,10 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     setCompletedChapters(new Set());
     setChapterProgress({});
     setStartTime(0);
-    
+
     // 🔥 Redux 액션 사용
     // dispatch(setHasProgressData(false));
-    
+
     console.log("🆕 빈 상태로 초기화 완료");
   }, [dispatch]); // dispatch 의존성 추가
 
@@ -599,21 +764,23 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   const setInitialChapterStartTime = useCallback(
     (progressCache: Record<number, WatchProgress>): void => {
       console.log("🎯 [DEBUG] setInitialChapterStartTime 시작");
-      
+
       if (chapters.length > 0) {
         const firstChapter = chapters[0];
         const firstChapterProgress = progressCache[firstChapter.id];
-  
+
         if (firstChapterProgress?.currentTime > 0) {
-          console.log(`🎯 [DEBUG] 시작 시간 설정: ${firstChapterProgress.currentTime}초`);
+          console.log(
+            `🎯 [DEBUG] 시작 시간 설정: ${firstChapterProgress.currentTime}초`
+          );
           setStartTime(firstChapterProgress.currentTime);
-          
+
           // 🔥 Redux 액션 사용
           dispatch(setHasProgressData(true));
         } else {
           console.log(`🎯 [DEBUG] 처음부터 시작 (진행률 없음)`);
           setStartTime(0);
-          
+
           // 🔥 Redux 액션 사용
           dispatch(setHasProgressData(false));
         }
@@ -805,9 +972,9 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //     });
   //     return;
   //   }
-  
+
   //   console.log("🚀 Redux: 전체 진행률 초기화 시작");
-  
+
   //   dispatch(
   //     loadProgressFromServer({
   //       userId,
@@ -816,34 +983,34 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //   ).then((result) => {
   //     if (loadProgressFromServer.fulfilled.match(result)) {
   //       const { success, serverData, lastWatched } = result.payload;
-        
+
   //       console.log("📡 서버 응답 데이터:", { success, lastWatched });
-        
+
   //       // 1️⃣ 서버 데이터로 로컬 캐시 업데이트 (기존과 동일)
   //       if (serverData?.chapters) {
   //         try {
   //           console.log("📡 [DEBUG] 서버 데이터 유효함 - 변환 시작");
-            
+
   //           const formattedCache = convertWatchProgressToCache(serverData.chapters);
   //           console.log("📡 [DEBUG] 변환된 캐시:", formattedCache);
-            
+
   //           setRealtimeCache(formattedCache);
   //           updateCache(formattedCache); // 로컬스토리지 저장
   //           updateUIStatesFromCache(formattedCache); // UI 상태 업데이트
-            
+
   //           console.log("✅ 서버 데이터로 로컬 캐시 동기화 완료");
   //         } catch (error) {
   //           console.error("❌ 서버 데이터 변환 실패:", error);
   //         }
   //       }
-        
+
   //       // 2️⃣ 마지막 시청 위치 복원 (기존과 동일)
   //       if (lastWatched.found && lastWatched.chapterId) {
   //         const chapterIndex = chapters.findIndex(ch => ch.id === lastWatched.chapterId);
-          
+
   //         if (chapterIndex !== -1) {
   //           console.log(`✅ 마지막 시청 위치 복원: 챕터 ${chapterIndex}, 시간 ${lastWatched.currentTime}초`);
-            
+
   //           setCurrentChapterIndex(chapterIndex);
   //           setStartTime(lastWatched.currentTime);
   //           // setCurrentTime(lastWatched.currentTime);
@@ -862,16 +1029,16 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //         setCurrentChapterIndex(0);
   //         setStartTime(0);
   //       }
-        
+
   //     } else {
   //       // 3️⃣ 서버 실패 시 로컬 캐시 폴백 (기존과 동일)
   //       console.error("❌ Redux 서버 로드 실패 - 로컬 캐시 폴백");
-        
+
   //       try {
   //         console.log("🔄 로컬 캐시 폴백 모드");
   //         const localCache = loadCache();
   //         console.log("🔄 [DEBUG] loadCache() 결과:", localCache);
-          
+
   //         if (localCache && Object.keys(localCache).length > 0) {
   //           console.log("🔄 [DEBUG] 로컬 캐시 유효함 - UI 업데이트 시작");
   //           setRealtimeCache(localCache);
@@ -885,16 +1052,16 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //         console.error("❌ 로컬 캐시 로드도 실패:", error);
   //         initializeEmptyState();
   //       }
-        
+
   //       // 기본값으로 설정
   //       setCurrentChapterIndex(0);
   //       setStartTime(0);
   //     }
-      
+
   //     console.log("🏁 Redux 전체 초기화 완료");
   //   }).catch((error) => {
   //     console.error("❌ Redux 초기화 중 예외:", error);
-      
+
   //     // 예외 발생 시도 로컬 폴백 시도
   //     try {
   //       const localCache = loadCache();
@@ -907,7 +1074,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //     } catch (localError) {
   //       initializeEmptyState();
   //     }
-      
+
   //     setCurrentChapterIndex(0);
   //     setStartTime(0);
   //   });
@@ -944,31 +1111,37 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
         console.warn("⚠️ 진행률 확인 생략");
         return;
       }
-  
+
       if (chapterIndex < 0 || chapterIndex >= chapters.length) {
         console.warn(`⚠️ 유효하지 않은 챕터 인덱스 ${chapterIndex}`);
         return;
       }
-  
+
       const chapter = chapters[chapterIndex];
       if (!chapter || !chapter.id) {
         console.warn(`⚠️ 챕터 ${chapterIndex} 데이터 없음`);
         return;
       }
-  
+
       const progress = getProgressFromCache(chapter.id);
-  
-      if (progress && typeof progress.currentTime === "number" && progress.currentTime > 0) {
+
+      if (
+        progress &&
+        typeof progress.currentTime === "number" &&
+        progress.currentTime > 0
+      ) {
         // 🔥 Redux 액션 사용
         dispatch(setHasProgressData(true));
         setStartTime(progress.currentTime);
-        
-        console.log(`✅ 기존 진행률 발견 - 챕터 ${chapter.id}: ${progress.currentTime}초부터`);
+
+        console.log(
+          `✅ 기존 진행률 발견 - 챕터 ${chapter.id}: ${progress.currentTime}초부터`
+        );
       } else {
         // 🔥 Redux 액션 사용
         dispatch(setHasProgressData(false));
         setStartTime(0);
-        
+
         console.log(`📝 새 챕터 - 챕터 ${chapter.id}: 처음부터 시작`);
       }
     },
@@ -1098,41 +1271,50 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     }
   }, [userId, courseData?.id]);
 
-  
   //리덕스스테이트 변경
   // useEffect(() => {
   //   console.log(`🔄 [DEBUG] startTime 변경 감지: ${startTime.toFixed(1)}초`);
   //   console.log(`🔄 [DEBUG] 이전 progress_currentTime:`, progress_currentTime);
-  
+
   //   // 🔥 Redux 액션 사용
   //   dispatch(setCurrentTime(startTime));
-  
+
   //   console.log(`🔄 [DEBUG] VideoPlayer startTime 변경: ${startTime.toFixed(1)}초`);
   //   console.log(`🔄 [DEBUG] Redux setCurrentTime(${startTime}) 호출 완료`);
   // }, [startTime, dispatch]);
 
-
   // 🔥 Redux 상태 변화 감지 (디버깅용)
-useEffect(() => {
-  console.log('🔄 [Redux] progress_currentTime 변경:', progress_currentTime);
-}, [progress_currentTime]);
+  // useEffect(() => {
+  //   console.log("🔄 [Redux] progress_currentTime 변경:", progress_currentTime);
+  // }, [progress_currentTime]);
 
-useEffect(() => {
-  console.log('🔄 [Redux] progress_hasProgressData 변경:', progress_hasProgressData);
-}, [progress_hasProgressData]);
+  // useEffect(() => {
+  //   console.log(
+  //     "🔄 [Redux] progress_hasProgressData 변경:",
+  //     progress_hasProgressData
+  //   );
+  // }, [progress_hasProgressData]);
 
-useEffect(() => {
-  console.log('🔄 [Redux] progress_isVideoPlaying 변경:', progress_isVideoPlaying);
-}, [progress_isVideoPlaying]);
+  // useEffect(() => {
+  //   console.log(
+  //     "🔄 [Redux] progress_isVideoPlaying 변경:",
+  //     progress_isVideoPlaying
+  //   );
+  // }, [progress_isVideoPlaying]);
 
-useEffect(() => {
-  console.log('🔄 [Redux] progress_lastSaveTime 변경:', progress_lastSaveTime);
-}, [progress_lastSaveTime]);
+  // useEffect(() => {
+  //   console.log(
+  //     "🔄 [Redux] progress_lastSaveTime 변경:",
+  //     progress_lastSaveTime
+  //   );
+  // }, [progress_lastSaveTime]);
 
-useEffect(() => {
-  console.log('🔄 [Redux] progress_currentVideoIndex 변경:', progress_currentVideoIndex);
-}, [progress_currentVideoIndex]);
-
+  // useEffect(() => {
+  //   console.log(
+  //     "🔄 [Redux] progress_currentVideoIndex 변경:",
+  //     progress_currentVideoIndex
+  //   );
+  // }, [progress_currentVideoIndex]);
 
   const handleVideoPlay = () => {
     console.log(`🎬 비디오 재생 시작 - 챕터 ${currentChapter.id}`);
@@ -1283,7 +1465,7 @@ useEffect(() => {
   // 🎥 로컬만저장 :비디오 시간 업데이트 핸들러  1초 간격으로 진행률을 업데이트(진행률 데이터가 있을 때만 저장)
   const onVideoProgress = (currentTime: number, videoDuration: number) => {
     // setCurrentTime(currentTime);
-    dispatch(setCurrentTime(currentTime));
+    // dispatch(setCurrentTime(currentTime));
     const progress = Math.min(currentTime, videoDuration);
     setChapterProgress((prev) => ({
       ...prev,
@@ -1408,45 +1590,45 @@ useEffect(() => {
       return;
     }
 
-    if (progress_hasProgressData) {
-      // realtimeCache 업데이트 (useEffect가 자동으로 로컬 저장)
-      // setRealtimeCache(prev => ({
-      //   ...prev,
-      //   [currentChapter.id]: {
-      //     ...prev[currentChapter.id],
-      //     totalDuration: videoDuration,
-      //   }
-      // }));
+    // if (progress_hasProgressData) {
+    //   // realtimeCache 업데이트 (useEffect가 자동으로 로컬 저장)
+    //   // setRealtimeCache(prev => ({
+    //   //   ...prev,
+    //   //   [currentChapter.id]: {
+    //   //     ...prev[currentChapter.id],
+    //   //     totalDuration: videoDuration,
+    //   //   }
+    //   // }));
 
-      // 🔥 안전한 LocalChapterCache 객체 생성
-      const safeLocalChapter: LocalChapterCache = {
-        currentTime: Math.floor(progress_currentTime), // 현재 재생 시간
-        totalDuration: Math.floor(videoDuration), // 비디오 전체 길이
-        watchedPercentage:
-          videoDuration > 0
-            ? Math.min(100, (progress_currentTime / videoDuration) * 100)
-            : 0,
-        isCompleted: false, // 메타데이터 로드 시점에는 완료 아님
-        lastUpdated: Date.now(), // ✅ 현재 타임스탬프
-      };
+    //   // 🔥 안전한 LocalChapterCache 객체 생성
+    //   const safeLocalChapter: LocalChapterCache = {
+    //     currentTime: Math.floor(progress_currentTime), // 현재 재생 시간
+    //     totalDuration: Math.floor(videoDuration), // 비디오 전체 길이
+    //     watchedPercentage:
+    //       videoDuration > 0
+    //         ? Math.min(100, (progress_currentTime / videoDuration) * 100)
+    //         : 0,
+    //     isCompleted: false, // 메타데이터 로드 시점에는 완료 아님
+    //     lastUpdated: Date.now(), // ✅ 현재 타임스탬프
+    //   };
 
-      // ProgressTracker.saveProgress(
-      //   userId,
-      //   courseData?.id || 1,
-      //   currentChapter.id,
-      //   safeLocalChapter // ✅ 검증된 데이터 전달
-      // )
-      //   .then((result) => {
-      //     if (result) {
-      //       console.log("✅ 메타데이터 서버 저장 성공:", result);
-      //     } else {
-      //       console.log("⚠️ 메타데이터 서버 저장 실패");
-      //     }
-      //   })
-      //   .catch((error) => {
-      //     console.error("❌ 메타데이터 서버 저장 중 오류:", error);
-      //   });
-    }
+    //   // ProgressTracker.saveProgress(
+    //   //   userId,
+    //   //   courseData?.id || 1,
+    //   //   currentChapter.id,
+    //   //   safeLocalChapter // ✅ 검증된 데이터 전달
+    //   // )
+    //   //   .then((result) => {
+    //   //     if (result) {
+    //   //       console.log("✅ 메타데이터 서버 저장 성공:", result);
+    //   //     } else {
+    //   //       console.log("⚠️ 메타데이터 서버 저장 실패");
+    //   //     }
+    //   //   })
+    //   //   .catch((error) => {
+    //   //     console.error("❌ 메타데이터 서버 저장 중 오류:", error);
+    //   //   });
+    // }
   };
 
   // 🎥 비디오 끝남 핸들러
@@ -1523,7 +1705,7 @@ useEffect(() => {
     setCurrentChapterIndex(chapterIndex);
     // setCurrentTime(0);
     dispatch(setCurrentTime(0));
-  dispatch(setIsVideoPlaying(false));
+    dispatch(setIsVideoPlaying(false));
   };
 
   // const saveProgressToLocalStorage = () => {
@@ -1740,49 +1922,33 @@ useEffect(() => {
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Clock className="w-4 h-4" />
-              <span>
-                총 시간: {ProgressCalculator.formatTime(totalDuration)}
-              </span>
-              {/* {startTime > 0 && (
-                <span className="text-green-600">
-                  시작: {Math.floor(startTime)}초
-                </span>
-              )} */}
             </div>
           </div>
         </div>
 
         {/* 비디오 플레이어 영역 */}
         <div className="flex-1 bg-black relative">
-          {/* {currentChapter ? (
-            <VideoPlayer
-              currentVideo={currentChapter.videoFile}
-              onTimeUpdate={onVideoProgress}
-              onLoadedMetadata={onVideoReady}
-              onEnded={handleVideoEnded}
-              onPlay={handleVideoPlay}
-              onPause={handleVideoPause}
-              startTime={startTime}
-              autoPlay
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="text-center text-gray-400">
-                <p className="text-lg">왼쪽에서 학습할 챕터를 선택해주세요</p>
-              </div>
-            </div>
-          )} */}
+      <VideoPlayer
+      currentVideo={`../../../public/video/video${serverVideoId}.mp4`}
+        onTimeUpdate={onVideoProgress}
+        onLoadedMetadata={onVideoReady}
+        onEnded={handleVideoEnded}
+        onPlay={handleVideoPlay}
+        onPause={handleVideoPause}
+        startTime={startTime}
+        autoPlay
+      />
 
-<VideoPlayer
-              // currentVideo={currentChapterRe.videoFile}
-              onTimeUpdate={onVideoProgress}
-              onLoadedMetadata={onVideoReady}
-              onEnded={handleVideoEnded}
-              onPlay={handleVideoPlay}
-              onPause={handleVideoPause}
-              // startTime={startTimeRe}
-              autoPlay
-            />
+          {/* <VideoPlayer
+            // currentVideo={currentChapterRe.videoFile}
+            // onTimeUpdate={onVideoProgress}
+            onLoadedMetadata={onVideoReady}
+            onEnded={handleVideoEnded}
+            onPlay={handleVideoPlay}
+            onPause={handleVideoPause}
+            // startTime={startTimeRe}
+            autoPlay
+          /> */}
           {/* {currentChapterRe ? (
             <VideoPlayer
               currentVideo={currentChapterRe.videoFile}
@@ -1818,14 +1984,14 @@ useEffect(() => {
             <button
               onClick={() => {
                 // if (currentChapterIndex < chapters.length - 1) {
-                  // setCurrentChapterIndex(currentChapterIndex + 1);
-                  // ✅ 수정 (Redux 액션 사용)
-                  // dispatch(
-                  //   setChapterAndTime({
-                  //     index: currentChapterIndex + 1,
-                  //     startTime: 0, // 다음 챕터는 처음부터
-                  //   })
-                  // );
+                // setCurrentChapterIndex(currentChapterIndex + 1);
+                // ✅ 수정 (Redux 액션 사용)
+                // dispatch(
+                //   setChapterAndTime({
+                //     index: currentChapterIndex + 1,
+                //     startTime: 0, // 다음 챕터는 처음부터
+                //   })
+                // );
                 // }
               }}
               // disabled={currentChapterIndex >= chapters.length - 1}
