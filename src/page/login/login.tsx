@@ -34,9 +34,6 @@ const LoginPage: React.FC<{
   onLoginSuccess: () => void;
   onGoToMain: () => void;
 }> = ({ onLoginSuccess, onGoToMain }) => {
-  const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://13.125.180.222";
-
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -89,7 +86,7 @@ const LoginPage: React.FC<{
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/users/login/`, {
+      const response = await fetch("/api/users/login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
