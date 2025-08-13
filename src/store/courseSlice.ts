@@ -51,42 +51,49 @@ const buildQueryParams = (params: FetchCoursesParams): string => {
   return queryParams.toString();
 };
 
-// 코스 목록 가져오기
+// 목록 가져오기
 export const fetchCourses = createAsyncThunk<
   ApiResponse,
   FetchCoursesParams | undefined
->("course/fetchCourses", async (params, { getState }) => {
-  const state = getState() as { course: CourseState };
-  const { activeFilters } = state.course;
-  const requestParams = params || {
-    page: 1,
-    categories: activeFilters.categories,
-    types: activeFilters.types,
-    levels: activeFilters.levels,
-    prices: activeFilters.prices,
-  };
+>("course/fetchCourses", async (params, { getState, rejectWithValue }) => {
+  try {
+    const state = getState() as { course: CourseState };
+    const { activeFilters } = state.course;
+    const requestParams = params || {
+      page: 1,
+      categories: activeFilters.categories,
+      types: activeFilters.types,
+      levels: activeFilters.levels,
+      prices: activeFilters.prices,
+    };
 
-  const baseUrl = "http://13.125.180.222/api/courses/";
-  const queryString = buildQueryParams(requestParams);
-  const url = `${baseUrl}?${queryString}`;
+    const baseUrl = "http://13.125.180.222/api/courses/";
+    const queryString = buildQueryParams(requestParams);
+    const url = `${baseUrl}?${queryString}`;
 
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error("코스 목록을 불러오는데 실패했습니다.");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    return rejectWithValue(
+      error instanceof Error
+        ? error.message
+        : "코스 목록을 불러오는데 실패했습니다."
+    );
   }
-
-  return await response.json();
 });
 
 const initialState: CourseState = {
   courses: [],
-  filteredCourses: [],
   filters: {
     categories: [
       "전체",
@@ -194,7 +201,6 @@ const courseSlice = createSlice({
         const courses = response?.results || [];
 
         state.courses = courses;
-        state.filteredCourses = courses;
         state.pagination.totalItems = response?.count || 0;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
@@ -202,7 +208,6 @@ const courseSlice = createSlice({
         state.error =
           action.error.message || "코스 목록을 불러오는데 실패했습니다.";
         state.courses = [];
-        state.filteredCourses = [];
       });
   },
 });

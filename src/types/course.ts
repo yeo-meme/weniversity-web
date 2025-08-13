@@ -2,7 +2,7 @@ export interface Course {
   course_id: string;
   title: string;
   instructors: Instructors[];
-  image: string;
+  course_image: string;
   type: string;
   category: string;
   level: string;
@@ -32,7 +32,6 @@ export interface PaginationState {
 
 export interface CourseState {
   courses: Course[];
-  filteredCourses: Course[];
   filters: CourseFilters;
   activeFilters: {
     categories: string[];

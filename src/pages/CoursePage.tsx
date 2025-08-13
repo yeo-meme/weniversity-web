@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../hooks/redux";
 import {
   fetchCourses,
@@ -13,17 +13,12 @@ import Pagination from "../components/common/Pagination";
 import ResetIcon from "../assets/icon-reset.png";
 import DeleteIcon from "../assets/icon-X.png";
 import EmptyIcon from "../assets/icon-empty.png";
+import type { Course } from "../types/course";
 
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const {
-    filteredCourses,
-    filters,
-    activeFilters,
-    pagination,
-    loading,
-    error,
-  } = useAppSelector(state => state.course);
+  const { courses, filters, activeFilters, pagination, loading, error } =
+    useAppSelector(state => state.course);
 
   useEffect(() => {
     dispatch(
@@ -43,9 +38,7 @@ const CoursePage: React.FC = () => {
     };
   }, [dispatch]);
 
-  const paginatedCourses = useMemo(() => {
-    return Array.isArray(filteredCourses) ? filteredCourses : [];
-  }, [filteredCourses]);
+  const coursesToDisplay = Array.isArray(courses) ? courses : [];
 
   const handleFilterChange = (
     filterType: keyof typeof activeFilters,
@@ -265,7 +258,7 @@ const CoursePage: React.FC = () => {
             </div>
           )}
 
-          {!Array.isArray(filteredCourses) || filteredCourses.length === 0 ? (
+          {coursesToDisplay.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-12">
               <img src={EmptyIcon} alt="" />
               <p className="mt-6 text-gray-500">찾는 조건의 강의가 없습니다.</p>
@@ -273,7 +266,7 @@ const CoursePage: React.FC = () => {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {paginatedCourses.map(course => (
+                {coursesToDisplay.map((course: Course) => (
                   <CourseCard key={course.course_id} course={course} />
                 ))}
               </div>

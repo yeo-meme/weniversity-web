@@ -1,13 +1,7 @@
 import React, { useState } from "react";
 import type { Course } from "../../types/course";
-// import HeartIconPicked from "../../assets/icon-heart-picked.png";
 import HeartIconHover from "../../assets/icon-heart-hover.png";
 import HeartIcon from "../../assets/icon-heart.png";
-import BlueLectureImage from "../../assets/lecture-blue-img.png";
-import OrangeLectureImage from "../../assets/lecture-orange-img.png";
-import CharcoalLectureImage from "../../assets/lecture-charcoal-img.png";
-import GreenLectureImage from "../../assets/lecture-green-img.png";
-import PurpleLectureImage from "../../assets/lecture-purple-img.png";
 
 interface CourseCardProps {
   course: Course;
@@ -32,19 +26,11 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
     if (type === "boost") return "부스트 커뮤니티";
   };
 
-  const getLectureImage = (category: string) => {
-    if (category === "프론트엔드") return OrangeLectureImage;
-    if (category === "백엔드") return GreenLectureImage;
-    if (category === "AI") return CharcoalLectureImage;
-    if (category === "데이터 분석") return BlueLectureImage;
-    return PurpleLectureImage;
-  };
-
   return (
     <div className="rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 course-card cursor-pointer">
       <div className="relative bg-python-gradient rounded-t-lg overflow-hidden">
         {/* 강의 이미지 */}
-        <img src={getLectureImage(course.category)} alt="강의이미지" />
+        <img src={course.course_image} alt="강의이미지" />
 
         {/* 좋아요 이미지 */}
         <img
@@ -84,7 +70,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
             <img
-              src={course.instructors[0].profile_image}
+              src={course.instructors?.[0]?.profile_image}
               alt="강사"
               className="w-full h-full object-cover"
             />
