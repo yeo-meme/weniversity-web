@@ -59,7 +59,7 @@ import type {
   PlayerState,
 } from "../../store/slices/testApiSlice";
 
-import {useGetCoursesQuery } from "../../store/api/courseApiSlice";
+// import {useGetCoursesQuery } from "../../store/api/courseApiSlice";
 
 
 interface VideoPlayerProps {
