@@ -17,7 +17,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user, token, refreshToken } = useAppSelector(
+    (state) => state.auth
+  );
 
   const [logoutMutation] = useLogoutMutation();
 
@@ -34,15 +36,27 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
 
   const handleLogout = async () => {
     try {
-      await logoutMutation().unwrap();
+      console.log("🚪 로그아웃 시작 - 토큰 확인:", {
+        accessToken: token ? "있음" : "없음",
+        refreshToken: refreshToken ? "있음" : "없음",
+      });
+
+      const result = await logoutMutation({
+        access: token || undefined,
+        refresh: refreshToken || undefined,
+      }).unwrap();
+
+      console.log("✅ API 로그아웃 성공:", result);
     } catch (error) {
-      console.error("로그아웃 API 오류:", error);
+      console.error("❌ 로그아웃 API 오류:", error);
     }
 
     if (onLogout) {
       onLogout();
+      console.log("🔄 로컬 로그아웃 콜백 실행 완료");
     }
 
+    console.log("🎉 로그아웃 프로세스 완료");
     alert("로그아웃 되었습니다.");
   };
 

@@ -33,6 +33,11 @@ export interface RefreshTokenResponse {
   refresh?: string;
 }
 
+export interface LogoutRequest {
+  access?: string;
+  refresh?: string;
+}
+
 export interface LogoutResponse {
   success: boolean;
   message?: string;
@@ -52,10 +57,11 @@ export const authApiSlice = createApi({
       invalidatesTags: ["Auth"],
     }),
 
-    logout: builder.mutation<LogoutResponse, void>({
-      query: () => ({
+    logout: builder.mutation<LogoutResponse, LogoutRequest>({
+      query: (tokens) => ({
         url: "/users/logout/",
         method: "POST",
+        body: tokens, // access와 refresh 토큰을 body로 전달
       }),
       invalidatesTags: ["Auth"],
     }),
