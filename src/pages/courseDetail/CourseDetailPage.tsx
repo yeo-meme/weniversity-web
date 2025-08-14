@@ -13,10 +13,12 @@ import TabNavigation from "../../components/courseDetail/TabNavigation";
 import CourseContent from "../../components/courseDetail/CourseContent";
 import LoadingMessage from "../../components/courseDetail/LoadingMessage";
 import { ErrorMessage } from "../../components/courseDetail/ErrorMessage";
+import { useNavigate, useParams } from "react-router-dom";
 
 const CourseDetailPage: React.FC = () => {
-  const id = "1"; // 임시 아이디
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { courseId } = useParams<{ courseId: string }>();
   const { courseDetail, activeTab, loading, error } = useAppSelector(
     state => state.courseDetail
   );
@@ -152,20 +154,24 @@ const CourseDetailPage: React.FC = () => {
   }, []);
 
   // 수강신청 핸들러
-  const handleEnrollment = useCallback(() => {
-    alert("수강신청 기능은 개발중입니다.");
-  }, []);
+  const handleEnrollment = useCallback(
+    (title: string) => {
+      alert(`"${title}" 수강신청이 완료되었습니다.`);
+      navigate("/");
+    },
+    [navigate]
+  );
 
   // 강의 데이터 fetch
   useEffect(() => {
-    if (id) {
-      dispatch(fetchCourseDetail(id));
+    if (courseId) {
+      dispatch(fetchCourseDetail(courseId));
     }
 
     return () => {
       dispatch(resetCourseDetailState());
     };
-  }, [dispatch, id]);
+  }, [dispatch, courseId]);
 
   // 스크롤 이벤트 등록
   useEffect(() => {

@@ -5,7 +5,7 @@ import type {
   RegisterState,
 } from "../types/register/user";
 
-// 회원가입 API
+// 회원가입
 export const register = createAsyncThunk(
   "register/register",
   async (formData: RegisterFormData) => {

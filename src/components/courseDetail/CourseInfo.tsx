@@ -6,7 +6,7 @@ interface CourseInfoProps {
   courseDetail: CourseDetailInfo;
   formatDateRange: (dateStr: string) => string;
   onShare: () => void;
-  onEnrollment: () => void;
+  onEnrollment: (title: string) => void;
   error: string | null;
 }
 
@@ -150,7 +150,7 @@ const CourseInfo: React.FC<CourseInfoProps> = ({
 
               <button
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors mb-3 disabled:opacity-50"
-                onClick={onEnrollment}
+                onClick={() => onEnrollment(courseDetail.title)}
               >
                 수강신청 하기
               </button>

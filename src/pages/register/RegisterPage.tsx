@@ -8,9 +8,11 @@ import type {
 import { validateForm, isFormValid } from "../../services/register/validation";
 import RegisterInput from "../../components/register/RegisterInput";
 import RegisterSelect from "../../components/register/RegisterSelect";
+import { useNavigate } from "react-router-dom";
 
 const RegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { loading, error, success } = useAppSelector(state => state.register);
 
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -71,8 +73,9 @@ const RegisterPage: React.FC = () => {
   useEffect(() => {
     if (success) {
       alert("회원가입이 완료되었습니다!");
+      navigate("/");
     }
-  }, [success]);
+  }, [success, navigate]);
 
   // 입력 변경 핸들러
   const handleInputChange = useCallback(

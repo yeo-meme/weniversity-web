@@ -2,15 +2,22 @@ import React, { useState } from "react";
 import type { Course } from "../../types/course/course";
 import HeartIconHover from "../../assets/icon-heart-hover.png";
 import HeartIcon from "../../assets/icon-heart.png";
+import { useNavigate } from "react-router-dom";
 
 interface CourseCardProps {
   course: Course;
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+  const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
-  const getLike = (id: string) => {
+  const getLike = (id: string, event: React.MouseEvent) => {
+    event.stopPropagation();
     console.log(`${id} 강의를 선택했습니다.`);
+  };
+
+  const navigateToCourseDetail = (id: string) => {
+    navigate(`/courses/${id}`);
   };
 
   const getPriceLabel = (price?: number) => {
@@ -28,7 +35,10 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
 
   return (
     <div className="rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 course-card cursor-pointer">
-      <div className="relative bg-python-gradient rounded-t-lg overflow-hidden">
+      <div
+        className="relative bg-python-gradient rounded-t-lg overflow-hidden"
+        onClick={() => navigateToCourseDetail(course.course_id)}
+      >
         {/* 강의 이미지 */}
         <img src={course.course_image} alt="강의이미지" />
 
@@ -39,7 +49,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
           className="absolute top-4 right-4 transition-colors"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          onClick={() => getLike(course.course_id)}
+          onClick={event => getLike(course.course_id, event)}
         />
       </div>
 
