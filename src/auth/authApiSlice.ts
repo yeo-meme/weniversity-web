@@ -1,7 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithRefresh } from "./baseQuery";
 
-
 // 최소한의 API 슬라이스 (리프레시 기능만)
 export const authApiSlice = createApi({
   reducerPath: "authApi",
@@ -19,17 +18,6 @@ export const authApiSlice = createApi({
       }),
     }),
 
-     // ✨ 코스 엔드포인트 추가
-  //    getCourses: builder.query<
-  //    any[], 
-  //    void   
-  //  >({
-  //    query: () => ({
-  //      url: '/courses/',
-  //      method: 'GET',
-  //    }),
-  //    providesTags: ['Course'],
-  //  }),
   }),
 });
 
