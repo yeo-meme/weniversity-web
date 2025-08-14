@@ -1,4 +1,6 @@
 import React from "react";
+import { useAppDispatch } from "../../hooks/redux-hooks";
+import { goToMyLectures } from "../../store/lecture-slice";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
@@ -21,6 +23,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   onLogin,
   user,
 }) => {
+  const dispatch = useAppDispatch();
+
   const getUserDisplayName = () => {
     if (user?.name) {
       return `${user.name}님`;
@@ -33,6 +37,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   const getUserEmail = () => {
     return user?.email || "paul-lab@naver.com";
+  };
+
+  const handleGoToMyLectures = () => {
+    dispatch(goToMyLectures());
   };
 
   if (isLoggedIn) {
@@ -55,6 +63,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             <a
               href="#"
               className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
+              onClick={(e) => {
+                e.preventDefault();
+                handleGoToMyLectures();
+              }}
             >
               <VideoIcon />내 강의 목록 보기
             </a>
