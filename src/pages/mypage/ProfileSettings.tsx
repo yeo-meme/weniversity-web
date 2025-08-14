@@ -2,7 +2,7 @@ import React, { useRef, useCallback, useMemo } from "react";
 import type {
   ProfileFormData,
   ProfileValidationMessages,
-} from "../../types/profile";
+} from "../../types/myPage/myPage";
 import imgIcon from "../../assets/img-icon.png";
 import MyPageInput from "../../components/mypage/profilesettings/MyPageInput";
 import MyPageSelect from "../../components/mypage/profilesettings/MyPageSelector";

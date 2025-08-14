@@ -9,12 +9,12 @@ import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import {
   fetchProfile,
   updateProfile,
-  resetProfileState,
-} from "../../store/profileSlice";
+  resetMyPageState,
+} from "../../store/myPageSlice";
 import type {
   ProfileFormData,
   ProfileValidationMessages,
-} from "../../types/profile";
+} from "../../types/myPage/myPage";
 import {
   validateProfileForm,
   isProfileFormValid,
@@ -28,7 +28,7 @@ type TabType = "profile" | "certificates" | "payments" | "account";
 const MyPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const { profile, loading, error, success } = useAppSelector(
-    state => state.profile
+    state => state.myPage
   );
 
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -73,7 +73,7 @@ const MyPage: React.FC = () => {
   useEffect(() => {
     dispatch(fetchProfile());
     return () => {
-      dispatch(resetProfileState());
+      dispatch(resetMyPageState());
     };
   }, [dispatch]);
 
@@ -108,7 +108,7 @@ const MyPage: React.FC = () => {
     if (success) {
       alert("프로필이 성공적으로 수정되었습니다!");
       isUpdatingRef.current = false;
-      dispatch(resetProfileState());
+      dispatch(resetMyPageState());
 
       // 프리뷰 이미지 업데이트
       if (profile?.profile_image) {

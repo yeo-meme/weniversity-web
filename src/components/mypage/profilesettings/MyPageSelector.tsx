@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import DownIcon from "../../../assets/icon-down.png";
-import type { Option } from "../../../types/profile";
+import type { Option } from "../../../types/myPage/myPage";
 
 interface MyPageSelectProps {
   id: string;

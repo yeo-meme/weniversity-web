@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from "react";
-import type { PaymentItem } from "../../types/payment";
+import type { PaymentItem } from "../../types/myPage/payment";
 import PaymentDetail from "../../components/mypage/paymenthistory/PaymentDetail";
 import PaymentMethod from "../../components/mypage/paymenthistory/PaymentMethod";
 

@@ -1,7 +1,7 @@
 import type {
   ProfileFormData,
   ProfileValidationMessages,
-} from "../../types/profile";
+} from "../../types/myPage/myPage";
 
 // 회원가입과 동일한 유효성 검사 함수들 재사용
 export const validateProfileName = (name: string): string | undefined => {

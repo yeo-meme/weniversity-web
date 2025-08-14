@@ -3,11 +3,11 @@ import type {
   RegisterFormData,
   RegisterRequestData,
   RegisterState,
-} from "../types/user";
+} from "../types/register/user";
 
 // 회원가입 API
 export const register = createAsyncThunk(
-  "auth/register",
+  "register/register",
   async (formData: RegisterFormData) => {
     const requestData: RegisterRequestData = {
       email: formData.email,
@@ -43,11 +43,11 @@ const initialState: RegisterState = {
   success: false,
 };
 
-const authSlice = createSlice({
-  name: "auth",
+const registerSlice = createSlice({
+  name: "register",
   initialState,
   reducers: {
-    resetAuthState: state => {
+    resetRegisterState: state => {
       state.loading = false;
       state.error = null;
       state.success = false;
@@ -71,5 +71,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { resetAuthState } = authSlice.actions;
-export default authSlice.reducer;
+export const { resetRegisterState } = registerSlice.actions;
+export default registerSlice.reducer;

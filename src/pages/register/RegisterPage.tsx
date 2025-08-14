@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import { register, resetAuthState } from "../../store/authSlice";
-import type { RegisterFormData, ValidationMessages } from "../../types/user";
-import { validateForm, isFormValid } from "../../services/auth/validation";
-import RegisterInput from "../../components/auth/RegisterInput";
-import RegisterSelect from "../../components/auth/RegisterSelect";
+import { register, resetRegisterState } from "../../store/registerSlice";
+import type {
+  RegisterFormData,
+  ValidationMessages,
+} from "../../types/register/user";
+import { validateForm, isFormValid } from "../../services/register/validation";
+import RegisterInput from "../../components/register/RegisterInput";
+import RegisterSelect from "../../components/register/RegisterSelect";
 
 const RegisterPage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { loading, error, success } = useAppSelector(state => state.auth);
+  const { loading, error, success } = useAppSelector(state => state.register);
 
   const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
@@ -60,7 +63,7 @@ const RegisterPage: React.FC = () => {
   // cleanup 효과
   useEffect(() => {
     return () => {
-      dispatch(resetAuthState());
+      dispatch(resetRegisterState());
     };
   }, [dispatch]);
 

@@ -15,6 +15,15 @@ export default {
         gray500: "#8D9299",
         gray700: "#47494D",
       },
+      animation: {
+        shimmer: "shimmer 1.5s infinite",
+      },
+      keyframes: {
+        shimmer: {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+      },
     },
   },
   plugins: [],

@@ -3,7 +3,7 @@ import type {
   PasswordResetRequest,
   PasswordResetResponse,
   PasswordResetState,
-} from "../types/findPassword";
+} from "../types/myPage/findPassword";
 
 // 비밀번호 재설정 이메일 전송 API
 export const sendPasswordResetEmail = createAsyncThunk<

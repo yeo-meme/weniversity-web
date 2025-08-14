@@ -25,7 +25,7 @@ export interface ProfileValidationMessages {
   birth_date?: string;
 }
 
-export interface ProfileState {
+export interface MyPageState {
   profile: UserProfile | null;
   loading: boolean;
   error: string | null;

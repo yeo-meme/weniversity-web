@@ -2,12 +2,12 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type {
   UserProfile,
   ProfileFormData,
-  ProfileState,
-} from "../types/profile";
+  MyPageState,
+} from "../types/myPage/myPage";
 
 // 프로필 정보 가져오기
 export const fetchProfile = createAsyncThunk<UserProfile>(
-  "profile/fetchProfile",
+  "myPage/fetchProfile",
   async () => {
     const user = await fetch("http://13.125.180.222/api/users/login/", {
       method: "POST",
@@ -39,7 +39,7 @@ export const fetchProfile = createAsyncThunk<UserProfile>(
 
 // 프로필 정보 수정
 export const updateProfile = createAsyncThunk<UserProfile, ProfileFormData>(
-  "profile/updateProfile",
+  "myPage/updateProfile",
   async (formData: ProfileFormData) => {
     const requestData = new FormData();
     requestData.append("name", formData.name);
@@ -82,18 +82,18 @@ export const updateProfile = createAsyncThunk<UserProfile, ProfileFormData>(
   }
 );
 
-const initialState: ProfileState = {
+const initialState: MyPageState = {
   profile: null,
   loading: false,
   error: null,
   success: false,
 };
 
-const profileSlice = createSlice({
-  name: "profile",
+const myPageSlice = createSlice({
+  name: "myPage",
   initialState,
   reducers: {
-    resetProfileState: state => {
+    resetMyPageState: state => {
       state.loading = false;
       state.error = null;
       state.success = false;
@@ -133,5 +133,5 @@ const profileSlice = createSlice({
   },
 });
 
-export const { resetProfileState } = profileSlice.actions;
-export default profileSlice.reducer;
+export const { resetMyPageState } = myPageSlice.actions;
+export default myPageSlice.reducer;
