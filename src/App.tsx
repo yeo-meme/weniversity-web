@@ -6,6 +6,7 @@ import { logout } from "./auth/auth-slice.ts";
 import Header from "./components/header/header.tsx";
 import HeroSection from "./components/hero/hero-section.tsx";
 import LoginPage from "./page/login/login.tsx";
+import MyLectures from "./page/my-lectures/my-lectures.tsx";
 import "./index.css";
 
 function AppContent() {
@@ -47,6 +48,7 @@ function AppContent() {
           isLoggedIn={isAuthenticated}
           onLogin={() => setCurrentPage("login")}
         />
+        <MyLectures />
         <div className="mt-4 flex gap-4"></div>
       </main>
     </>
