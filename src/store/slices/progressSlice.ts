@@ -1,104 +1,91 @@
-import { createSlice } from '@reduxjs/toolkit';
-import type {  PayloadAction } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
-
-
-interface Chapter {
-  id: string;
-  userId: string;
-  courseId: number;
-  chapterId: number;
-  videoId: number;
-  chapterOrder: number;
-  videoOrder: number;
-  chapterIndex: number;
-  videoIndex: number;
-  currentTime: number;
-  totalDuration: number;
-  watchedPercentage: number;
-  isCompleted: boolean;
-  totalWatchTime: number;
-  sessionCount: number;
-  watchSpeed: number;
-  firstWatchedAt: string;
-  lastWatchedAt: string;
-  completedAt: string | null;
-  title?: string;
-  chapters: Chapter[];
+export interface UILecture {
+  id: number;
+  title: string;
+  time: string;        // "0:00"
+  duration: string;    // "5:00"  
+  durationSeconds: number;
+  videoFile: string;
+  completed: boolean;
 }
 
 interface WatchProgressState {
   userId: string;
-  courseId: number;
-  chapters: Chapter[];
-  totalChapters: number;
-  completedChapters: number;
+  lectureId: number;
+  lectures: UILecture[];
+  totalLectures: number;
+  completedLectures: number;
 }
 
-interface PlayerState {
+interface ProgressState {
   cachedProgress: Record<number, WatchProgressState>;
   realtimeCache: any;
-  currentChapterIndex: number;
+  currentLectureIndex: number;
   currentTime: number;
   duration: number;
-  completedChapters: number[];  // 🔥 배열로 변경
-  chapterProgress: Record<number, number>;
+  completedLectures: number[];
+  lectureProgress: Record<number, number>;
   startTime: number;
   hasProgressData: boolean;
   isVideoPlaying: boolean;
   lastSaveTime: number;
-  expandedGroups: number[];     // 🔥 배열로 변경
-  courseTitle: string;
-  chapters: Chapter[];
+  expandedGroups: number[];
+  lectureTitle: string;
+  lectures: UILecture[]; // 🔥 UILecture 타입 사용
 }
 
-const initialState: PlayerState = {
+const initialState: ProgressState = {
   cachedProgress: {},
   realtimeCache: {},
-  currentChapterIndex: -1,
+  currentLectureIndex: -1,
   currentTime: 0,
   duration: 0,
-  completedChapters: [],        // 🔥 빈 배열
-  chapterProgress: {},
+  completedLectures: [],
+  lectureProgress: {},
   startTime: 0,
   hasProgressData: false,
   isVideoPlaying: false,
   lastSaveTime: 0,
-  expandedGroups: [1, 2],       // 🔥 배열
-  courseTitle: "프로그래밍 기초 강의",
-  chapters: [],
+  expandedGroups: [1, 2],
+  lectureTitle: "강의를 선택해주세요",
+  lectures: [],
 };
 
-
-export const progressSlice = createSlice({
+const progressSlice = createSlice({
   name: 'progress',
   initialState,
   reducers: {
-    // 🔥 기본 액션들
-    setChapters: (state, action: PayloadAction<Chapter[]>) => {
-      state.chapters = action.payload;
+    // 🔥 UILecture 배열 설정
+    setLectures: (state, action: PayloadAction<UILecture[]>) => {
+      state.lectures = action.payload;
+      console.log('🔥 Redux: 강의 설정됨', action.payload.length, '개');
       
-      // 🔥 완료된 챕터들을 배열로 업데이트
-      state.completedChapters = action.payload
-        .filter(chapter => chapter.isCompleted)
-        .map(chapter => chapter.chapterId)
-        .filter((chapterId, index, self) => self.indexOf(chapterId) === index); // 중복 제거
+      // 완료된 강의들을 배열로 업데이트
+      state.completedLectures = action.payload
+        .filter(lecture => lecture.completed)
+        .map(lecture => lecture.id)
+        .filter((lectureId, index, self) => self.indexOf(lectureId) === index);
     },
     
-    setCourseTitle: (state, action: PayloadAction<string>) => {
-      state.courseTitle = action.payload;
+    setLectureTitle: (state, action: PayloadAction<string>) => {
+      state.lectureTitle = action.payload;
+      console.log('🔥 Redux: 코스 제목 설정됨', action.payload);
     },
     
     setDuration: (state, action: PayloadAction<number>) => {
       state.duration = action.payload;
     },
     
-    setCurrentChapterIndex: (state, action: PayloadAction<number>) => {
-      state.currentChapterIndex = action.payload;
+    setCurrentLectureIndex: (state, action: PayloadAction<number>) => {
+      state.currentLectureIndex = action.payload;
+      console.log('🔥 Redux: 현재 강의 인덱스 설정됨', action.payload);
     },
     
     setStartTime: (state, action: PayloadAction<number>) => {
       state.startTime = action.payload;
+      console.log('🔥 Redux: 시작 시간 설정됨', action.payload);
     },
     
     setCurrentTime: (state, action: PayloadAction<number>) => {
@@ -107,143 +94,77 @@ export const progressSlice = createSlice({
     
     setIsVideoPlaying: (state, action: PayloadAction<boolean>) => {
       state.isVideoPlaying = action.payload;
+      console.log('🔥 Redux: 비디오 재생 상태', action.payload);
     },
     
-    // 🔥 완료된 챕터 관리 (배열 방식)
-    addCompletedChapter: (state, action: PayloadAction<number>) => {
-      const chapterId = action.payload;
-      if (!state.completedChapters.includes(chapterId)) {
-        state.completedChapters.push(chapterId);
+    // 완료된 강의 관리
+    addCompletedLecture: (state, action: PayloadAction<number>) => {
+      const lectureId = action.payload;
+      if (!state.completedLectures.includes(lectureId)) {
+        state.completedLectures.push(lectureId);
+        console.log('🔥 Redux: 완료된 강의 추가됨', lectureId);
       }
     },
     
-    removeCompletedChapter: (state, action: PayloadAction<number>) => {
-      const chapterId = action.payload;
-      state.completedChapters = state.completedChapters.filter(id => id !== chapterId);
+    setCompletedLectures: (state, action: PayloadAction<number[]>) => {
+      state.completedLectures = action.payload;
     },
     
-    setCompletedChapters: (state, action: PayloadAction<number[]>) => {
-      state.completedChapters = action.payload;
+    // 강의 진행률 업데이트
+    updateLectureProgress: (state, action: PayloadAction<{ lectureId: number; progress: number }>) => {
+      const { lectureId, progress } = action.payload;
+      state.lectureProgress[lectureId] = progress;
     },
     
-    // 🔥 확장된 그룹 관리 (배열 방식)
-    toggleExpandedGroup: (state, action: PayloadAction<number>) => {
-      const groupId = action.payload;
-      if (state.expandedGroups.includes(groupId)) {
-        state.expandedGroups = state.expandedGroups.filter(id => id !== groupId);
-      } else {
-        state.expandedGroups.push(groupId);
-      }
-    },
-    
-    addExpandedGroup: (state, action: PayloadAction<number>) => {
-      const groupId = action.payload;
-      if (!state.expandedGroups.includes(groupId)) {
-        state.expandedGroups.push(groupId);
-      }
-    },
-    
-    removeExpandedGroup: (state, action: PayloadAction<number>) => {
-      const groupId = action.payload;
-      state.expandedGroups = state.expandedGroups.filter(id => id !== groupId);
-    },
-    
-    setExpandedGroups: (state, action: PayloadAction<number[]>) => {
-      state.expandedGroups = action.payload;
-    },
-    
-    // 🔥 챕터 진행률 업데이트
-    updateChapterProgress: (state, action: PayloadAction<{ chapterId: number; progress: number }>) => {
-      const { chapterId, progress } = action.payload;
-      state.chapterProgress[chapterId] = progress;
-    },
-    
-    // 🔥 캐시된 진행률 업데이트
-    setCachedProgress: (state, action: PayloadAction<{ courseId: number; progress: WatchProgressState }>) => {
-      const { courseId, progress } = action.payload;
-      state.cachedProgress[courseId] = progress;
-    },
-    
-    // 🔥 진행률 데이터 존재 여부
+    // 진행률 데이터 존재 여부
     setHasProgressData: (state, action: PayloadAction<boolean>) => {
       state.hasProgressData = action.payload;
+      console.log('🔥 Redux: 진행률 데이터 여부', action.payload);
     },
     
-    // 🔥 마지막 저장 시간 업데이트
+    // 마지막 저장 시간 업데이트
+    setLastSaveTime: (state, action: PayloadAction<number>) => {
+      state.lastSaveTime = action.payload;
+    },
+    
     updateLastSaveTime: (state) => {
       state.lastSaveTime = Date.now();
     },
     
-    // 🔥 상태 초기화
+    // 상태 초기화
     resetProgressState: (state) => {
       Object.assign(state, initialState);
-    },
-    
-    // 🔥 특정 코스 상태 초기화
-    resetCourseState: (state, action: PayloadAction<number>) => {
-      const courseId = action.payload;
-      delete state.cachedProgress[courseId];
-      state.chapters = [];
-      state.currentChapterIndex = 0;
-      state.currentTime = 0;
-      state.startTime = 0;
-      state.completedChapters = [];
-      state.chapterProgress = {};
-      state.hasProgressData = false;
+      console.log('🔥 Redux: 진행률 상태 초기화됨');
     },
   },
 });
 
 export const {
-  setChapters,
-  setCourseTitle,
+  setLectures,
+  setLectureTitle,
   setDuration,
-  setCurrentChapterIndex,
+  setCurrentLectureIndex,
   setStartTime,
   setCurrentTime,
   setIsVideoPlaying,
-  addCompletedChapter,
-  removeCompletedChapter,
-  setCompletedChapters,
-  toggleExpandedGroup,
-  addExpandedGroup,
-  removeExpandedGroup,
-  setExpandedGroups,
-  updateChapterProgress,
-  setCachedProgress,
+  addCompletedLecture,
+  setCompletedLectures,
+  updateLectureProgress,
   setHasProgressData,
+  setLastSaveTime,
   updateLastSaveTime,
   resetProgressState,
-  resetCourseState,
 } = progressSlice.actions;
 
 export default progressSlice.reducer;
 
-// 🔥 셀렉터들 (배열 기반)
-export const selectCompletedChapters = (state: { progress: ProgressState }) => state.progress.completedChapters;
-export const selectExpandedGroups = (state: { progress: ProgressState }) => state.progress.expandedGroups;
-export const selectIsChapterCompleted = (chapterId: number) => (state: { progress: ProgressState }) => 
-  state.progress.completedChapters.includes(chapterId);
-export const selectIsGroupExpanded = (groupId: number) => (state: { progress: ProgressState }) => 
-  state.progress.expandedGroups.includes(groupId);
-
-// 🔥 유틸리티 함수들
-export const getCompletedChapterIds = (chapters: Chapter[]): number[] => {
-  return chapters
-    .filter(chapter => chapter.isCompleted)
-    .map(chapter => chapter.chapterId)
-    .filter((chapterId, index, self) => self.indexOf(chapterId) === index); // 중복 제거
+// 🔥 셀렉터들
+export const selectLectures = (state: { progress: ProgressState }) => state.progress.lectures;
+export const selectCurrentLectureIndex = (state: { progress: ProgressState }) => state.progress.currentLectureIndex;
+export const selectCurrentLecture = (state: { progress: ProgressState }) => {
+  const { lectures, currentLectureIndex } = state.progress;
+  return currentLectureIndex >= 0 && currentLectureIndex < lectures.length 
+    ? lectures[currentLectureIndex] 
+    : null;
 };
-
-export const getChapterProgress = (chapters: Chapter[]): Record<number, number> => {
-  const progress: Record<number, number> = {};
-  
-  chapters.forEach(chapter => {
-    const chapterId = chapter.chapterId;
-    if (!progress[chapterId] || progress[chapterId] < chapter.watchedPercentage) {
-      progress[chapterId] = chapter.watchedPercentage;
-    }
-  });
-  
-  return progress;
-};
+export const selectCompletedLectures = (state: { progress: ProgressState }) => state.progress.completedLectures;

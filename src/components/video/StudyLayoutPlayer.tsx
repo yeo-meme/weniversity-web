@@ -11,8 +11,7 @@ import { ProgressCalculator } from "../../utils/progressCalculator";
 import { ProgressTracker } from "../../services/ProgressTracker";
 import type {
   LocalProgressCache,
-  LocalCourseCache,
-  LocalChapterCache,
+  LocalchaterCache,
 } from "../../types/progress.types";
 
 import { localChapterToWatchProgress } from "../../utils/convertCacheToWatchProgress";
@@ -22,19 +21,26 @@ import { convertWatchProgressToCache } from "../../utils/convertCacheToWatchProg
 
 import { useAppDispatch, useAppSelector } from "../../store/store";
 import { 
-  useGetCoursesQuery,
-  useLazyGetCoursesQuery 
+  useGetLecturesQuery,
+  useLazyGetLecturesQuery,
+  transformLectureToUILectures, //함수 import
 } from "../../store/slices/lectureApiSlice";
-
+import type { 
+  UIlecture
+} from "../../store/slices/lectureApiSlice";
 // 테스터 완료 임포트
 
 import { useDispatch, useSelector } from "react-redux";
 import {
-  setChapters,
-  setCourseTitle,
+  setLectures,
+  setLectureTitle,
   setDuration,
-  setCurrentChapterIndex,
+  setCurrentLectureIndex,
   setStartTime,
+  setCurrentTime,
+  setIsVideoPlaying,
+  setHasProgressData,
+  setLastSaveTime,
 } from "../../store/slices/progressSlice"; 
 
 // import {
@@ -42,19 +48,19 @@ import {
 //   useGetWatchProgressQuery,
 //   useCreateWatchProgressMutation,
 //   useCreateNextVideoMutation,
-//   useGetChapterProgressQuery,
+//   useGetchaterProgressQuery,
 // } from "../../store/slices/testApiSlice";
 
 // import type {
-//   CourseProgressResponse,
+//   chaterProgressResponse,
 //   WatchProgress,
 //   LastWatched,
-//   CourseProgressStatistics,
-//   Chapter,
+//   chaterProgressStatistics,
+//   chater,
 //   PlayerState,
 // } from "../../store/slices/testApiSlice";
 
-// import {useGetCoursesQuery } from "../../store/api/courseApiSlice";
+// import {useGetchatersQuery } from "../../store/api/chaterApiSlice";
 
 
 interface VideoPlayerProps {
@@ -315,7 +321,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
 interface StudyLayoutPlayerProps {
   onClose: () => void;
-  courseData: {
+  chaterData: {
     id: number;
     title: string;
     description?: string;
@@ -323,7 +329,7 @@ interface StudyLayoutPlayerProps {
   userId?: string;
 }
 
-interface Chapter {
+interface chater {
   id: number;
   title: string;
   time: string;
@@ -333,7 +339,7 @@ interface Chapter {
   completed: boolean;
 }
 
-const chapters: Chapter[] = [
+const chaters: chater[] = [
   {
     id: 1,
     title: "변수와 상수",
@@ -392,125 +398,111 @@ const chapters: Chapter[] = [
 
 const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   onClose,
-  courseData,
+  chaterData,
   userId = "user123",
 }) => {
   const dispatch = useDispatch();
 
-  // Redux 상태 읽기
-  const chapters = useSelector((state: RootState) => state.progress.chapters);
-  const currentChapterIndex = useSelector((state: RootState) => state.progress.currentChapterIndex);
+
+  // Redux 상태
+  const lectures = useSelector((state: RootState) => state.progress.lectures);
+  const currentLectureIndex = useSelector((state: RootState) => state.progress.currentLectureIndex);
   const startTime = useSelector((state: RootState) => state.progress.startTime);
-  const courseTitle = useSelector((state: RootState) => state.progress.courseTitle);
+  const lectureTitle = useSelector((state: RootState) => state.progress.lectureTitle);
   const currentTime = useSelector((state: RootState) => state.progress.currentTime);
   const hasProgressData = useSelector((state: RootState) => state.progress.hasProgressData);
   const isVideoPlaying = useSelector((state: RootState) => state.progress.isVideoPlaying);
   const lastSaveTime = useSelector((state: RootState) => state.progress.lastSaveTime);
 
   // 로컬 상태
-  const [completedChapters, setCompletedChapters] = useState<Set<number>>(new Set());
-  const [chapterProgress, setChapterProgress] = useState<Record<number, number>>({});
+  const [completedLectures, setCompletedLectures] = useState<Set<number>>(new Set());
+  const [lectureProgress, setLectureProgress] = useState<Record<number, number>>({});
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set([1, 2]));
   const [realtimeCache, setRealtimeCache] = useState<Record<string, any>>({});
 
-  // RTK Query 훅
-  const { 
-    data: coursesData, 
-    error: coursesError, 
-    isLoading: coursesLoading 
-  } = useGetCoursesQuery({ page: 1, limit: 10 }, {
-    skip: false // 항상 실행
-  });
+  // 현재 강의 계산
+// 현재 강의 계산
+const { 
+  data: lecturesData, 
+  error: lecturesError, 
+  isLoading: lecturesLoading 
+} = useGetLecturesQuery({ page: 1, limit: 10 });
 
-  const [triggerGetCourses, coursesLazyResult] = useLazyGetCoursesQuery();
+  const [triggerGetlectures, lecturesLazyResult] = useLazyGetLecturesQuery();
 
-  // 현재 챕터 계산
-  const currentChapter = chapters?.[currentChapterIndex] ?? null;
+// 현재 강의 선택
+
+const currentLecture = lectures?.[currentLectureIndex] ?? null;
 
   // RTK Query 데이터 처리
   useEffect(() => {
-    if (coursesData) {
-      console.log("📚 RTK Query - 코스 데이터 수신:", coursesData);
+    if (lecturesData && lecturesData.results && lecturesData.results.length > 0) {
+      console.log("📚 RTK Query - 강의 데이터 수신:", lecturesData);
       
-      // 임시 챕터 데이터 생성 (실제로는 서버에서 받아와야 함)
-      const mockChapters: Chapter[] = [
-        {
-          id: 1,
-          title: "JavaScript 기초",
-          duration: "15:30",
-          durationSeconds: 930,
-          videoFile: "/videos/js-basics.mp4"
-        },
-        {
-          id: 2,
-          title: "변수와 자료형",
-          duration: "12:45",
-          durationSeconds: 765,
-          videoFile: "/videos/variables.mp4"
-        },
-        {
-          id: 3,
-          title: "함수 만들기",
-          duration: "18:20",
-          durationSeconds: 1100,
-          videoFile: "/videos/functions.mp4"
-        }
-      ];
+      const firstLecture = lecturesData.results[0];
+      console.log("🎯 선택된 강의:", firstLecture.title);
+      console.log("📋 원본 강의 데이터:", firstLecture.lectures);
+      
+      const uiLectures: UILecture[] = transformLectureToUILectures(firstLecture);
+      console.log("🔄 변환된 UI 강의:", uiLectures);
+      
+      dispatch(setLectures(uiLectures));
+      dispatch(setLectureTitle(firstLecture.title));
 
-      dispatch(setChapters(mockChapters));
-      dispatch(setCourseTitle(`${coursesData.count}개 강의 중 선택된 코스`));
-      
-      // 첫 번째 챕터로 초기화
-      if (currentChapterIndex === -1 && mockChapters.length > 0) {
-        dispatch(setCurrentChapterIndex(0));
+      if (currentLectureIndex === -1 && uiLectures.length > 0) {
+        dispatch(setCurrentLectureIndex(0));
         dispatch(setStartTime(0));
+        console.log("🎬 첫 번째 강의로 초기화:", uiLectures[0].title);
       }
+    } else {
+      console.warn("⚠️ 강의 데이터가 없거나 비어있음");
     }
-  }, [coursesData, dispatch, currentChapterIndex]);
+  }, [lecturesData, dispatch, currentLectureIndex]);
+
 
   // 에러 처리
   useEffect(() => {
-    if (coursesError) {
-      console.error("🔥 RTK Query 에러:", coursesError);
+    if (lecturesError) {
+      console.error("🔥 RTK Query 에러:", lecturesError);
     }
-  }, [coursesError]);
-
+  }, [lecturesError]);
   // 수동 API 호출 함수
   const handleManualApiCall = useCallback(async () => {
     try {
       console.log("🔍 수동 RTK Query 호출 시작");
-      const result = await triggerGetCourses({ page: 1, limit: 10 }).unwrap();
+      const result = await triggerGetchaters({ page: 1, limit: 10 }).unwrap();
       console.log("✅ 수동 호출 결과:", result);
     } catch (error) {
       console.error("❌ 수동 호출 실패:", error);
     }
-  }, [triggerGetCourses]);
+  }, [triggerGetlectures]);
 
   // 챕터 클릭 핸들러
-  const handleChapterClick = useCallback((chapterId: number) => {
-    const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
-    if (chapterIndex === -1) {
-      console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
+  const handlechaterClick = useCallback((chaterId: number) => {
+    const chaterIndex = chaters.findIndex((ch) => ch.id === chaterId);
+    if (chaterIndex === -1) {
+      console.warn("❗ 유효하지 않은 챕터 ID:", chaterId);
       return;
     }
 
-    const selectedChapter = chapters[chapterIndex];
-    console.log(`🎬 챕터 선택: ${selectedChapter.title}`);
+    const selectedchater = chaters[chaterIndex];
+    console.log(`🎬 챕터 선택: ${selectedchater.title}`);
 
-    dispatch(setCurrentChapterIndex(chapterIndex));
+    
+    dispatch(setCurrentLectureIndex(lectureIndex));
     dispatch(setCurrentTime(0));
     dispatch(setStartTime(0));
     dispatch(setIsVideoPlaying(false));
-  }, [chapters, dispatch]);
+  }, [chaters, dispatch]);
 
   // 비디오 이벤트 핸들러들
   const handleVideoPlay = useCallback(() => {
-    if (!currentChapter) return;
+    if (!currentLecture) return;
     
-    console.log(`🎬 비디오 재생 시작 - 챕터 ${currentChapter.id}`);
+    console.log(`🎬 비디오 재생 시작 - 챕터 ${currentLecture.id}`);
     dispatch(setIsVideoPlaying(true));
     dispatch(setHasProgressData(true));
-  }, [currentChapter, dispatch]);
+  }, [currentLecture, dispatch]);
 
   const handleVideoPause = useCallback((e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget as HTMLVideoElement;
@@ -528,15 +520,15 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   }, [dispatch]);
 
   const onVideoProgress = useCallback((videoCurrentTime: number, videoDuration: number) => {
-    if (!currentChapter || !isVideoPlaying) return;
+    if (!currentchater || !isVideoPlaying) return;
 
     dispatch(setCurrentTime(videoCurrentTime));
     
     // 실시간 진행률 업데이트
     const progress = Math.min(videoCurrentTime, videoDuration);
-    setChapterProgress((prev) => ({
+    setlectureProgress((prev) => ({
       ...prev,
-      [currentChapterIndex]: progress,
+      [currentchaterIndex]: progress,
     }));
 
     // 1초마다 캐시 업데이트
@@ -549,7 +541,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       // 로컬 캐시 업데이트
       setRealtimeCache((prev) => ({
         ...prev,
-        [`${userId}_${currentChapter.id}`]: {
+        [`${userId}_${currentchater.id}`]: {
           currentTime: videoCurrentTime,
           totalDuration: videoDuration,
           watchedPercentage,
@@ -561,41 +553,41 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
 
       dispatch(setLastSaveTime(now));
     }
-  }, [currentChapter, currentChapterIndex, isVideoPlaying, lastSaveTime, userId, dispatch]);
+  }, [currentLecture, currentLectureIndex, isVideoPlaying, lastSaveTime, userId, dispatch]);
 
   const onVideoReady = useCallback((videoDuration: number) => {
     console.log(`📊 비디오 메타데이터 로드: ${videoDuration}초`);
   }, []);
 
   const handleVideoEnded = useCallback(() => {
-    if (!currentChapter) return;
+    if (!currentchater) return;
     
-    console.log(`🏁 비디오 재생 완료: ${currentChapter.title}`);
-    setCompletedChapters((prev) => new Set([...prev, currentChapterIndex]));
+    console.log(`🏁 비디오 재생 완료: ${currentchater.title}`);
+    setCompletedchaters((prev) => new Set([...prev, currentchaterIndex]));
     dispatch(setIsVideoPlaying(false));
 
     // 다음 챕터로 자동 이동
-    if (currentChapterIndex < chapters.length - 1) {
+    if (setCurrentLectureIndex < chaters.length - 1) {
       console.log("➡️ 다음 챕터로 자동 이동");
-      dispatch(setCurrentChapterIndex(currentChapterIndex + 1));
+      dispatch(setCurrentchaterIndex(currentchaterIndex + 1));
       dispatch(setCurrentTime(0));
       dispatch(setStartTime(0));
     } else {
       console.log("🎊 모든 챕터 완료!");
     }
-  }, [currentChapter, currentChapterIndex, chapters.length, dispatch]);
+  }, [currentLecture, setCurrentLectureIndex, lectures.length, dispatch]);
 
   // 진행률 계산 함수
-  const getChapterProgress = useCallback((index: number) => {
-    const realTimeProgress = chapterProgress[index] || 0;
-    const chapter = chapters[index];
-    if (!chapter) return 0;
+  const getLectureProgress = useCallback((index: number) => {
+    const realTimeProgress = lectureProgress[index] || 0;
+    const lecture = lectures[index];
+    if (!lecture) return 0;
     
-    return (realTimeProgress / chapter.durationSeconds) * 100;
-  }, [chapterProgress, chapters]);
+    return (realTimeProgress / lecture.durationSeconds) * 100;
+  }, [lectureProgress, lectures]);
 
   // 로딩 상태
-  if (coursesLoading) {
+  if (lecturesLoading) {
     return (
       <div className="flex h-screen bg-white items-center justify-center">
         <div className="text-center">
@@ -607,7 +599,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   }
 
   // 에러 상태
-  if (coursesError) {
+  if (lecturesError) {
     return (
       <div className="flex h-screen bg-white items-center justify-center">
         <div className="text-center">
@@ -638,7 +630,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
               <X className="w-5 h-5" />
             </button>
           </div>
-          <p className="text-sm text-gray-600">{courseTitle}</p>
+          <p className="text-sm text-gray-600">{lectureTitle}</p>
           
           {/* 디버깅 버튼 */}
           <button
@@ -649,26 +641,26 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
           </button>
         </div>
 
-        {/* 챕터 목록 */}
+        {/* 강의 목록 */}
         <div className="p-2">
           <div className="mb-2">
             <div className="p-3">
               <span className="font-medium text-gray-900 text-sm">
-                프로그래밍 기초 강의
+                {lectureTitle || "프로그래밍 기초 강의"}
               </span>
             </div>
 
             <div className="ml-4 space-y-1">
-              {chapters.map((chapter, index) => {
-                const isCurrent = index === currentChapterIndex;
-                const isCompleted = completedChapters.has(index);
-                const currentProgress = getChapterProgress(index);
+              {lectures.map((lecture, index) => {
+                const isCurrent = index === currentLectureIndex;
+                const isCompleted = completedLectures.has(index);
+                const currentProgress = getLectureProgress(index);
                 const hasProgress = currentProgress > 0;
 
                 return (
                   <button
-                    key={chapter.id}
-                    onClick={() => handleChapterClick(chapter.id)}
+                    key={lecture.id}
+                    onClick={() => handleLectureClick(lecture.id)}
                     className={`w-full flex items-center gap-3 p-3 text-left rounded-lg transition-colors ${
                       isCurrent
                         ? "bg-blue-50 border border-blue-200"
@@ -696,7 +688,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
                       )}
                     </div>
 
-                    {/* 챕터 정보 */}
+                    {/* 강의 정보 */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p
@@ -704,10 +696,10 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
                             isCurrent ? "text-blue-900" : "text-gray-900"
                           }`}
                         >
-                          {chapter.title}
+                          {lecture.title}
                         </p>
                         <span className="text-xs text-gray-500 ml-2">
-                          {chapter.duration}
+                          {lecture.duration}
                         </span>
                       </div>
 
@@ -738,24 +730,24 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-gray-900">
-                {currentChapter?.title || "영상을 선택해주세요"}
+                {currentLecture?.title || "영상을 선택해주세요"}
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                {courseTitle} • {currentChapter?.duration || "0:00"}
+                {lectureTitle} • {currentLecture?.duration || "0:00"}
               </p>
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Clock className="w-4 h-4" />
-              <span>진행률: {currentChapter ? getChapterProgress(currentChapterIndex).toFixed(1) : 0}%</span>
+              <span>진행률: {currentLecture ? getLectureProgress(currentLectureIndex).toFixed(1) : 0}%</span>
             </div>
           </div>
         </div>
 
         {/* 비디오 플레이어 영역 */}
         <div className="flex-1 bg-black relative">
-          {currentChapter ? (
+          {currentLecture ? (
             <VideoPlayer
-              currentVideo={currentChapter.videoFile}
+              currentVideo={currentLecture.videoFile}
               onTimeUpdate={onVideoProgress}
               onLoadedMetadata={onVideoReady}
               onEnded={handleVideoEnded}
@@ -767,7 +759,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <div className="text-center text-gray-400">
-                <p className="text-lg">왼쪽에서 학습할 챕터를 선택해주세요</p>
+                <p className="text-lg">왼쪽에서 학습할 강의를 선택해주세요</p>
               </div>
             </div>
           )}
@@ -779,23 +771,23 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
             <div className="text-sm text-gray-600">
               전체 진행률:{" "}
               <span className="font-medium text-gray-900">
-                {chapters.length > 0 
-                  ? Math.round((completedChapters.size / chapters.length) * 100)
+                {lectures.length > 0 
+                  ? Math.round((completedLectures.size / lectures.length) * 100)
                   : 0}%
               </span>
             </div>
             <button
               onClick={() => {
-                if (currentChapterIndex < chapters.length - 1) {
-                  dispatch(setCurrentChapterIndex(currentChapterIndex + 1));
+                if (currentLectureIndex < lectures.length - 1) {
+                  dispatch(setCurrentLectureIndex(currentLectureIndex + 1));
                   dispatch(setCurrentTime(0));
                   dispatch(setStartTime(0));
                 }
               }}
-              disabled={currentChapterIndex >= chapters.length - 1}
+              disabled={currentLectureIndex >= lectures.length - 1}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {currentChapterIndex >= chapters.length - 1
+              {currentLectureIndex >= lectures.length - 1
                 ? "마지막 영상"
                 : "다음 영상"}
             </button>
