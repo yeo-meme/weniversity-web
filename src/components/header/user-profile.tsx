@@ -1,16 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
 import profileImg from "../../assets/profile-img.png";
 
+interface User {
+  id?: number;
+  email: string;
+  name?: string;
+  role?: string;
+}
+
 interface UserProfileProps {
   isLoggedIn: boolean;
   onLogin: () => void;
   onLogout: () => void;
+  user?: User | null;
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({
   isLoggedIn,
   onLogin,
   onLogout,
+  user,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -60,6 +69,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
             className="flex items-center w-[42px] h-[42px] rounded-full bg-transparent p-0 transition-all relative"
             type="button"
             onClick={toggleDropdown}
+            title={user?.email ? `${user.email}님의 프로필` : "사용자 프로필"}
           >
             <img
               src={profileImg}

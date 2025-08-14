@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAppSelector } from "../../hooks/redux-hooks";
+import { useLoginMutation } from "../../auth/auth-api-slice";
 import logoIcon from "../../assets/logo-icon.png";
 import githubIcon from "../../assets/github-mark.png";
 import googleIcon from "../../assets/google.png";
@@ -13,27 +15,14 @@ interface FormErrors {
   password?: string;
 }
 
-interface LoginResponse {
-  access?: string;
-  refresh?: string;
-  email?: string;
-  role?: string;
-  success?: boolean;
-  message?: string;
-  data?: {
-    token: string;
-    user: {
-      id: number;
-      email: string;
-      name: string;
-    };
-  };
-}
-
 const LoginPage: React.FC<{
   onLoginSuccess: () => void;
   onGoToMain: () => void;
 }> = ({ onLoginSuccess, onGoToMain }) => {
+  const [login, { isLoading }] = useLoginMutation();
+
+  const { isAuthenticated, error } = useAppSelector((state) => state.auth);
+
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -41,6 +30,28 @@ const LoginPage: React.FC<{
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("로그인 성공! 위니버시티에 오신 것을 환영합니다! 🎉");
+      onLoginSuccess();
+    }
+  }, [isAuthenticated, onLoginSuccess]);
+
+  useEffect(() => {
+    if (error) {
+      if (error.includes("이메일") || error.includes("email")) {
+        setErrors({ email: "* 이메일을 확인해주세요" });
+      } else if (error.includes("비밀번호") || error.includes("password")) {
+        setErrors({ password: "* 비밀번호를 확인해주세요" });
+      } else {
+        setErrors({
+          email: "* 이메일을 확인해주세요",
+          password: "* 비밀번호를 확인해주세요",
+        });
+      }
+    }
+  }, [error]);
 
   const handleFocus = (fieldName: string) => {
     setFocusedField(fieldName);
@@ -86,65 +97,9 @@ const LoginPage: React.FC<{
     }
 
     try {
-      const response = await fetch("/api/users/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data: LoginResponse = await response.json();
-
-      if (response.ok && (data.access || (data.success && data.data))) {
-        console.log("로그인 성공:", data);
-
-        if (data.access) {
-          localStorage.setItem("access_token", data.access);
-          localStorage.setItem("refresh_token", data.refresh || "");
-          localStorage.setItem("user_email", data.email || "");
-          localStorage.setItem("user_role", data.role || "");
-
-          alert(`로그인 성공! 환영합니다, ${data.email}님!`);
-        } else if (data.data?.token) {
-          localStorage.setItem("token", data.data.token);
-
-          alert(`로그인 성공! 환영합니다, ${data.data?.user?.email}님!`);
-        }
-
-        onLoginSuccess();
-      } else {
-        const serverMessage = data.message || "로그인에 실패했습니다.";
-
-        if (
-          serverMessage.includes("이메일") ||
-          serverMessage.includes("email")
-        ) {
-          setErrors({
-            email: "* 이메일을 확인해주세요",
-          });
-        } else if (
-          serverMessage.includes("비밀번호") ||
-          serverMessage.includes("password")
-        ) {
-          setErrors({
-            password: "* 비밀번호를 확인해주세요",
-          });
-        } else {
-          setErrors({
-            email: "* 이메일을 확인해주세요",
-            password: "* 비밀번호를 확인해주세요",
-          });
-        }
-      }
+      await login(formData).unwrap();
     } catch (error) {
-      console.error("로그인 API 호출 중 오류:", error);
-      setErrors({
-        email: "* 네트워크 오류가 발생했습니다. 다시 시도해주세요.",
-      });
+      console.error("Login failed:", error);
     }
   };
 
@@ -247,14 +202,14 @@ const LoginPage: React.FC<{
 
               <button
                 type="submit"
-                disabled={!isFormValid}
+                disabled={!isFormValid || isLoading}
                 className={`py-3 my-6 rounded-lg transition-colors duration-200 ${
-                  isFormValid
+                  isFormValid && !isLoading
                     ? "text-white bg-primary cursor-pointer"
                     : "text-gray500 bg-gray200 cursor-not-allowed"
                 }`}
               >
-                로그인
+                {isLoading ? "로그인 중..." : "로그인"}
               </button>
             </div>
           </form>
