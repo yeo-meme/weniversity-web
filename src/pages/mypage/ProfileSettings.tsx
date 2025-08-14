@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useCallback, useMemo } from "react";
 import type {
   ProfileFormData,
   ProfileValidationMessages,
@@ -40,25 +40,41 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 성별 옵션
-  const genderOptions = [
-    { value: "M", label: "남성" },
-    { value: "F", label: "여성" },
-  ];
+  const genderOptions = useMemo(
+    () => [
+      { value: "M", label: "남성" },
+      { value: "F", label: "여성" },
+    ],
+    []
+  );
 
-  const handleImageClick = () => {
+  // 이미지 클릭 핸들러
+  const handleImageClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
   // 이미지 표시 로직
-  const getDisplayImage = () => {
-    // previewImage가 있으면 우선 사용 (파일 선택 시 미리보기 또는 서버 이미지)
-    if (previewImage) {
-      return previewImage;
-    }
+  const getDisplayImage = useCallback(() => {
+    return previewImage || profileNoneImage;
+  }, [previewImage]);
 
-    // 없으면 기본 이미지
-    return profileNoneImage;
-  };
+  // 이미지 에러 핸들러
+  const handleImageError = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const target = e.target as HTMLImageElement;
+      target.src = profileNoneImage;
+    },
+    []
+  );
+
+  // 파일 입력 클릭 핸들러
+  const handleFileInputClick = useCallback(
+    (e: React.MouseEvent<HTMLInputElement>) => {
+      // 같은 파일도 다시 선택 가능하도록 value 초기화
+      (e.target as HTMLInputElement).value = "";
+    },
+    []
+  );
 
   return (
     <div className="bg-white rounded-lg shadow p-6">
@@ -74,11 +90,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
                   src={getDisplayImage()}
                   alt="프로필"
                   className="w-full h-full object-cover rounded-full"
-                  onError={e => {
-                    // 이미지 로드 실패 시 기본 이미지로 대체
-                    const target = e.target as HTMLImageElement;
-                    target.src = profileNoneImage;
-                  }}
+                  onError={handleImageError}
                 />
               </div>
 
@@ -99,10 +111,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
             accept="image/*"
             onChange={onImageChange}
             className="hidden"
-            onClick={e => {
-              // 같은 파일도 다시 선택 가능하도록 value 초기화
-              (e.target as HTMLInputElement).value = "";
-            }}
+            onClick={handleFileInputClick}
           />
 
           <div className="flex-1 space-y-4">
@@ -174,4 +183,4 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   );
 };
 
-export default ProfileSettings;
+export default React.memo(ProfileSettings);

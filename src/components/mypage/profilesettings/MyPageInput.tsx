@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 
 interface MyPageInputProps {
   id: string;
@@ -14,61 +14,67 @@ interface MyPageInputProps {
   showError?: boolean;
 }
 
-const MyPageInput: React.FC<MyPageInputProps> = ({
-  id,
-  label,
-  type,
-  value,
-  placeholder,
-  onChange,
-  onBlur,
-  className = "",
-  required = false,
-  errorMessage,
-  showError = false,
-}) => {
-  const [isFocused, setIsFocused] = useState(false);
-  const handleFocus = () => {
-    setIsFocused(true);
-  };
+const MyPageInput: React.FC<MyPageInputProps> = React.memo(
+  ({
+    id,
+    label,
+    type,
+    value,
+    placeholder,
+    onChange,
+    onBlur,
+    className = "",
+    required = false,
+    errorMessage,
+    showError = false,
+  }) => {
+    const [isFocused, setIsFocused] = useState(false);
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    setIsFocused(false);
-    if (onBlur) onBlur(e);
-  };
-  return (
-    <div className="w-[257px]">
-      <label
-        htmlFor={id}
-        className={`block text-sm font-medium transition-colors ${
-          isFocused ? "text-blue-500" : "text-gray-700"
-        }`}
-      >
-        {label}
-      </label>
-      <div className="mt-1">
-        <input
-          id={id}
-          name={id}
-          type={type}
-          value={value}
-          placeholder={placeholder}
-          onChange={onChange}
-          onBlur={handleBlur}
-          onFocus={handleFocus}
-          required={required}
-          className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`}
-        />
-      </div>
+    const handleFocus = useCallback(() => {
+      setIsFocused(true);
+    }, []);
 
-      {/* 에러 메시지 */}
-      {showError && errorMessage && (
-        <div className="mt-1 bg-red-50 border border-red-200 rounded-md p-2">
-          <p className="text-sm text-red-600">{errorMessage}</p>
+    const handleBlur = useCallback(
+      (e: React.FocusEvent<HTMLInputElement>) => {
+        setIsFocused(false);
+        onBlur(e);
+      },
+      [onBlur]
+    );
+
+    return (
+      <div className="w-[257px]">
+        <label
+          htmlFor={id}
+          className={`block text-sm font-medium transition-colors ${
+            isFocused ? "text-blue-500" : "text-gray-700"
+          }`}
+        >
+          {label}
+        </label>
+        <div className="mt-1">
+          <input
+            id={id}
+            name={id}
+            type={type}
+            value={value}
+            placeholder={placeholder}
+            onChange={onChange}
+            onBlur={handleBlur}
+            onFocus={handleFocus}
+            required={required}
+            className={`appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${className}`}
+          />
         </div>
-      )}
-    </div>
-  );
-};
 
-export default MyPageInput;
+        {showError && errorMessage && (
+          <div className="mt-1 bg-red-50 border border-red-200 rounded-md p-2">
+            <p className="text-sm text-red-600">{errorMessage}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+);
+
+export default React.memo(MyPageInput);

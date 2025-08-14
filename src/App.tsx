@@ -1,4 +1,3 @@
-// import React from "react";
 // import RegisterPage from "./pages/auth/RegisterPage.tsx";
 import MyPage from "./pages/mypage/MyPage.tsx";
 import Header from "./components/header/header.tsx";

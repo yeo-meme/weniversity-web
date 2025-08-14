@@ -5,22 +5,6 @@ import type {
   RegisterState,
 } from "../types/user";
 
-// 이메일 중복 확인 API
-// export const checkEmailDuplicate = createAsyncThunk(
-//   "auth/checkEmailDuplicate",
-//   async (email: string) => {
-//     // 실제 API 호출 로직으로 대체
-//     const response = await fetch(`/api/users/check-email/${email}`);
-
-//     if (!response.ok) {
-//       throw Error("이메일 확인 중 오류가 발생했습니다!");
-//     }
-
-//     const data = await response.json();
-//     return data.isDuplicate;
-//   }
-// );
-
 // 회원가입 API
 export const register = createAsyncThunk(
   "auth/register",
@@ -71,18 +55,6 @@ const authSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      // 이메일 중복 확인
-      // .addCase(checkEmailDuplicate.pending, state => {
-      //   state.loading = true;
-      // })
-      // .addCase(checkEmailDuplicate.fulfilled, state => {
-      //   state.loading = false;
-      // })
-      // .addCase(checkEmailDuplicate.rejected, (state, action) => {
-      //   state.loading = false;
-      //   state.error =
-      //     action.error.message || "이메일 확인 중 오류가 발생했습니다.";
-      // })
       // 회원가입
       .addCase(register.pending, state => {
         state.loading = true;

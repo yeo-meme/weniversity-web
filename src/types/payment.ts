@@ -9,10 +9,3 @@ export interface PaymentItem {
   status: "completed" | "cancelled" | "refunded";
   receiptLink?: string;
 }
-
-export interface PaymentHistoryState {
-  payments: PaymentItem[];
-  loading: boolean;
-  error: string | null;
-  activeFilter: "all" | "completed" | "cancelled" | "refunded";
-}

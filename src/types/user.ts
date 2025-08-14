@@ -1,12 +1,3 @@
-export interface User {
-  user_id: string;
-  email: string;
-  password: string;
-  name: string;
-  gender: "M" | "F";
-  birth_date: string;
-}
-
 export interface RegisterFormData {
   email: string;
   password: string;

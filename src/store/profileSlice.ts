@@ -9,8 +9,6 @@ import type {
 export const fetchProfile = createAsyncThunk<UserProfile>(
   "profile/fetchProfile",
   async () => {
-    // 임시 토큰 받아오기
-    // const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
     const user = await fetch("http://13.125.180.222/api/users/login/", {
       method: "POST",
       headers: {
@@ -18,7 +16,7 @@ export const fetchProfile = createAsyncThunk<UserProfile>(
       },
       body: JSON.stringify({
         email: "jaeho614a@gmail.com",
-        password: "jaeho614!",
+        password: "jaeho614@",
       }),
     });
     const userData = await user.json();
@@ -54,8 +52,6 @@ export const updateProfile = createAsyncThunk<UserProfile, ProfileFormData>(
       requestData.append("profile_image", formData.profile_image);
     }
 
-    // 임시 토큰 받아오기
-    // const accessToken = import.meta.env.VITE_ACCESS_TOKEN;
     const user = await fetch("http://13.125.180.222/api/users/login/", {
       method: "POST",
       headers: {
@@ -63,7 +59,7 @@ export const updateProfile = createAsyncThunk<UserProfile, ProfileFormData>(
       },
       body: JSON.stringify({
         email: "jaeho614a@gmail.com",
-        password: "jaeho614!",
+        password: "jaeho614@",
       }),
     });
     const userData = await user.json();

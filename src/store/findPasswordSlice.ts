@@ -1,4 +1,3 @@
-// store/passwordResetSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type {
   PasswordResetRequest,

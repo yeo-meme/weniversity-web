@@ -24,7 +24,6 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({
             onClick={e => {
               e.preventDefault();
               // 영수증 보기 로직 구현
-              console.log("영수증 보기 클릭");
             }}
           >
             {link}

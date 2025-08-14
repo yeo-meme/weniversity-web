@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { register, resetAuthState } from "../../store/authSlice";
 import type { RegisterFormData, ValidationMessages } from "../../types/user";
@@ -27,67 +27,16 @@ const RegisterPage: React.FC = () => {
   const [termsAgreed, setTermsAgreed] = useState(false);
 
   // 성별 옵션
-  const genderOptions = [
-    { value: "M", label: "남성" },
-    { value: "F", label: "여성" },
-  ];
-
-  useEffect(() => {
-    return () => {
-      dispatch(resetAuthState());
-    };
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (success) {
-      alert("회원가입이 완료되었습니다!");
-    }
-  }, [success]);
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // 실시간 유효성 검사
-    const newValidationMessages = validateForm({ ...formData, [name]: value });
-    setValidationMessages(newValidationMessages);
-  };
-
-  const handleBlur = (
-    e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    // 값이 있을 때만 touched 상태로 설정
-    if (value.trim()) {
-      setTouchedFields(prev => ({
-        ...prev,
-        [name]: true,
-      }));
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const messages = validateForm(formData);
-    setValidationMessages(messages);
-
-    if (isFormEmpty() || !isFormValid(messages) || !termsAgreed) {
-      return;
-    }
-
-    dispatch(register(formData));
-  };
+  const genderOptions = useMemo(
+    () => [
+      { value: "M", label: "남성" },
+      { value: "F", label: "여성" },
+    ],
+    []
+  );
 
   // 폼이 비어있는지 확인하는 함수
-  const isFormEmpty = () => {
+  const isFormEmpty = useCallback(() => {
     return (
       !formData.email ||
       !formData.password ||
@@ -96,13 +45,92 @@ const RegisterPage: React.FC = () => {
       !formData.gender ||
       !formData.birth_date
     );
-  };
+  }, [formData]);
 
-  const isSubmitDisabled =
-    isFormEmpty() ||
-    !isFormValid(validationMessages) ||
-    !termsAgreed ||
-    loading;
+  // Submit 버튼 비활성화 상태
+  const isSubmitDisabled = useMemo(() => {
+    return (
+      isFormEmpty() ||
+      !isFormValid(validationMessages) ||
+      !termsAgreed ||
+      loading
+    );
+  }, [isFormEmpty, validationMessages, termsAgreed, loading]);
+
+  // cleanup 효과
+  useEffect(() => {
+    return () => {
+      dispatch(resetAuthState());
+    };
+  }, [dispatch]);
+
+  // 성공 시 알림
+  useEffect(() => {
+    if (success) {
+      alert("회원가입이 완료되었습니다!");
+    }
+  }, [success]);
+
+  // 입력 변경 핸들러
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+
+      // 실시간 유효성 검사
+      const newValidationMessages = validateForm({
+        ...formData,
+        [name]: value,
+      });
+      setValidationMessages(newValidationMessages);
+    },
+    [formData]
+  );
+
+  // 블러 핸들러
+  const handleBlur = useCallback(
+    (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const { name, value } = e.target;
+
+      // 값이 있을 때만 touched 상태로 설정
+      if (value.trim()) {
+        setTouchedFields(prev => ({
+          ...prev,
+          [name]: true,
+        }));
+      }
+    },
+    []
+  );
+
+  // 약관 동의 핸들러
+  const handleTermsChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setTermsAgreed(e.target.checked);
+    },
+    []
+  );
+
+  // 폼 제출 핸들러
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+
+      const messages = validateForm(formData);
+      setValidationMessages(messages);
+
+      if (isFormEmpty() || !isFormValid(messages) || !termsAgreed) {
+        return;
+      }
+
+      dispatch(register(formData));
+    },
+    [formData, isFormEmpty, termsAgreed, dispatch]
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -192,7 +220,7 @@ const RegisterPage: React.FC = () => {
               showError={touchedFields.birth_date}
             />
 
-            {/* API 에러 메시지 (서버 에러가 있을 때만 표시) */}
+            {/* API 에러 메시지 */}
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-md p-3">
                 <p className="text-sm text-red-600">{error}</p>
@@ -206,7 +234,7 @@ const RegisterPage: React.FC = () => {
                   id="terms"
                   type="checkbox"
                   checked={termsAgreed}
-                  onChange={e => setTermsAgreed(e.target.checked)}
+                  onChange={handleTermsChange}
                   className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 border-gray-300 rounded"
                 />
                 <label
@@ -237,7 +265,7 @@ const RegisterPage: React.FC = () => {
                     : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 }`}
               >
-                {!loading ? "동의하고 회원가입" : "회원가입 신청중.."}
+                {loading ? "회원가입 신청중.." : "동의하고 회원가입"}
               </button>
             </div>
           </form>
@@ -247,4 +275,4 @@ const RegisterPage: React.FC = () => {
   );
 };
 
-export default RegisterPage;
+export default React.memo(RegisterPage);

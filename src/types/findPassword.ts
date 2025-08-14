@@ -1,4 +1,3 @@
-// types/passwordReset.ts
 export interface PasswordResetRequest {
   email: string;
 }
