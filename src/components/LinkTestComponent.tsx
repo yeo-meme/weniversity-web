@@ -1,28 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import type { RootState } from '../store/store';
-import { 
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+
+import type { RootState } from "../store/store";
+
+import {
   useLazyGetCoursesQuery,
-  useLazyGetMyCoursesQuery 
-} from '../store/api/coursesApiSlice';
+  useLazyGetMyCoursesQuery,
+} from "../store/slices/coursesApiSlice";
 
 const LinkTestComponent: React.FC = () => {
   const navigate = useNavigate();
   const auth = useSelector((state: RootState) => state.auth || {});
+
+  
   const [apiResult, setApiResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // RTK Query 훅들 사용 (자동 호출은 건너뛰기)
   const [triggerGetCourses, coursesLazyResult] = useLazyGetCoursesQuery();
-  const [triggerGetMyCourses, myCoursesLazyResult] = useLazyGetMyCoursesQuery();
 
   // Redux state 디버깅
   console.log("🔍 현재 Redux state:", auth);
-  console.log("🔍 전체 state:", useSelector((state: RootState) => state));
+  console.log(
+    "🔍 전체 state:",
+    useSelector((state: RootState) => state)
+  );
 
-  // RTK Query Lazy 호출 - 전체 코스
   const handleRTKQueryCall = async () => {
     setIsLoading(true);
     setError(null);
@@ -41,27 +45,34 @@ const LinkTestComponent: React.FC = () => {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8 text-blue-600">
           🎉 API 테스트 페이지
         </h1>
-        
+
         {/* 인증 상태 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">🔐 현재 인증 상태</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div>
-              <strong>Access Token:</strong> 
-              <span className={auth?.accessToken ? "text-green-600" : "text-red-600"}>
+              <strong>Access Token:</strong>
+              <span
+                className={
+                  auth?.accessToken ? "text-green-600" : "text-red-600"
+                }
+              >
                 {auth?.accessToken ? " ✅ 있음" : " ❌ 없음"}
               </span>
             </div>
             <div>
-              <strong>Refresh Token:</strong> 
-              <span className={auth?.refreshToken ? "text-green-600" : "text-red-600"}>
+              <strong>Refresh Token:</strong>
+              <span
+                className={
+                  auth?.refreshToken ? "text-green-600" : "text-red-600"
+                }
+              >
                 {auth?.refreshToken ? " ✅ 있음" : " ❌ 없음"}
               </span>
             </div>
@@ -74,7 +85,8 @@ const LinkTestComponent: React.FC = () => {
           </div>
           {auth?.tokenExpiryTime && (
             <div className="mt-2 text-sm">
-              <strong>토큰 만료:</strong> {new Date(auth.tokenExpiryTime).toLocaleString()}
+              <strong>토큰 만료:</strong>{" "}
+              {new Date(auth.tokenExpiryTime).toLocaleString()}
             </div>
           )}
         </div>
@@ -82,7 +94,7 @@ const LinkTestComponent: React.FC = () => {
         {/* API 테스트 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">🚀 API 테스트</h2>
-          
+
           <div className="space-y-3 mb-4">
             <button
               onClick={handleRTKQueryCall}
@@ -91,8 +103,6 @@ const LinkTestComponent: React.FC = () => {
             >
               {isLoading ? "호출 중..." : "RTK Query로 /api/courses/ 호출"}
             </button>
-
-          
           </div>
 
           {!auth?.accessToken && (
@@ -105,7 +115,9 @@ const LinkTestComponent: React.FC = () => {
           {error && (
             <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded">
               <h3 className="font-semibold text-red-800">❌ 오류 발생:</h3>
-              <pre className="text-sm text-red-600 mt-2 whitespace-pre-wrap">{error}</pre>
+              <pre className="text-sm text-red-600 mt-2 whitespace-pre-wrap">
+                {error}
+              </pre>
             </div>
           )}
 
@@ -122,22 +134,22 @@ const LinkTestComponent: React.FC = () => {
         {/* 기존 네비게이션 테스트 */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h3 className="text-lg font-semibold mb-3">🔗 네비게이션 테스트</h3>
-          
+
           <div className="space-y-3">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="block w-full text-left px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
             >
               홈으로 이동 (useNavigate)
             </button>
-            
-            <Link 
+
+            <Link
               to="/"
               className="block w-full text-left px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
             >
               홈으로 이동 (Link)
             </Link>
-            
+
             <button
               onClick={() => window.history.back()}
               className="block w-full text-left px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
@@ -151,10 +163,18 @@ const LinkTestComponent: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold mb-3">📊 현재 상태</h3>
           <ul className="space-y-2 text-sm">
-            <li><strong>현재 URL:</strong> {window.location.href}</li>
-            <li><strong>Pathname:</strong> {window.location.pathname}</li>
-            <li><strong>Hash:</strong> {window.location.hash || '없음'}</li>
-            <li><strong>Timestamp:</strong> {new Date().toLocaleString()}</li>
+            <li>
+              <strong>현재 URL:</strong> {window.location.href}
+            </li>
+            <li>
+              <strong>Pathname:</strong> {window.location.pathname}
+            </li>
+            <li>
+              <strong>Hash:</strong> {window.location.hash || "없음"}
+            </li>
+            <li>
+              <strong>Timestamp:</strong> {new Date().toLocaleString()}
+            </li>
           </ul>
         </div>
       </div>

@@ -109,7 +109,6 @@ const LoginPage2: React.FC<{
         console.log("🎉 로그인 성공:", data);
 
         if (data.access && data.refresh) {
-          // ✅ Redux store에 토큰과 사용자 정보 저장
           dispatch(setCredentials({
             accessToken: data.access,
             refreshToken: data.refresh,
