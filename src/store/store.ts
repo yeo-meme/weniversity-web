@@ -4,18 +4,21 @@ import authReducer from "../auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 //개발시
-import { coursesApiSlice } from "./slices/coursesApiSlice"; // 추가
+import { lectureApiSlice } from "./slices/lectureApiSlice"; // 추가
+import progressReducer from '../store/slices/progressSlice';
+
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    progress: progressReducer,
     [authApiSlice.reducerPath]: authApiSlice.reducer,
-    [coursesApiSlice.reducerPath]: coursesApiSlice.reducer,
+    [lectureApiSlice.reducerPath]: lectureApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
       authApiSlice.middleware,
-      coursesApiSlice.middleware
+      lectureApiSlice.middleware
     ),
 });
 

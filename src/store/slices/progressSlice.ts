@@ -24,6 +24,7 @@ interface Chapter {
   lastWatchedAt: string;
   completedAt: string | null;
   title?: string;
+  chapters: Chapter[];
 }
 
 interface WatchProgressState {
@@ -54,7 +55,7 @@ interface PlayerState {
 const initialState: PlayerState = {
   cachedProgress: {},
   realtimeCache: {},
-  currentChapterIndex: 0,
+  currentChapterIndex: -1,
   currentTime: 0,
   duration: 0,
   completedChapters: [],        // 🔥 빈 배열
@@ -69,7 +70,7 @@ const initialState: PlayerState = {
 };
 
 
-const progressSlice = createSlice({
+export const progressSlice = createSlice({
   name: 'progress',
   initialState,
   reducers: {

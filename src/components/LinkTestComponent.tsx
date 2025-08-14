@@ -7,13 +7,12 @@ import type { RootState } from "../store/store";
 import {
   useLazyGetCoursesQuery,
   useLazyGetMyCoursesQuery,
-} from "../store/slices/coursesApiSlice";
+} from "../store/slices/lectureApiSlice";
 
 const LinkTestComponent: React.FC = () => {
   const navigate = useNavigate();
   const auth = useSelector((state: RootState) => state.auth || {});
 
-  
   const [apiResult, setApiResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
