@@ -1,38 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
 
+interface User {
+  id?: number;
+  email: string;
+  name?: string;
+  role?: string;
+}
+
 interface ProfileCardProps {
   isLoggedIn: boolean;
   onLogin: () => void;
+  user?: User | null;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
-  const [userInfo, setUserInfo] = useState({
-    email: "",
-    role: "",
-  });
-
-  // 로그인 상태 변경 시 사용자 정보 가져오기
-  useEffect(() => {
-    if (isLoggedIn) {
-      const email = localStorage.getItem("user_email") || "";
-      const role = localStorage.getItem("user_role") || "";
-      setUserInfo({ email, role });
-    } else {
-      setUserInfo({ email: "", role: "" });
-    }
-  }, [isLoggedIn]);
-
-  // 사용자 이름 표시 로직
+const ProfileCard: React.FC<ProfileCardProps> = ({
+  isLoggedIn,
+  onLogin,
+  user,
+}) => {
   const getUserDisplayName = () => {
-    if (userInfo.email) {
-      // 이메일에서 @ 앞부분을 사용자명으로 사용
-      const username = userInfo.email.split("@")[0];
+    if (user?.name) {
+      return `${user.name}님`;
+    } else if (user?.email) {
+      const username = user.email.split("@")[0];
       return `${username}님`;
     }
-    return "위니브 소울곰";
+    return "열정 만수르";
+  };
+
+  const getUserEmail = () => {
+    return user?.email || "paul-lab@naver.com";
   };
 
   if (isLoggedIn) {
@@ -45,12 +45,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
             alt="사용자 프로필"
           />
         </div>
-        <h3 className="mb-4 text-main-text text-base font-semibold">
+        <h3 className="mb-2 text-main-text text-base font-semibold">
           {getUserDisplayName()}
         </h3>
-        <p className="text-sm text-gray500 mb-6">
-          {userInfo.email || "paul-lab@naver.com"}
-        </p>
+        <p className="text-sm text-gray500 mb-6">{getUserEmail()}</p>
 
         <ul className="flex flex-col justify-center items-start gap-4 list-none">
           <li>
