@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Provider } from "react-redux";
 import { store } from "./store";
 import { useAppSelector, useAppDispatch } from "./hooks/redux-hooks";
-import { logout } from "./store/auth-slice";
+import { logout } from "./auth/auth-slice.ts";
 import Header from "./components/header/header.tsx";
 import HeroSection from "./components/hero/hero-section.tsx";
 import LoginPage from "./page/login/login.tsx";

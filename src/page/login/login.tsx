@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
-import { loginUser, clearError } from "../../store/auth-slice";
+import { useAppSelector } from "../../hooks/redux-hooks";
+import { useLoginMutation } from "../../auth/auth-api-slice";
 import logoIcon from "../../assets/logo-icon.png";
 import githubIcon from "../../assets/github-mark.png";
 import googleIcon from "../../assets/google.png";
@@ -19,10 +19,9 @@ const LoginPage: React.FC<{
   onLoginSuccess: () => void;
   onGoToMain: () => void;
 }> = ({ onLoginSuccess, onGoToMain }) => {
-  const dispatch = useAppDispatch();
-  const { loading, error, isAuthenticated } = useAppSelector(
-    (state) => state.auth
-  );
+  const [login, { isLoading }] = useLoginMutation();
+
+  const { isAuthenticated, error } = useAppSelector((state) => state.auth);
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -32,14 +31,13 @@ const LoginPage: React.FC<{
   const [errors, setErrors] = useState<FormErrors>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // 로그인 성공시 처리
   useEffect(() => {
     if (isAuthenticated) {
+      console.log("로그인 성공! 위니버시티에 오신 것을 환영합니다! 🎉");
       onLoginSuccess();
     }
   }, [isAuthenticated, onLoginSuccess]);
 
-  // Redux 에러를 폼 에러로 변환
   useEffect(() => {
     if (error) {
       if (error.includes("이메일") || error.includes("email")) {
@@ -57,10 +55,6 @@ const LoginPage: React.FC<{
 
   const handleFocus = (fieldName: string) => {
     setFocusedField(fieldName);
-    // 포커스시 에러 클리어
-    if (error) {
-      dispatch(clearError());
-    }
   };
 
   const handleBlur = () => {
@@ -74,7 +68,6 @@ const LoginPage: React.FC<{
       [name]: value,
     }));
 
-    // 입력시 해당 필드 에러 클리어
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({
         ...prev,
@@ -103,7 +96,11 @@ const LoginPage: React.FC<{
       return;
     }
 
-    dispatch(loginUser(formData));
+    try {
+      await login(formData).unwrap();
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
   };
 
   const isFormValid =
@@ -205,14 +202,14 @@ const LoginPage: React.FC<{
 
               <button
                 type="submit"
-                disabled={!isFormValid || loading}
+                disabled={!isFormValid || isLoading}
                 className={`py-3 my-6 rounded-lg transition-colors duration-200 ${
-                  isFormValid && !loading
+                  isFormValid && !isLoading
                     ? "text-white bg-primary cursor-pointer"
                     : "text-gray500 bg-gray200 cursor-not-allowed"
                 }`}
               >
-                {loading ? "로그인 중..." : "로그인"}
+                {isLoading ? "로그인 중..." : "로그인"}
               </button>
             </div>
           </form>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useAppSelector, useAppDispatch } from "../../hooks/redux-hooks";
-import { logout } from "../../store/auth-slice";
+import { useAppSelector } from "../../hooks/redux-hooks";
+import { useLogoutMutation } from "../../auth/auth-api-slice";
 import logoImg from "../../assets/logo.png";
 import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";
@@ -8,7 +8,7 @@ import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
 
 interface HeaderProps {
-  isLoggedIn: boolean; // 호환성을 위해 남겨둠 (사실 Redux에서 가져오므로 불필요)
+  isLoggedIn: boolean;
   onLogin?: () => void;
   onLogout?: () => void;
   onGoToMain?: () => void;
@@ -17,11 +17,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Redux에서 로그인 상태와 사용자 정보 가져오기
-  const { isAuthenticated, user, token } = useAppSelector(
-    (state) => state.auth
-  );
-  const dispatch = useAppDispatch();
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+
+  const [logoutMutation] = useLogoutMutation();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -36,25 +34,11 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
 
   const handleLogout = async () => {
     try {
-      // Redux에서 관리하는 토큰 사용
-      if (token) {
-        await fetch("http://13.125.180.222/api/users/logout/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
+      await logoutMutation().unwrap();
     } catch (error) {
-      // 에러 로그만 남기고 메시지 삭제
       console.error("로그아웃 API 오류:", error);
     }
 
-    // Redux 액션으로 로그아웃 (localStorage 정리도 자동으로 됨)
-    dispatch(logout());
-
-    // App.tsx의 상태도 업데이트
     if (onLogout) {
       onLogout();
     }
