@@ -1,53 +1,58 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from "react";
 import Header from "./components/header/header.tsx";
-import LearnerDashboard from './pages/dashboard/LearnerDashboard';
-import MissionPage from './pages/mission/MissionPage';
-import VideoPage from './pages/video/VideoPage';
-import './index.css';
+import HeroSection from "./components/hero/hero-section.tsx";
+import LoginPage from "./page/login/login.tsx";
+import "./index.css";
 
 function App() {
-  const [showDashboard, setShowDashboard] = useState(false);
-  const [showMission, setShowMission] = useState(false);
-  const [showVideo, setShowVideo] = useState(false);
+  const [currentPage, setCurrentPage] = useState("main");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  if (showDashboard) {
-    return <LearnerDashboard />;
-  }
+  // 초기 로그인 상태 체크
+  useEffect(() => {
+    const token =
+      localStorage.getItem("access_token") || localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
 
-  if (showMission) {
-    return <MissionPage />;
-  }
+  // 로그인 성공 시
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setCurrentPage("main");
+  };
 
-  if (showVideo) {
-    return <VideoPage />;
+  // 로그아웃 시
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentPage("main");
+  };
+
+  if (currentPage === "login") {
+    return (
+      <LoginPage
+        onLoginSuccess={handleLoginSuccess}
+        onGoToMain={() => setCurrentPage("main")}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center font-pretendard">
-      <Header />
-      <div className="mt-4 flex gap-4">
-        <button 
-          onClick={() => setShowDashboard(true)}
-          className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
-        >
-          대시보드로 이동
-        </button>
-        <button 
-          onClick={() => setShowMission(true)}
-          className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
-        >
-          미션 이동
-        </button>
-        <button 
-          onClick={() => setShowVideo(true)}
-          className="px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-lg"
-        >
-          비디오 이동
-        </button>
-      </div>
-    </div>
+    <>
+      <Header
+        isLoggedIn={isLoggedIn}
+        onLogin={() => setCurrentPage("login")}
+        onLogout={handleLogout}
+        onGoToMain={() => setCurrentPage("main")}
+      />
+      <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
+        <HeroSection
+          isLoggedIn={isLoggedIn}
+          onLogin={() => setCurrentPage("login")}
+        />
+        <div className="mt-4 flex gap-4"></div>
+      </main>
+    </>
   );
-  
 }
 
 export default App;
