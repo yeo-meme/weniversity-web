@@ -3,6 +3,7 @@ import registerReducer from "./registerSlice";
 import myPageReducer from "./myPageSlice";
 import findPasswordReducer from "./findPasswordSlice";
 import courseReducer from "./courseSlice";
+import courseDetailReducer from "./courseDetailSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     myPage: myPageReducer,
     findPassword: findPasswordReducer,
     course: courseReducer,
+    courseDetail: courseDetailReducer,
   },
 });
 

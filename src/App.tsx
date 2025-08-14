@@ -3,6 +3,7 @@ import MyPage from "./pages/mypage/MyPage.tsx";
 import Header from "./components/header/header.tsx";
 import RegisterPage from "./pages/register/RegisterPage.tsx";
 import CoursePage from "./pages/course/CoursePage.tsx";
+import CourseDetailPage from "./pages/courseDetail/CourseDetailPage.tsx";
 import "./index.css";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
         <RegisterPage />
         <MyPage />
         <CoursePage />
+        <CourseDetailPage />
         <div className="mt-4 flex gap-4"></div>
       </main>
     </>
