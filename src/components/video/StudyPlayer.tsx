@@ -1,4 +1,3 @@
-// src/components/StudyPlayer.tsx
 import React, { useState, useRef, useEffect,useMemo } from "react";
 import {
   Play,

@@ -1,15 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { apiSlice } from '../store/slices/apiSlice'
-import chapterReducer from "../store/slices/chapterSlice";
+import { authApiSlice } from '../auth/authApiSlice'
 import { useDispatch, useSelector } from 'react-redux'
+
 
 export const store = configureStore({
   reducer: {
-    [apiSlice.reducerPath]: apiSlice.reducer,
-    chapter: chapterReducer,
+    [authApiSlice.reducerPath]: authApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(apiSlice.middleware),
+    getDefaultMiddleware().concat(authApiSlice.middleware),
 })
 
 export type RootState = ReturnType<typeof store.getState>

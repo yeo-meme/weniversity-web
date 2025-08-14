@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
+import { useNavigate,Link } from "react-router-dom";
+
 
 interface ProfileCardProps {
   isLoggedIn: boolean;
@@ -9,10 +11,14 @@ interface ProfileCardProps {
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
+  const navigate = useNavigate();
+
+
   const [userInfo, setUserInfo] = useState({
     email: "",
     role: "",
   });
+
 
   // 로그인 상태 변경 시 사용자 정보 가져오기
   useEffect(() => {
@@ -54,12 +60,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
 
         <ul className="flex flex-col justify-center items-start gap-4 list-none">
           <li>
-            <a
+            {/* <a
               href="#"
               className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
-            >
-              <VideoIcon />내 강의 목록 보기
-            </a>
+            > */}
+               <Link
+    to="/my-courses"
+    className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
+  >
+                <VideoIcon />내 강의 목록 보기
+                </Link>
+            {/* </a> */}
           </li>
           <li>
             <a

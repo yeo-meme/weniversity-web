@@ -1,15 +1,22 @@
-import React from 'react' // ✅ 기본 import 방식
+import React from 'react' 
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App6.tsx'
+import App from './App.tsx'
 import { Provider } from 'react-redux'
-// import { store } from './store/store.ts'
-import { testStore } from "./store/testStore";
+import { store } from './store/store.ts'
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import StudyLayoutPlayer from "./components/LinkTestComponent.tsx";
 
 createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Provider store={testStore}>
-      <App />
+    <Provider store={store}>
+      <BrowserRouter>
+        <Routes>
+          {/* 기본 페이지 */}
+          <Route path="/" element={<App />} />
+          <Route path="/my-courses" element={<StudyLayoutPlayer />} />
+        </Routes>
+      </BrowserRouter>
     </Provider>
   </React.StrictMode>
 )

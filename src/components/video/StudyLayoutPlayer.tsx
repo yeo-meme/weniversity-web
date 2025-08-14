@@ -42,22 +42,22 @@ import {
   setStartTime,
 } from "../../store/slices/progressSlice"; 
 
-import {
-  useGetWatchProgressAllQuery,
-  useGetWatchProgressQuery,
-  useCreateWatchProgressMutation,
-  useCreateNextVideoMutation,
-  useGetChapterProgressQuery,
-} from "../../store/slices/testApiSlice";
+// import {
+//   useGetWatchProgressAllQuery,
+//   useGetWatchProgressQuery,
+//   useCreateWatchProgressMutation,
+//   useCreateNextVideoMutation,
+//   useGetChapterProgressQuery,
+// } from "../../store/slices/testApiSlice";
 
-import type {
-  CourseProgressResponse,
-  WatchProgress,
-  LastWatched,
-  CourseProgressStatistics,
-  Chapter,
-  PlayerState,
-} from "../../store/slices/testApiSlice";
+// import type {
+//   CourseProgressResponse,
+//   WatchProgress,
+//   LastWatched,
+//   CourseProgressStatistics,
+//   Chapter,
+//   PlayerState,
+// } from "../../store/slices/testApiSlice";
 
 // import {useGetCoursesQuery } from "../../store/api/courseApiSlice";
 
