@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useAppSelector, useAppDispatch } from "../../hooks/redux-hooks";
+import { logout } from "../../store/auth-slice";
 import logoImg from "../../assets/logo.png";
 import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";
@@ -6,7 +8,7 @@ import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
 
 interface HeaderProps {
-  isLoggedIn: boolean;
+  isLoggedIn: boolean; // 호환성을 위해 남겨둠 (사실 Redux에서 가져오므로 불필요)
   onLogin?: () => void;
   onLogout?: () => void;
   onGoToMain?: () => void;
@@ -14,13 +16,12 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    const token =
-      localStorage.getItem("access_token") || localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
+  // Redux에서 로그인 상태와 사용자 정보 가져오기
+  const { isAuthenticated, user, token } = useAppSelector(
+    (state) => state.auth
+  );
+  const dispatch = useAppDispatch();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,9 +36,7 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
 
   const handleLogout = async () => {
     try {
-      const token =
-        localStorage.getItem("access_token") || localStorage.getItem("token");
-
+      // Redux에서 관리하는 토큰 사용
       if (token) {
         await fetch("http://13.125.180.222/api/users/logout/", {
           method: "POST",
@@ -49,16 +48,13 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
       }
     } catch (error) {
       // 에러 로그만 남기고 메시지 삭제
+      console.error("로그아웃 API 오류:", error);
     }
 
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("user_role");
-    localStorage.removeItem("token");
+    // Redux 액션으로 로그아웃 (localStorage 정리도 자동으로 됨)
+    dispatch(logout());
 
-    setIsLoggedIn(false);
-
+    // App.tsx의 상태도 업데이트
     if (onLogout) {
       onLogout();
     }
@@ -73,12 +69,6 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
-
-  useEffect(() => {
-    const token =
-      localStorage.getItem("access_token") || localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  });
 
   return (
     <>
@@ -143,9 +133,10 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
                 </form>
 
                 <UserProfile
-                  isLoggedIn={isLoggedIn}
+                  isLoggedIn={isAuthenticated}
                   onLogin={handleLogin}
                   onLogout={handleLogout}
+                  user={user}
                 />
               </div>
             </div>
@@ -169,10 +160,11 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
 
       <MobileMenu
         isOpen={isMobileMenuOpen}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={isAuthenticated}
         onClose={closeMobileMenu}
         onLogin={handleLogin}
         onLogout={handleLogout}
+        user={user}
       />
     </>
   );

@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import closeIcon from "../../assets/icon-close.png";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
+
+interface User {
+  id?: number;
+  email: string;
+  name?: string;
+  role?: string;
+}
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -10,6 +17,7 @@ interface MobileMenuProps {
   onClose: () => void;
   onLogin: () => void;
   onLogout: () => void;
+  user?: User | null;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
@@ -18,31 +26,21 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   onClose,
   onLogin,
   onLogout,
+  user,
 }) => {
-  const [userInfo, setUserInfo] = useState({
-    email: "",
-    role: "",
-  });
-
-  // 로그인 상태 변경 시 사용자 정보 가져오기
-  useEffect(() => {
-    if (isLoggedIn) {
-      const email = localStorage.getItem("user_email") || "";
-      const role = localStorage.getItem("user_role") || "";
-      setUserInfo({ email, role });
-    } else {
-      setUserInfo({ email: "", role: "" });
-    }
-  }, [isLoggedIn]);
-
   // 사용자 이름 표시 로직
   const getUserDisplayName = () => {
-    if (userInfo.email) {
-      // 이메일에서 @ 앞부분을 사용자명으로 사용
-      const username = userInfo.email.split("@")[0];
+    if (user?.name) {
+      return `${user.name}님`;
+    } else if (user?.email) {
+      const username = user.email.split("@")[0];
       return `${username}님`;
     }
     return "위니브 소울곰";
+  };
+
+  const getUserEmail = () => {
+    return user?.email || "paul-lab@naver.com";
   };
 
   return (
@@ -82,7 +80,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </h2>
             <p className="text-gray700 leading-[22px] text-center mb-6">
               {isLoggedIn ? (
-                userInfo.email || "paul-lab@naver.com"
+                getUserEmail()
               ) : (
                 <>
                   위니버시티에 로그인 후<br />
