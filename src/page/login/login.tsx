@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
+import { loginUser, clearError } from "../../store/auth-slice";
 import logoIcon from "../../assets/logo-icon.png";
 import githubIcon from "../../assets/github-mark.png";
 import googleIcon from "../../assets/google.png";
@@ -13,27 +15,15 @@ interface FormErrors {
   password?: string;
 }
 
-interface LoginResponse {
-  access?: string;
-  refresh?: string;
-  email?: string;
-  role?: string;
-  success?: boolean;
-  message?: string;
-  data?: {
-    token: string;
-    user: {
-      id: number;
-      email: string;
-      name: string;
-    };
-  };
-}
-
 const LoginPage: React.FC<{
   onLoginSuccess: () => void;
   onGoToMain: () => void;
 }> = ({ onLoginSuccess, onGoToMain }) => {
+  const dispatch = useAppDispatch();
+  const { loading, error, isAuthenticated } = useAppSelector(
+    (state) => state.auth
+  );
+
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -42,8 +32,35 @@ const LoginPage: React.FC<{
   const [errors, setErrors] = useState<FormErrors>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // 로그인 성공시 처리
+  useEffect(() => {
+    if (isAuthenticated) {
+      onLoginSuccess();
+    }
+  }, [isAuthenticated, onLoginSuccess]);
+
+  // Redux 에러를 폼 에러로 변환
+  useEffect(() => {
+    if (error) {
+      if (error.includes("이메일") || error.includes("email")) {
+        setErrors({ email: "* 이메일을 확인해주세요" });
+      } else if (error.includes("비밀번호") || error.includes("password")) {
+        setErrors({ password: "* 비밀번호를 확인해주세요" });
+      } else {
+        setErrors({
+          email: "* 이메일을 확인해주세요",
+          password: "* 비밀번호를 확인해주세요",
+        });
+      }
+    }
+  }, [error]);
+
   const handleFocus = (fieldName: string) => {
     setFocusedField(fieldName);
+    // 포커스시 에러 클리어
+    if (error) {
+      dispatch(clearError());
+    }
   };
 
   const handleBlur = () => {
@@ -57,6 +74,7 @@ const LoginPage: React.FC<{
       [name]: value,
     }));
 
+    // 입력시 해당 필드 에러 클리어
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({
         ...prev,
@@ -85,67 +103,7 @@ const LoginPage: React.FC<{
       return;
     }
 
-    try {
-      const response = await fetch("/api/users/login/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const data: LoginResponse = await response.json();
-
-      if (response.ok && (data.access || (data.success && data.data))) {
-        console.log("로그인 성공:", data);
-
-        if (data.access) {
-          localStorage.setItem("access_token", data.access);
-          localStorage.setItem("refresh_token", data.refresh || "");
-          localStorage.setItem("user_email", data.email || "");
-          localStorage.setItem("user_role", data.role || "");
-
-          alert(`로그인 성공! 환영합니다, ${data.email}님!`);
-        } else if (data.data?.token) {
-          localStorage.setItem("token", data.data.token);
-
-          alert(`로그인 성공! 환영합니다, ${data.data?.user?.email}님!`);
-        }
-
-        onLoginSuccess();
-      } else {
-        const serverMessage = data.message || "로그인에 실패했습니다.";
-
-        if (
-          serverMessage.includes("이메일") ||
-          serverMessage.includes("email")
-        ) {
-          setErrors({
-            email: "* 이메일을 확인해주세요",
-          });
-        } else if (
-          serverMessage.includes("비밀번호") ||
-          serverMessage.includes("password")
-        ) {
-          setErrors({
-            password: "* 비밀번호를 확인해주세요",
-          });
-        } else {
-          setErrors({
-            email: "* 이메일을 확인해주세요",
-            password: "* 비밀번호를 확인해주세요",
-          });
-        }
-      }
-    } catch (error) {
-      console.error("로그인 API 호출 중 오류:", error);
-      setErrors({
-        email: "* 네트워크 오류가 발생했습니다. 다시 시도해주세요.",
-      });
-    }
+    dispatch(loginUser(formData));
   };
 
   const isFormValid =
@@ -247,14 +205,14 @@ const LoginPage: React.FC<{
 
               <button
                 type="submit"
-                disabled={!isFormValid}
+                disabled={!isFormValid || loading}
                 className={`py-3 my-6 rounded-lg transition-colors duration-200 ${
-                  isFormValid
+                  isFormValid && !loading
                     ? "text-white bg-primary cursor-pointer"
                     : "text-gray500 bg-gray200 cursor-not-allowed"
                 }`}
               >
-                로그인
+                {loading ? "로그인 중..." : "로그인"}
               </button>
             </div>
           </form>
