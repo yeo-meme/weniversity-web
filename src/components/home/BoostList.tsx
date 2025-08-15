@@ -10,15 +10,14 @@ import CourseCard from "../course/CourseCard";
 import CourseCardSkeleton from "../course/CourseCardSkeleton";
 import RightIcon from "../../assets/icon-right.png";
 
-const SKELETON_COUNT = 3;
-const BOOST_COMMUNITY_FILTER = "부스트 커뮤니티";
-
 const BoostList: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { boostCourses, boostLoading, boostError } = useAppSelector(
     state => state.homeCourse
   );
+  const SKELETON_COUNT = 3;
+  const BOOST_COMMUNITY_FILTER = "부스트 커뮤니티";
 
   // 더보기 버튼 클릭 핸들러
   const handleMoreClick = useCallback(() => {

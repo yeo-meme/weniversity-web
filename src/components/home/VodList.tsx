@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
 import {
@@ -17,18 +17,21 @@ const VodList: React.FC = () => {
     state => state.homeCourse
   );
 
+  const SKELETON_COUNT = 6;
+  const BOOST_COMMUNITY_FILTER = "VOD";
+
   // 더보기 버튼 클릭 핸들러
-  const handleMoreClick = () => {
+  const handleMoreClick = useCallback(() => {
     // 필터 초기화 후 VOD 필터 설정
     dispatch(clearAllFilters());
     dispatch(
       setActiveFilter({
         filterType: "types",
-        value: "VOD",
+        value: BOOST_COMMUNITY_FILTER,
       })
     );
     navigate("/courses");
-  };
+  }, [dispatch, navigate]);
 
   // 컴포넌트 마운트 시 VOD 강의 데이터 가져오기
   useEffect(() => {
@@ -69,7 +72,7 @@ const VodList: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {vodLoading
             ? // 로딩 중일 때 스켈레톤 6개 표시
-              Array.from({ length: 6 }).map((_, index) => (
+              Array.from({ length: SKELETON_COUNT }).map((_, index) => (
                 <CourseCardSkeleton key={`skeleton-${index}`} />
               ))
             : // 실제 데이터 표시
@@ -89,4 +92,4 @@ const VodList: React.FC = () => {
   );
 };
 
-export default VodList;
+export default React.memo(VodList);
