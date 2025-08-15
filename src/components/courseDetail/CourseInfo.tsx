@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import type { CourseDetailInfo } from "../../types/courseDetail/courseDetail";
 import ShareIcon from "../../assets/icon-Share.png";
 
@@ -64,6 +64,13 @@ const CourseInfo: React.FC<CourseInfoProps> = ({
     ],
     [courseDetail]
   );
+
+  const formatPrice = useCallback((price: number) => {
+    if (price === 0) return "무료 강의";
+    if (price === -1) return "국비 지원 강의";
+    if (price > 0) return `₩ ${price.toLocaleString()}`;
+    return "";
+  }, []);
 
   return (
     <div>
@@ -144,7 +151,7 @@ const CourseInfo: React.FC<CourseInfoProps> = ({
 
               <div className="text-center mb-6">
                 <div className="text-left text-2xl font-bold text-gray-900">
-                  ₩{courseDetail.price.toLocaleString()}
+                  {formatPrice(courseDetail.price)}
                 </div>
               </div>
 
