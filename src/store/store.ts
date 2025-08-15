@@ -9,29 +9,30 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import storage from "redux-persist/lib/storage"; 
+import storage from "redux-persist/lib/storage";
 
 import authReducer from "../auth/authSlice";
 import { authApiSlice } from "../auth/authApiSlice";
+import { lectureApiSlice } from "./slices/lectureApiSlice";
 import pageReducer from "./slices/pageSlice";
-
 
 const authPersistConfig = {
   key: "auth",
   storage,
-  whitelist: ["token", "refreshToken", "user"], 
+  whitelist: ["token", "refreshToken", "user"],
 };
 
 const pagePersistConfig = {
-  key: "page", 
+  key: "page",
   storage,
-  whitelist: ["currentTab"], 
+  whitelist: ["currentTab"],
 };
 
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
   page: persistReducer(pagePersistConfig, pageReducer),
   [authApiSlice.reducerPath]: authApiSlice.reducer,
+  [lectureApiSlice.reducerPath]: lectureApiSlice.reducer,
 });
 
 export const store = configureStore({
@@ -41,9 +42,10 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(authApiSlice.middleware),
+    })
+      .concat(authApiSlice.middleware)
+      .concat(lectureApiSlice.middleware),
 });
-
 
 export const persistor = persistStore(store);
 

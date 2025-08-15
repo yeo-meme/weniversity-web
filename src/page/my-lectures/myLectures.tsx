@@ -1,7 +1,7 @@
 import React from "react";
-import LectureCard from "../../components/lectures/lecture-card";
-import LectureFilter from "../../components/lectures/lecture-filter";
-import { useGetMyLecturesQuery } from "../../store/lecture-api-slice";
+import LectureCard from "../../components/lectures/lectureCard";
+import LectureFilter from "../../components/lectures/lectureFilter";
+import { useGetMyLecturesQuery } from "../../store/slices/lectureApiSlice";
 import type { LectureQueryParams } from "../../types/lecture";
 
 const MyLectures = () => {
@@ -59,7 +59,6 @@ const MyLectures = () => {
     return "알 수 없는 오류가 발생했습니다.";
   };
 
-  // 디버깅 코드 (staging-v2에서 온 것)
   console.log(localStorage.getItem("persist:auth"));
   console.log(localStorage.getItem("persist:page"));
 

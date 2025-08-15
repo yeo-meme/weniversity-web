@@ -4,7 +4,7 @@ import { logout } from "./auth/authSlice";
 import { setCurrentTab } from "./store/slices/pageSlice";
 
 import LoginPage from "./page/login/login";
-import MyLectures from "./page/my-lectures/my-lectures";
+import MyLectures from "./page/my-lectures/myLectures";
 import Header from "./components/header/header";
 import HeroSection from "./components/hero/hero-section";
 import TabSync from "./components/TabSync";

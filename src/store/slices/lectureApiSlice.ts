@@ -3,8 +3,8 @@ import type {
   ApiLecturesResponse,
   LecturesResponse,
   LectureQueryParams,
-} from "../types/lecture";
-import { transformApiLecture } from "../types/lecture";
+} from "../../types/lecture";
+import { transformApiLecture } from "../../types/lecture";
 
 // 더미 데이터 (개발용)
 const getMockData = (params: LectureQueryParams) => {

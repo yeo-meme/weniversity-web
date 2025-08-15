@@ -4,7 +4,7 @@ import {
   selectIsAuthenticated,
   selectCurrentUser,
 } from "../../auth/authSlice.ts";
-import { goToMyLectures } from "../../store/slices/lecture-slice.ts";
+import { goToMyLectures } from "../../store/slices/lectureSlice.ts";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
