@@ -15,6 +15,8 @@ import authReducer from "../auth/authSlice";
 import { authApiSlice } from "../auth/authApiSlice";
 import pageReducer from "./slices/pageSlice";
 
+import { lectureApiSlice } from "./slices/lectureApiSlice";
+import progressReducer from "./slices/progressSlice";
 
 const authPersistConfig = {
   key: "auth",
@@ -31,7 +33,9 @@ const pagePersistConfig = {
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
   page: persistReducer(pagePersistConfig, pageReducer),
+  progress: progressReducer,
   [authApiSlice.reducerPath]: authApiSlice.reducer,
+  [lectureApiSlice.reducerPath]: lectureApiSlice.reducer,
 });
 
 export const store = configureStore({
