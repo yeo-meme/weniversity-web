@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useAppSelector } from "../../hooks/hook.ts";
+import { useLogoutMutation } from "../../auth/authApiSlice.ts";
 import logoImg from "../../assets/logo.png";
 import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";
@@ -14,13 +16,12 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  useEffect(() => {
-    const token =
-      localStorage.getItem("access_token") || localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
+  const { isAuthenticated, user, token, refreshToken } = useAppSelector(
+    (state) => state.auth
+  );
+
+  const [logoutMutation] = useLogoutMutation();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,34 +36,27 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
 
   const handleLogout = async () => {
     try {
-      const token =
-        localStorage.getItem("access_token") || localStorage.getItem("token");
+      console.log("🚪 로그아웃 시작 - 토큰 확인:", {
+        accessToken: token ? "있음" : "없음",
+        refreshToken: refreshToken ? "있음" : "없음",
+      });
 
-      if (token) {
-        await fetch("http://13.125.180.222/api/users/logout/", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-      }
+      const result = await logoutMutation({
+        access: token || undefined,
+        refresh: refreshToken || undefined,
+      }).unwrap();
+
+      console.log("✅ API 로그아웃 성공:", result);
     } catch (error) {
-      // 에러 로그만 남기고 메시지 삭제
+      console.error("❌ 로그아웃 API 오류:", error);
     }
-
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    localStorage.removeItem("user_email");
-    localStorage.removeItem("user_role");
-    localStorage.removeItem("token");
-
-    setIsLoggedIn(false);
 
     if (onLogout) {
       onLogout();
+      console.log("🔄 로컬 로그아웃 콜백 실행 완료");
     }
 
+    console.log("🎉 로그아웃 프로세스 완료");
     alert("로그아웃 되었습니다.");
   };
 
@@ -73,12 +67,6 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
   };
-
-  useEffect(() => {
-    const token =
-      localStorage.getItem("access_token") || localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  });
 
   return (
     <>
@@ -143,9 +131,10 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
                 </form>
 
                 <UserProfile
-                  isLoggedIn={isLoggedIn}
+                  isLoggedIn={isAuthenticated}
                   onLogin={handleLogin}
                   onLogout={handleLogout}
+                  user={user}
                 />
               </div>
             </div>
@@ -169,10 +158,11 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
 
       <MobileMenu
         isOpen={isMobileMenuOpen}
-        isLoggedIn={isLoggedIn}
+        isLoggedIn={isAuthenticated}
         onClose={closeMobileMenu}
         onLogin={handleLogin}
         onLogout={handleLogout}
+        user={user}
       />
     </>
   );
