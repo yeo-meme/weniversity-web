@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQueryWithReauth } from "./base-query";
-import type { UserData } from "./token-service.ts";
+import { baseQueryWithReauth } from "./baseQuery.ts";
+import type { UserData } from "./tokenService.ts";
 
 export interface LoginRequest {
   email: string;
@@ -61,7 +61,7 @@ export const authApiSlice = createApi({
       query: (tokens) => ({
         url: "/users/logout/",
         method: "POST",
-        body: tokens, // access와 refresh 토큰을 body로 전달
+        body: tokens,
       }),
       invalidatesTags: ["Auth"],
     }),

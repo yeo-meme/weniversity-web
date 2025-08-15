@@ -1,30 +1,26 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useAppDispatch } from "../../hooks/hook";
-import { goToMyLectures } from "../../store/slices/lecture-slice";
+import { useNavigate } from "react-router";
+import { useAppDispatch, useAppSelector } from "../../hooks/hook.ts";
+import {
+  selectIsAuthenticated,
+  selectCurrentUser,
+} from "../../auth/authSlice.ts";
+import { goToMyLectures } from "../../store/slices/lecture-slice.ts";
 import profileImg from "../../assets/profile-img.png";
 
-
 interface UserProfileProps {
-  isLoggedIn: boolean;
   onLogin: () => void;
   onLogout: () => void;
-  user?: {
-    id?: number | null;
-    email: string;
-    name?: string | null;
-    role?: string | null;
-  } | null;
 }
 
-const UserProfile: React.FC<UserProfileProps> = ({
-  isLoggedIn,
-  onLogin,
-  onLogout,
-  user,
-}) => {
+const UserProfile: React.FC<UserProfileProps> = ({ onLogin, onLogout }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const currentUser = useAppSelector(selectCurrentUser);
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -37,6 +33,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
 
   const handleGoToMyLectures = () => {
     dispatch(goToMyLectures());
+    navigate("/my-lectures");
     setIsDropdownOpen(false);
   };
 
@@ -58,8 +55,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
 
   return (
     <div>
-      {/* 로그인 전 버튼 */}
-      {!isLoggedIn && (
+      {!isAuthenticated && (
         <button
           className="rounded-[10px] py-[11px] px-3 lg:px-5 text-white bg-primary whitespace-nowrap text-sm"
           type="button"
@@ -69,14 +65,17 @@ const UserProfile: React.FC<UserProfileProps> = ({
         </button>
       )}
 
-      {/* 로그인 후 프로필 버튼 + 드롭다운 */}
-      {isLoggedIn && (
+      {isAuthenticated && (
         <div className="relative inline-block" ref={dropdownRef}>
           <button
             className="flex items-center w-[42px] h-[42px] rounded-full bg-transparent p-0 transition-all relative"
             type="button"
             onClick={toggleDropdown}
-            title={user?.email ? `${user.email}님의 프로필` : "사용자 프로필"}
+            title={
+              currentUser?.email
+                ? `${currentUser.email}님의 프로필`
+                : "사용자 프로필"
+            }
           >
             <img
               src={profileImg}

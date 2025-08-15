@@ -1,45 +1,38 @@
 import React from "react";
-import { useAppDispatch } from "../../hooks/hook.ts";
+import { useAppDispatch, useAppSelector } from "../../hooks/hook.ts";
+import {
+  selectIsAuthenticated,
+  selectCurrentUser,
+} from "../../auth/authSlice.ts";
 import { goToMyLectures } from "../../store/slices/lecture-slice.ts";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
-
 import { useNavigate } from "react-router-dom";
 
-
-
 interface ProfileCardProps {
-  isLoggedIn: boolean;
   onLogin: () => void;
-  user?: {
-    id?: number | null;
-    email: string;
-    name?: string | null;
-    role?: string | null;
-  } | null;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({
-  isLoggedIn,
-  onLogin,
-  user,
-}) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ onLogin }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const currentUser = useAppSelector(selectCurrentUser);
+
   const getUserDisplayName = () => {
-    if (user?.name) {
-      return `${user.name}님`;
-    } else if (user?.email) {
-      const username = user.email.split("@")[0];
+    if (currentUser?.name) {
+      return `${currentUser.name}님`;
+    } else if (currentUser?.email) {
+      const username = currentUser.email.split("@")[0];
       return `${username}님`;
     }
     return "열정 만수르";
   };
 
   const getUserEmail = () => {
-    return user?.email || "paul-lab@naver.com";
+    return currentUser?.email || "paul-lab@naver.com";
   };
 
   const handleGoToMyLectures = () => {
@@ -47,7 +40,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     navigate("/my-lectures");
   };
 
-  if (isLoggedIn) {
+  if (isAuthenticated) {
     return (
       <article className="flex flex-col justify-center items-center w-[290px] p-8 box-border bg-white border border-gray200 rounded-[10px] text-center max-[834px]:hidden">
         <div className="w-[100px] h-[100px] overflow-hidden rounded-full border border-gray200 mb-3">
