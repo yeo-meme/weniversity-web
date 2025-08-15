@@ -1,187 +1,158 @@
 import React from "react";
-import LectureCard from "../../components/lectures/lecture-card.tsx";
-
-// 타입 정의
-interface Tag {
-  text: string;
-  type: "type" | "kind";
-}
-
-interface Lecture {
-  id: string;
-  thumbnailSrc: string;
-  tags: Tag[];
-  title: string;
-  currentProgress: number;
-  totalLessons: number;
-  progressPercentage: number;
-  isExpired: boolean;
-}
-
-interface FilterButtonProps {
-  label: string;
-  isActive: boolean;
-  onClick: () => void;
-}
+import LectureCard from "../../components/lectures/lecture-card";
+import LectureFilter from "../../components/lectures/lecture-filter";
+import { useGetMyLecturesQuery } from "../../store/lecture-api-slice";
+import type { LectureQueryParams } from "../../types/lecture";
 
 const MyLectures = () => {
-  // 필터 상태
   const [selectedSubject, setSelectedSubject] = React.useState<string>("전체");
   const [selectedStatus, setSelectedStatus] = React.useState<string>("전체");
 
-  // 강의 데이터
-  const lectures: Lecture[] = [
-    {
-      id: "1",
-      thumbnailSrc: "src/assets/OG.png",
-      tags: [
-        { text: "부스트 커뮤니티", type: "type" },
-        { text: "백엔드", type: "kind" },
-        { text: "초급", type: "kind" },
-      ],
-      title: "파이썬 강의",
-      currentProgress: 3,
-      totalLessons: 15,
-      progressPercentage: 20,
-      isExpired: false,
-    },
-    {
-      id: "2",
-      thumbnailSrc: "src/assets/OG.png",
-      tags: [
-        { text: "정규 과정", type: "type" },
-        { text: "프론트엔드", type: "kind" },
-        { text: "중급", type: "kind" },
-      ],
-      title: "React 강의",
-      currentProgress: 8,
-      totalLessons: 20,
-      progressPercentage: 40,
-      isExpired: false,
-    },
-    {
-      id: "3",
-      thumbnailSrc: "src/assets/OG.png",
-      tags: [
-        { text: "부스트 커뮤니티", type: "type" },
-        { text: "풀스택", type: "kind" },
-        { text: "고급", type: "kind" },
-      ],
-      title: "Node.js 강의",
-      currentProgress: 12,
-      totalLessons: 18,
-      progressPercentage: 67,
-      isExpired: true,
-    },
-  ];
+  const queryParams: LectureQueryParams = React.useMemo(() => {
+    const params: LectureQueryParams = {};
 
-  // 필터 옵션
-  const statusOptions = ["전체", "학습 가능", "종료"] as const;
-  const subjectOptions = ["전체", "VOD", "부스트 커뮤니티", "KDC"] as const;
+    if (selectedSubject !== "전체") {
+      if (selectedSubject === "VOD") {
+        params.type = "vod";
+      } else if (selectedSubject === "부스트 커뮤니티") {
+        params.type = "boost";
+      }
+    }
 
-  // 필터링
-  const filteredLectures = lectures.filter((lecture) => {
-    const subjectMatch =
-      selectedSubject === "전체" ||
-      lecture.tags.some((tag) => tag.text === selectedSubject);
+    if (selectedStatus !== "전체") {
+      if (selectedStatus === "학습 가능") {
+        params.status = "available";
+      } else if (selectedStatus === "수강 종료") {
+        params.status = "expired";
+      }
+    }
 
-    const statusMatch =
-      selectedStatus === "전체" ||
-      (selectedStatus === "학습 가능" && !lecture.isExpired) ||
-      (selectedStatus === "종료" && lecture.isExpired);
+    return params;
+  }, [selectedSubject, selectedStatus]);
 
-    return subjectMatch && statusMatch;
-  });
+  const {
+    data: lecturesData,
+    error,
+    isLoading,
+    refetch,
+  } = useGetMyLecturesQuery(queryParams);
 
-  // 필터 버튼
-  const FilterButton: React.FC<FilterButtonProps> = ({
-    label,
-    isActive,
-    onClick,
-  }) => (
-    <span
-      className={`px-3 py-1.5 text-base cursor-pointer ${
-        isActive ? "text-blue-500 font-bold" : "text-black"
-      }`}
-      onClick={onClick}
-    >
-      {label}
-    </span>
-  );
+  const statusOptions = ["전체", "학습 가능", "수강 종료"] as const;
+  const subjectOptions = ["전체", "VOD", "부스트 커뮤니티"] as const;
 
-  // 이벤트 핸들러
-  const handleLearnClick = () => {
-    console.log("학습하기");
+  const handleLearnClick = (_lectureId: string) => {
+    // TODO: 강의 학습 페이지로 이동
   };
 
-  const handleDetailClick = () => {
-    console.log("상세보기");
+  const handleDetailClick = (_lectureId: string) => {
+    // TODO: 강의 상세 페이지로 이동
   };
 
-  const handleReapplyClick = () => {
-    console.log("재수강");
+  const handleReapplyClick = (_lectureId: string) => {
+    // TODO: 재수강 신청 로직
   };
+
+  const getErrorMessage = (error: unknown): string => {
+    if (error && typeof error === "object" && "message" in error) {
+      return error.message as string;
+    }
+    return "알 수 없는 오류가 발생했습니다.";
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
+        <h2 className="text-[40px] font-bold mb-6">내 강의 목록</h2>
+        <div className="text-center py-12">
+          <p className="text-gray-500">강의 목록을 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
+        <h2 className="text-[40px] font-bold mb-6">내 강의 목록</h2>
+        <div className="text-center py-12">
+          <p className="text-red-500">강의 목록을 불러오는데 실패했습니다.</p>
+          <p className="text-sm text-gray-500 mt-2">{getErrorMessage(error)}</p>
+          <button
+            onClick={() => refetch()}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const lectures = lecturesData?.results || [];
 
   return (
     <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
       <h2 className="text-[40px] font-bold mb-6">내 강의 목록</h2>
 
-      {/* 필터 섹션 */}
       <div className="border-y-2 border-gray-200 mb-8">
-        {/* 상태 필터 */}
         <div className="flex items-center p-5 border-b border-gray-200">
           <h3 className="font-bold text-gray-700 mr-5 w-20">상태</h3>
           <div className="flex flex-wrap gap-2">
             {statusOptions.map((status) => (
-              <FilterButton
+              <LectureFilter
                 key={status}
                 label={status}
+                value={status}
                 isActive={selectedStatus === status}
-                onClick={() => setSelectedStatus(status)}
+                onClick={setSelectedStatus}
               />
             ))}
           </div>
         </div>
 
-        {/* 유형 필터 */}
         <div className="flex items-center p-5">
           <h3 className="font-bold text-gray-700 mr-5 w-20">유형</h3>
           <div className="flex flex-wrap gap-2">
             {subjectOptions.map((subject) => (
-              <FilterButton
+              <LectureFilter
                 key={subject}
                 label={subject}
+                value={subject}
                 isActive={selectedSubject === subject}
-                onClick={() => setSelectedSubject(subject)}
+                onClick={setSelectedSubject}
               />
             ))}
           </div>
         </div>
       </div>
 
-      {/* 강의 목록 */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredLectures.map((lecture) => (
+        {lectures.map((lecture) => (
           <LectureCard
             key={lecture.id}
-            thumbnailSrc={lecture.thumbnailSrc}
+            thumbnailSrc={lecture.thumbnail}
             tags={lecture.tags}
             title={lecture.title}
-            currentProgress={lecture.currentProgress}
-            totalLessons={lecture.totalLessons}
-            progressPercentage={lecture.progressPercentage}
-            isExpired={lecture.isExpired}
-            onLearnClick={handleLearnClick}
-            onDetailClick={handleDetailClick}
-            onReapplyClick={handleReapplyClick}
+            currentProgress={lecture.current_progress}
+            totalLessons={lecture.total_lessons}
+            progressPercentage={lecture.progress_percentage}
+            isExpired={lecture.is_expired}
+            onLearnClick={() => handleLearnClick(lecture.id)}
+            onDetailClick={() => handleDetailClick(lecture.id)}
+            onReapplyClick={() => handleReapplyClick(lecture.id)}
           />
         ))}
       </div>
 
-      {/* 빈 결과 */}
-      {filteredLectures.length === 0 && (
+      {lectures.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500">조건에 맞는 강의가 없습니다.</p>
+        </div>
+      )}
+
+      {lecturesData && (
+        <div className="text-sm text-gray-600 mt-4">
+          총 {lecturesData.count}개의 강의
         </div>
       )}
     </div>
