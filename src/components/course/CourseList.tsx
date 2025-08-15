@@ -43,6 +43,7 @@ const CourseGrid = memo<{ courses: Course[]; loading: boolean }>(
     </div>
   )
 );
+
 CourseGrid.displayName = "CourseGrid";
 
 const CourseList: React.FC<CourseListProps> = memo(

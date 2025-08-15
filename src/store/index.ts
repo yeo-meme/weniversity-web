@@ -4,6 +4,7 @@ import myPageReducer from "./myPageSlice";
 import findPasswordReducer from "./findPasswordSlice";
 import courseReducer from "./courseSlice";
 import courseDetailReducer from "./courseDetailSlice";
+import homeCourseReducer from "./homeCourseSlice";
 import authReducer from "../auth/auth-slice";
 import { authApiSlice } from "../auth/auth-api-slice";
 
@@ -15,6 +16,7 @@ export const store = configureStore({
     myPage: myPageReducer,
     findPassword: findPasswordReducer,
     course: courseReducer,
+    homeCourse: homeCourseReducer,
     courseDetail: courseDetailReducer,
   },
   middleware: getDefaultMiddleware =>
