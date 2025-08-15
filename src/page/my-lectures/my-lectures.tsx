@@ -59,6 +59,17 @@ const MyLectures = () => {
     return "알 수 없는 오류가 발생했습니다.";
   };
 
+  // 디버깅 코드 (staging-v2에서 온 것)
+  console.log(localStorage.getItem("persist:auth"));
+  console.log(localStorage.getItem("persist:page"));
+
+  const authStr = localStorage.getItem("persist:auth");
+  if (authStr) {
+    const auth = JSON.parse(authStr);
+    const user = JSON.parse(auth.user);
+    console.log("💾 persist:auth.user:", user);
+  }
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
@@ -127,7 +138,7 @@ const MyLectures = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {lectures.map((lecture) => (
+        {lectures.map((lecture: any) => (
           <LectureCard
             key={lecture.id}
             thumbnailSrc={lecture.thumbnail}

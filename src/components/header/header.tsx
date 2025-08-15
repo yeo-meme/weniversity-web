@@ -1,6 +1,11 @@
 import React, { useState } from "react";
-import { useAppSelector } from "../../hooks/redux-hooks";
-import { useLogoutMutation } from "../../auth/auth-api-slice";
+import { useAppSelector } from "../../hooks/hook.ts";
+import { useLogoutMutation } from "../../auth/authApiSlice.ts";
+import {
+  selectIsAuthenticated,
+  selectCurrentUser,
+  selectAuthToken,
+} from "../../auth/authSlice.ts";
 import logoImg from "../../assets/logo.png";
 import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";
@@ -8,7 +13,6 @@ import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
 
 interface HeaderProps {
-  isLoggedIn: boolean;
   onLogin?: () => void;
   onLogout?: () => void;
   onGoToMain?: () => void;
@@ -17,9 +21,18 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const { isAuthenticated, user, token, refreshToken } = useAppSelector(
-    (state) => state.auth
-  );
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const user = useAppSelector(selectCurrentUser);
+  const token = useAppSelector(selectAuthToken);
+  const { refreshToken } = useAppSelector((state) => state.auth);
+
+  console.log("🔍 Header 인증 상태 확인:", {
+    isAuthenticated,
+    hasUser: !!user,
+    hasEmail: !!user?.email,
+    hasToken: !!token,
+    userEmail: user?.email,
+  });
 
   const [logoutMutation] = useLogoutMutation();
 
@@ -130,12 +143,7 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
                   </button>
                 </form>
 
-                <UserProfile
-                  isLoggedIn={isAuthenticated}
-                  onLogin={handleLogin}
-                  onLogout={handleLogout}
-                  user={user}
-                />
+                <UserProfile onLogin={handleLogin} onLogout={handleLogout} />
               </div>
             </div>
           </div>
@@ -158,11 +166,9 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
 
       <MobileMenu
         isOpen={isMobileMenuOpen}
-        isLoggedIn={isAuthenticated}
         onClose={closeMobileMenu}
         onLogin={handleLogin}
         onLogout={handleLogout}
-        user={user}
       />
     </>
   );

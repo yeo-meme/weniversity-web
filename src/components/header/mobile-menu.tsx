@@ -1,46 +1,53 @@
 import React from "react";
+import { useNavigate } from "react-router";
+import { useAppDispatch, useAppSelector } from "../../hooks/hook.ts";
+import {
+  selectIsAuthenticated,
+  selectCurrentUser,
+} from "../../auth/authSlice.ts";
+import { goToMyLectures } from "../../store/slices/lecture-slice.ts";
 import closeIcon from "../../assets/icon-close.png";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
 
-interface User {
-  id?: number;
-  email: string;
-  name?: string;
-  role?: string;
-}
-
 interface MobileMenuProps {
   isOpen: boolean;
-  isLoggedIn: boolean;
   onClose: () => void;
   onLogin: () => void;
   onLogout: () => void;
-  user?: User | null;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
   isOpen,
-  isLoggedIn,
   onClose,
   onLogin,
   onLogout,
-  user,
 }) => {
-  // 사용자 이름 표시 로직
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const currentUser = useAppSelector(selectCurrentUser);
+
   const getUserDisplayName = () => {
-    if (user?.name) {
-      return `${user.name}님`;
-    } else if (user?.email) {
-      const username = user.email.split("@")[0];
+    if (currentUser?.name) {
+      return `${currentUser.name}님`;
+    } else if (currentUser?.email) {
+      const username = currentUser.email.split("@")[0];
       return `${username}님`;
     }
-    return "위니브 소울곰";
+    return "열정 만수르";
   };
 
   const getUserEmail = () => {
-    return user?.email || "paul-lab@naver.com";
+    return currentUser?.email || "paul-lab@naver.com";
+  };
+
+  const handleGoToMyLectures = () => {
+    dispatch(goToMyLectures());
+    navigate("/my-lectures");
+    onClose();
   };
 
   return (
@@ -71,15 +78,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <div className="w-[100px] h-[100px] overflow-hidden rounded-full border border-gray200 mb-3">
               <img
                 className="w-full h-full object-cover"
-                src={isLoggedIn ? profileImg : profileNoneImg}
+                src={isAuthenticated ? profileImg : profileNoneImg}
                 alt="프로필 이미지"
               />
             </div>
             <h2 className="mb-1 text-base font-semibold">
-              {isLoggedIn ? getUserDisplayName() : "호기심 많은 개발자님"}
+              {isAuthenticated ? getUserDisplayName() : "호기심 많은 개발자님"}
             </h2>
             <p className="text-gray700 leading-[22px] text-center mb-6">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 getUserEmail()
               ) : (
                 <>
@@ -90,7 +97,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </p>
           </section>
 
-          {!isLoggedIn ? (
+          {!isAuthenticated ? (
             <button
               className="rounded-[10px] py-[14px] px-[94.5px] text-white bg-primary text-sm"
               onClick={onLogin}
@@ -103,6 +110,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 <a
                   href="#"
                   className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleGoToMyLectures();
+                  }}
                 >
                   <VideoIcon />내 강의 목록 보기
                 </a>
@@ -141,7 +152,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </ul>
         </nav>
 
-        {isLoggedIn && (
+        {isAuthenticated && (
           <div className="w-full border-b border-gray200  py-[8px]">
             <button
               className="block w-full text-left px-5 py-2.5 text-sm font-medium text-main-text hover:bg-gray-100 transition-colors"

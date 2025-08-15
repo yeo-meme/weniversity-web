@@ -1,17 +1,19 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { authApiSlice } from "./auth-api-slice.ts";
-import { TokenService } from "./token-service.ts";
+import { authApiSlice } from "./authApiSlice.ts";
+import { TokenService } from "./tokenService.ts";
+import type { RootState } from "../store/store.ts";
 
 interface User {
-  id?: number;
+  id?: number | null;
   email: string;
-  name?: string;
-  role?: string;
+  name?: string | null;
+  role?: string | null;
 }
 
 interface AuthState {
   isAuthenticated: boolean;
+  isHydrated: boolean;
   user: User | null;
   token: string | null;
   refreshToken: string | null;
@@ -28,6 +30,7 @@ const initialState: AuthState = {
   loading: false,
   error: null,
   tokenExpiration: null,
+  isHydrated: false,
 };
 
 const authSlice = createSlice({
@@ -35,6 +38,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
+      console.log("🔴 Persist: 로그아웃 → localStorage에서 auth 제거");
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
@@ -60,8 +64,9 @@ const authSlice = createSlice({
       state.token = token;
       state.user = user;
       state.refreshToken = refreshToken || state.refreshToken;
-      state.isAuthenticated = true;
-
+      state.isAuthenticated = !!(
+        action.payload.user?.email && action.payload.token
+      );
       state.tokenExpiration = TokenService.getTokenExpiration(token);
     },
 
@@ -85,6 +90,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addMatcher(authApiSlice.endpoints.login.matchPending, (state) => {
+        console.log("✅ API 로그인 성공 → persist 저장 트리거");
         state.loading = true;
         state.error = null;
       })
@@ -94,13 +100,21 @@ const authSlice = createSlice({
           state.loading = false;
           state.error = null;
 
-          const data = action.payload;
+          const data: any = action.payload;
 
           if (data.access) {
+            console.log("🔑 Case 1: access 토큰 방식");
+            console.log("📧 email:", data.email);
+            console.log("🎯 role:", data.role);
+
             const user = {
+              id: null,
               email: data.email || "",
-              role: data.role,
+              name: null,
+              role: data.role || null,
             };
+
+            console.log("👤 생성된 user:", user);
 
             authSlice.caseReducers.setCredentials(state, {
               type: "auth/setCredentials",
@@ -115,6 +129,7 @@ const authSlice = createSlice({
               id: data.data.user.id,
               email: data.data.user.email,
               name: data.data.user.name,
+              role: data.data.user.role || null,
             };
 
             authSlice.caseReducers.setCredentials(state, {
@@ -154,10 +169,39 @@ const authSlice = createSlice({
       )
       .addMatcher(authApiSlice.endpoints.logout.matchFulfilled, (state) => {
         authSlice.caseReducers.logout(state);
-      });
+      })
+      .addMatcher(
+        (action) =>
+          action.type === "persist/REHYDRATE" && action.key === "auth",
+        (state) => {
+          state.isHydrated = true;
+          console.log("✅ persist/REHYDRATE 완료: auth 상태 복원됨");
+        }
+      )
+      .addMatcher(
+        (action) =>
+          action.type === "persist/REHYDRATE" && action.key === "auth",
+        (state) => {
+          state.isHydrated = true;
+          state.isAuthenticated = !!(state.user?.email && state.token);
+          console.log("✅ persist/REHYDRATE 완료");
+          console.log("📧 이메일:", state.user?.email);
+          console.log("🎫 토큰:", state.token);
+          console.log("🔓 인증 상태:", state.isAuthenticated);
+        }
+      );
   },
 });
 
 export const { logout, clearError, setCredentials, updateToken } =
   authSlice.actions;
 export default authSlice.reducer;
+
+export const selectIsAuthenticated = (state: RootState) => {
+  return !!(state.auth.user?.email && state.auth.token);
+};
+
+export const selectCurrentUser = (state: RootState) => state.auth.user;
+export const selectAuthToken = (state: RootState) => state.auth.token;
+export const selectAuthLoading = (state: RootState) => state.auth.loading;
+export const selectAuthError = (state: RootState) => state.auth.error;
