@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
 import {
   fetchProfile,
   updateProfile,
@@ -22,6 +22,7 @@ import {
 import ProfileSettings from "./ProfileSettings";
 import PaymentHistory from "./PaymentHistory";
 import AccountManagement from "./AccoountManagement";
+import LoadingMessage from "../../components/courseDetail/LoadingMessage";
 
 type TabType = "profile" | "certificates" | "payments" | "account";
 
@@ -287,10 +288,9 @@ const MyPage: React.FC = () => {
     handleSubmit,
   ]);
 
-  // LoadingMessage 가져와서 사용하기
-  // if (loading && !profile) {
-  //   return <LoadingSpinner message="프로필 정보를 불러오는 중..." />;
-  // }
+  if (loading && !profile) {
+    return <LoadingMessage message="프로필 정보를 불러오는 중..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

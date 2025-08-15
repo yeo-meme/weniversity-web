@@ -1,28 +1,31 @@
-import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
-import RegisterPage from "./pages/register/RegisterPage";
-import CoursePage from "./pages/course/CoursePage";
-import CourseDetailPage from "./pages/courseDetail/CourseDetailPage";
-import MyPage from "./pages/mypage/MyPage";
-import Header from "./components/header/header";
+import { HashRouter, Route, Routes } from "react-router-dom";
+import RegisterPage from "./page/register/RegisterPage.tsx";
+import CoursePage from "./page/course/CoursePage.tsx";
+import CourseDetailPage from "./page/courseDetail/CourseDetailPage.tsx";
+import MyPage from "./page/mypage/MyPage.tsx";
+import LoginPage from "./page/login/login.tsx";
+import HomePage from "./page/main/HomePage.tsx";
+import Layout from "./page/main/Layout.tsx";
 
 function App2() {
   return (
     <HashRouter>
-      <Header />
-      <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
-        <Routes>
-          <Route path="/" element={<Navigate to="/courses" replace />} />
-          {/* <Route
-            path="*"
-            element={<div>404 - 페이지를 찾을 수 없습니다</div>}
-          /> */}
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/mypage" element={<MyPage />} />
-          <Route path="/courses" element={<CoursePage />} />
-          <Route path="/courses/:courseId" element={<CourseDetailPage />} />
-        </Routes>
-        <div className="mt-4 flex gap-4"></div>
-      </main>
+      <Routes>
+        {/* 레이아웃이 필요한 페이지들 */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<HomePage />} />
+          <Route path="mypage" element={<MyPage />} />
+          <Route path="courses" element={<CoursePage />} />
+          <Route path="courses/:courseId" element={<CourseDetailPage />} />
+        </Route>
+
+        {/* 레이아웃이 필요없는 독립적인 페이지들 */}
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+
+        {/* 404 페이지 */}
+        <Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
+      </Routes>
     </HashRouter>
   );
 }

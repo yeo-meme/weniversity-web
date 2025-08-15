@@ -1,0 +1,25 @@
+import React from "react";
+import Header from "../../components/header/header";
+import { Outlet } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.ts";
+
+const Layout: React.FC = () => {
+  const { isAuthenticated, handleLogout } = useAuth();
+
+  const handleLogoutWithAlert = async () => {
+    await handleLogout();
+    alert("로그아웃 되었습니다.");
+  };
+
+  return (
+    <>
+      <Header isLoggedIn={isAuthenticated} onLogout={handleLogoutWithAlert} />
+      <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
+        <Outlet />
+      </main>
+      <div className="mt-4 flex gap-4"></div>
+    </>
+  );
+};
+
+export default React.memo(Layout);

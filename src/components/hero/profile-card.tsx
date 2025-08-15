@@ -2,13 +2,36 @@ import React from "react";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
+import { useNavigate } from "react-router-dom";
+
+interface User {
+  id?: number;
+  email: string;
+  name?: string;
+  role?: string;
+}
 
 interface ProfileCardProps {
   isLoggedIn: boolean;
-  onLogin: () => void;
+  user?: User | null;
 }
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
+const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, user }) => {
+  const navigate = useNavigate();
+  const getUserDisplayName = () => {
+    if (user?.name) {
+      return `${user.name}님`;
+    } else if (user?.email) {
+      const username = user.email.split("@")[0];
+      return `${username}님`;
+    }
+    return "열정 만수르";
+  };
+
+  const getUserEmail = () => {
+    return user?.email || "paul-lab@naver.com";
+  };
+
   if (isLoggedIn) {
     return (
       <article className="flex flex-col justify-center items-center w-[290px] p-8 box-border bg-white border border-gray200 rounded-[10px] text-center max-[834px]:hidden">
@@ -16,18 +39,18 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
           <img
             className="w-full h-full object-cover"
             src={profileImg}
-            alt="위니브 소울곰 프로필"
+            alt="사용자 프로필"
           />
         </div>
-        <h3 className="mb-4 text-main-text text-base font-semibold">
-          위니브 소울곰
+        <h3 className="mb-2 text-main-text text-base font-semibold">
+          {getUserDisplayName()}
         </h3>
-        <p className="text-sm text-gray500 mb-6">paul-lab@naver.com</p>
+        <p className="text-sm text-gray500 mb-6">{getUserEmail()}</p>
 
         <ul className="flex flex-col justify-center items-start gap-4 list-none">
           <li>
             <a
-              href="#"
+              href="#/mycourses"
               className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
             >
               <VideoIcon />내 강의 목록 보기
@@ -35,7 +58,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
           </li>
           <li>
             <a
-              href="#"
+              href="#/mypage"
               className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
             >
               <UserIcon />
@@ -64,8 +87,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, onLogin }) => {
         커뮤니티와 함께 성장하세요.
       </p>
       <button
-        className="w-full bg-primary text-white border-none rounded-[10px] py-[14px] px-0 text-sm font-medium transition-colors hover:bg-[#3a7ce0] transition-colors duration-200 ease-in-out "
-        onClick={onLogin}
+        className="w-full bg-primary text-white border-none rounded-[10px] py-[14px] px-0 text-sm font-medium transition-colors hover:bg-[#3a7ce0] duration-200 ease-in-out "
+        onClick={() => navigate("/login")}
       >
         로그인
       </button>

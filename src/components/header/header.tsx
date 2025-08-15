@@ -1,13 +1,21 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logoImg from "../../assets/logo.png";
 import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";
 import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
+import { useAuth } from "../../hooks/useAuth";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  isLoggedIn: boolean;
+  onLogout?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user } = useAuth();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -15,11 +23,13 @@ const Header: React.FC = () => {
   };
 
   const handleLogin = () => {
-    setIsLoggedIn(true);
+    navigate("/login");
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
+  const handleLogout = async () => {
+    if (onLogout) {
+      await onLogout();
+    }
   };
 
   const toggleMobileMenu = () => {
@@ -36,7 +46,7 @@ const Header: React.FC = () => {
         <div className="flex items-center min-[835px]:justify-center min-[835px]:h-[70px] min-[835px]:px-4 max-[834px]:justify-between max-[834px]:w-full max-[834px]:h-14 max-[834px]:px-4 max-w-[1190px] max-[834px]:max-w-[calc(100%-32px)] mx-auto">
           <div className="min-[835px]:flex min-[835px]:items-center min-[835px]:w-full min-[835px]:justify-between max-[834px]:contents">
             <h1 className="min-[835px]:flex-shrink-0 min-[835px]:w-34 md:w-36 lg:w-40 xl:w-[202px]">
-              <a href="#">
+              <a href="#" onClick={() => navigate("/")}>
                 <img
                   src={logoImg}
                   alt="logo"
@@ -88,8 +98,8 @@ const Header: React.FC = () => {
 
                 <UserProfile
                   isLoggedIn={isLoggedIn}
-                  onLogin={handleLogin}
                   onLogout={handleLogout}
+                  user={user}
                 />
               </div>
             </div>
@@ -117,6 +127,7 @@ const Header: React.FC = () => {
         onClose={closeMobileMenu}
         onLogin={handleLogin}
         onLogout={handleLogout}
+        user={user}
       />
     </>
   );

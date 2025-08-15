@@ -8,77 +8,79 @@ import type {
 // 프로필 정보 가져오기
 export const fetchProfile = createAsyncThunk<UserProfile>(
   "myPage/fetchProfile",
-  async () => {
-    const user = await fetch("http://13.125.180.222/api/users/login/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: "jaeho614a@gmail.com",
-        password: "jaeho614@",
-      }),
-    });
-    const userData = await user.json();
-    const accessToken = userData.access;
+  async (_, { rejectWithValue }) => {
+    try {
+      // 인증 토큰을 localStorage나 다른 방법으로 관리하는 것을 권장
+      const token = localStorage.getItem("accessToken");
 
-    const response = await fetch("http://13.125.180.222/api/users/mypage/", {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
+      if (!token) {
+        throw new Error("인증 토큰이 없습니다.");
+      }
 
-    if (!response.ok) {
-      throw new Error("프로필 정보를 불러오는데 실패했습니다.");
+      const response = await fetch("http://13.125.180.222/api/users/mypage/", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : "프로필 정보를 불러오는데 실패했습니다."
+      );
     }
-
-    return await response.json();
   }
 );
 
 // 프로필 정보 수정
 export const updateProfile = createAsyncThunk<UserProfile, ProfileFormData>(
   "myPage/updateProfile",
-  async (formData: ProfileFormData) => {
-    const requestData = new FormData();
-    requestData.append("name", formData.name);
-    requestData.append("gender", formData.gender as string);
-    requestData.append("birth_date", formData.birth_date);
-    requestData.append("email", "jaeho614a@gmail.com");
-    requestData.append("password", "jaeho614!");
+  async (formData, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("accessToken");
 
-    if (formData.profile_image) {
-      requestData.append("profile_image", formData.profile_image);
+      if (!token) {
+        throw new Error("인증 토큰이 없습니다.");
+      }
+
+      const requestData = new FormData();
+      requestData.append("name", formData.name);
+      requestData.append("gender", formData.gender as string);
+      requestData.append("birth_date", formData.birth_date);
+
+      if (formData.profile_image) {
+        requestData.append("profile_image", formData.profile_image);
+      }
+
+      const response = await fetch("http://13.125.180.222/api/users/mypage/", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: requestData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "프로필 수정에 실패했습니다."
+      );
     }
-
-    const user = await fetch("http://13.125.180.222/api/users/login/", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: "jaeho614a@gmail.com",
-        password: "jaeho614@",
-      }),
-    });
-    const userData = await user.json();
-    const accessToken = userData.access;
-
-    const response = await fetch("http://13.125.180.222/api/users/mypage/", {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: requestData,
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || "프로필 수정에 실패했습니다.");
-    }
-
-    return await response.json();
   }
 );
 
@@ -98,6 +100,9 @@ const myPageSlice = createSlice({
       state.error = null;
       state.success = false;
     },
+    clearMyPageError: state => {
+      state.error = null;
+    },
   },
   extraReducers: builder => {
     builder
@@ -113,7 +118,8 @@ const myPageSlice = createSlice({
       .addCase(fetchProfile.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          action.error.message || "프로필 정보를 불러오는데 실패했습니다.";
+          (action.payload as string) ||
+          "프로필 정보를 불러오는데 실패했습니다.";
       })
       // 프로필 정보 수정
       .addCase(updateProfile.pending, state => {
@@ -128,10 +134,12 @@ const myPageSlice = createSlice({
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || "프로필 수정에 실패했습니다.";
+        state.error =
+          (action.payload as string) || "프로필 수정에 실패했습니다.";
       });
   },
 });
 
-export const { resetMyPageState } = myPageSlice.actions;
+export const { resetMyPageState, clearMyPageError } = myPageSlice.actions;
+
 export default myPageSlice.reducer;

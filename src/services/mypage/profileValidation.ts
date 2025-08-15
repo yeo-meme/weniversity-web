@@ -3,7 +3,6 @@ import type {
   ProfileValidationMessages,
 } from "../../types/myPage/myPage";
 
-// 회원가입과 동일한 유효성 검사 함수들 재사용
 export const validateProfileName = (name: string): string | undefined => {
   if (!name) {
     return "이름을 입력해주세요.";

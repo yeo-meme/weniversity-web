@@ -9,37 +9,33 @@ import type {
 export const sendPasswordResetEmail = createAsyncThunk<
   PasswordResetResponse,
   PasswordResetRequest
->("passwordReset/sendEmail", async (requestData: PasswordResetRequest) => {
-  const { email } = requestData;
+>("passwordReset/sendEmail", async (requestData, { rejectWithValue }) => {
+  try {
+    const { email } = requestData;
 
-  await fetch("http://13.125.180.222/api/users/login/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email: "jaeho614a@gmail.com",
-      password: "jaeho614!",
-    }),
-  });
+    const response = await fetch("http://13.125.180.222/api/password-reset/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email }),
+    });
 
-  const response = await fetch("http://13.125.180.222/api/password-reset/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email,
-    }),
-  });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || "비밀번호 재설정 이메일 전송에 실패했습니다."
+      );
+    }
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.message || "비밀번호 재설정 이메일 전송에 실패했습니다."
+    return await response.json();
+  } catch (error) {
+    return rejectWithValue(
+      error instanceof Error
+        ? error.message
+        : "비밀번호 재설정 이메일 전송에 실패했습니다."
     );
   }
-  return await response.json();
 });
 
 const initialState: PasswordResetState = {
@@ -81,11 +77,13 @@ const findPasswordSlice = createSlice({
       .addCase(sendPasswordResetEmail.rejected, (state, action) => {
         state.loading = false;
         state.error =
-          action.error.message || "비밀번호 재설정 이메일 전송에 실패했습니다.";
+          (action.payload as string) ||
+          "비밀번호 재설정 이메일 전송에 실패했습니다.";
       });
   },
 });
 
 export const { resetPasswordResetState, clearPasswordResetError } =
   findPasswordSlice.actions;
+
 export default findPasswordSlice.reducer;

@@ -1,19 +1,28 @@
 import React, { useState, useRef, useEffect } from "react";
 import profileImg from "../../assets/profile-img.png";
+import { useNavigate } from "react-router-dom";
+
+interface User {
+  id?: number;
+  email: string;
+  name?: string;
+  role?: string;
+}
 
 interface UserProfileProps {
   isLoggedIn: boolean;
-  onLogin: () => void;
   onLogout: () => void;
+  user?: User | null;
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({
   isLoggedIn,
-  onLogin,
   onLogout,
+  user,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -47,7 +56,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
         <button
           className="rounded-[10px] py-[11px] px-3 lg:px-5 text-white bg-primary whitespace-nowrap text-sm"
           type="button"
-          onClick={onLogin}
+          onClick={() => navigate("/login")}
         >
           로그인
         </button>
@@ -60,6 +69,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
             className="flex items-center w-[42px] h-[42px] rounded-full bg-transparent p-0 transition-all relative"
             type="button"
             onClick={toggleDropdown}
+            title={user?.email ? `${user.email}님의 프로필` : "사용자 프로필"}
           >
             <img
               src={profileImg}
@@ -84,18 +94,18 @@ const UserProfile: React.FC<UserProfileProps> = ({
           >
             <nav>
               <a
-                href="#"
+                href="#/mycourses"
                 className="block py-2.5 pl-5 pr-0 no-underline text-main-text bg-transparent text-sm font-medium cursor-pointer hover:bg-gray100"
               >
                 내 강의 목록
               </a>
               <a
-                href="#"
+                href="#/mypage"
                 className="block py-2.5 pl-5 pr-0 no-underline text-main-text bg-transparent text-sm font-medium cursor-pointer hover:bg-gray100"
               >
                 마이페이지
               </a>
-              <hr className="my-2 border-t border-gray200 block mx-0 border-solid border-t-[1px]" />
+              <hr className="my-2 border-gray200 block mx-0 border-solid border-t-[1px]" />
               <button
                 className="block py-2.5 pl-5 pr-0 text-main-text bg-transparent border-none text-left cursor-pointer text-sm font-medium w-full hover:bg-gray100"
                 type="button"
@@ -103,7 +113,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
               >
                 로그아웃
               </button>
-              <hr className="my-2 border-t border-gray200 block mx-0 border-solid border-t-[1px]" />
+              <hr className="my-2 border-gray200 block mx-0 border-solid border-t-[1px]" />
             </nav>
             <address className="py-2 pl-4 pr-0 text-xs text-gray500 not-italic">
               제보 및 문의: paul-lab@naver.com

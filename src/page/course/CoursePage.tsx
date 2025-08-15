@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback, useMemo } from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
 import {
   fetchCourses,
   setActiveFilter,
@@ -11,9 +11,11 @@ import type { CourseFilters } from "../../types/course/course";
 import FilterSection from "../../components/course/FilterSection";
 import CourseList from "../../components/course/CourseList";
 import FilterControls from "../../components/course/FilterControls";
+import { useSearchParams } from "react-router-dom";
 
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch();
+  const [searchParams] = useSearchParams(); //
   const { courses, filters, activeFilters, pagination, loading, error } =
     useAppSelector(state => state.course);
 
@@ -51,6 +53,20 @@ const CoursePage: React.FC = () => {
       dispatch(resetCourseState());
     };
   }, [dispatch]);
+
+  // URL 파라미터에서 카테고리 초기 설정
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    if (categoryParam && categoryParam !== "전체") {
+      dispatch(clearAllFilters());
+      dispatch(
+        setActiveFilter({
+          filterType: "categories",
+          value: categoryParam,
+        })
+      );
+    }
+  }, [searchParams, dispatch]);
 
   // 필터 변경 핸들러
   const handleFilterChange = useCallback(

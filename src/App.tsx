@@ -1,25 +1,72 @@
-import HeroSection from "./components/hero/hero-section.tsx";
-import MyPage from "./pages/mypage/MyPage.tsx";
-import Header from "./components/header/header.tsx";
-import RegisterPage from "./pages/register/RegisterPage.tsx";
-import CoursePage from "./pages/course/CoursePage.tsx";
-import CourseDetailPage from "./pages/courseDetail/CourseDetailPage.tsx";
-import "./index.css";
+// import Header from "./components/header/header.tsx";
+// import HeroSection from "./components/hero/hero-section.tsx";
+// import MyPage from "./page/mypage/MyPage.tsx";
+// import RegisterPage from "./page/register/RegisterPage.tsx";
+// import CoursePage from "./page/course/CoursePage.tsx";
+// import CourseDetailPage from "./page/courseDetail/CourseDetailPage.tsx";
+// import { useState } from "react";
+// import { Provider } from "react-redux";
+// import { store } from "./store";
+// import { useAppSelector, useAppDispatch } from "./hooks/redux-hooks";
+// import { logout } from "./auth/auth-slice.ts";
+// import LoginPage from "./page/login/login.tsx";
+// import "./index.css";
 
-function App() {
-  return (
-    <>
-      <Header />
-      <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
-        <HeroSection />
-        <RegisterPage />
-        <MyPage />
-        <CoursePage />
-        <CourseDetailPage />
-        <div className="mt-4 flex gap-4"></div>
-      </main>
-    </>
-  );
-}
+// function AppContent() {
+//   const [currentPage, setCurrentPage] = useState("main");
+//   const dispatch = useAppDispatch();
 
-export default App;
+//   const { isAuthenticated } = useAppSelector(state => state.auth);
+
+//   // 로그인 성공 시
+//   const handleLoginSuccess = () => {
+//     setCurrentPage("main");
+//   };
+
+//   // 로그아웃 시
+//   const handleLogout = () => {
+//     dispatch(logout());
+//     setCurrentPage("main");
+//   };
+
+//   if (currentPage === "login") {
+//     return (
+//       <LoginPage
+//         onLoginSuccess={handleLoginSuccess}
+//         onGoToMain={() => setCurrentPage("main")}
+//       />
+//     );
+//   }
+
+//   return (
+//     <>
+//       <Header
+//         isLoggedIn={isAuthenticated}
+//         onLogin={() => setCurrentPage("login")}
+//         onLogout={handleLogout}
+//         onGoToMain={() => setCurrentPage("main")}
+//       />
+//       <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
+//         <RegisterPage />
+//         <MyPage />
+//         <CoursePage />
+//         <CourseDetailPage />
+//         <HeroSection
+//           isLoggedIn={isAuthenticated}
+//           onLogin={() => setCurrentPage("login")}
+//         />
+//         <div className="mt-4 flex gap-4"></div>
+//       </main>
+//     </>
+//   );
+// }
+
+// function App() {
+//   return (
+//     <Provider store={store}>
+//       <AppContent />
+//     </Provider>
+//   );
+// }
+
+// export default App;

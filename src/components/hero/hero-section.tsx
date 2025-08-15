@@ -1,18 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
+import { useAppSelector } from "../../hooks/redux-hooks";
 import HeroBanner from "./hero-banner.tsx";
 import ProfileCard from "./profile-card.tsx";
 
-const HeroSection: React.FC = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+interface HeroSectionProps {
+  isLoggedIn: boolean;
+}
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-  };
+const HeroSection: React.FC<HeroSectionProps> = () => {
+  const { isAuthenticated, user } = useAppSelector(state => state.auth);
 
   return (
     <section className="flex gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
       <HeroBanner />
-      <ProfileCard isLoggedIn={isLoggedIn} onLogin={handleLogin} />
+      <ProfileCard isLoggedIn={isAuthenticated} user={user} />
     </section>
   );
 };

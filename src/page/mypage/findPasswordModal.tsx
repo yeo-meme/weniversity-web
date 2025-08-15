@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import FindPasswordInput from "../../components/mypage/accountmanagement/findPasswordInput";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
 import {
   sendPasswordResetEmail,
   resetPasswordResetState,
