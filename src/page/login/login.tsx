@@ -99,6 +99,7 @@ const LoginPage: React.FC<{
     if (!validateForm()) return;
     try {
       await login(formData).unwrap();
+      onLoginSuccess();
     } catch (error) {
       console.error("로그인 실패:", error);
     }

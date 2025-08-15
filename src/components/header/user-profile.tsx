@@ -2,39 +2,40 @@ import React, { useState, useRef, useEffect } from "react";
 import { useAppDispatch } from "../../hooks/hook";
 import { goToMyLectures } from "../../store/slices/lecture-slice";
 import profileImg from "../../assets/profile-img.png";
+import { useNavigate } from "react-router-dom"; 
+import { useAppSelector } from "../../hooks/hook"; 
+import { useLogoutMutation, useLoginMutation } from "../../auth/authApiSlice"; 
 
-
-interface UserProfileProps {
-  isLoggedIn: boolean;
-  onLogin: () => void;
-  onLogout: () => void;
-  user?: {
-    id?: number | null;
-    email: string;
-    name?: string | null;
-    role?: string | null;
-  } | null;
-}
-
-const UserProfile: React.FC<UserProfileProps> = ({
-  isLoggedIn,
-  onLogin,
-  onLogout,
-  user,
-}) => {
+const UserProfile: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate(); 
+
+  const { user, token } = useAppSelector((state) => state.auth);
+  const [logoutMutation] = useLogoutMutation();
+  const [loginMutation] = useLoginMutation();
+
+  const isActuallyLoggedIn = !!user?.email && !!token;
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleLogout = () => {
-    onLogout();
-    setIsDropdownOpen(false);
+  const handleLogout = async () => {
+    try {
+      await logoutMutation({
+        access: token || undefined,
+      }).unwrap();
+    } catch (error) {
+      console.error("로그아웃 오류:", error);
+    } finally {
+      setIsDropdownOpen(false);
+    }
   };
 
+
+      // onLogout();
   const handleGoToMyLectures = () => {
     dispatch(goToMyLectures());
     setIsDropdownOpen(false);
@@ -59,18 +60,20 @@ const UserProfile: React.FC<UserProfileProps> = ({
   return (
     <div>
       {/* 로그인 전 버튼 */}
-      {!isLoggedIn && (
+      {!isActuallyLoggedIn && (
         <button
           className="rounded-[10px] py-[11px] px-3 lg:px-5 text-white bg-primary whitespace-nowrap text-sm"
           type="button"
-          onClick={onLogin}
+          onClick={() => {
+            navigate('/login')
+          }}
         >
           로그인
         </button>
       )}
 
       {/* 로그인 후 프로필 버튼 + 드롭다운 */}
-      {isLoggedIn && (
+      {isActuallyLoggedIn && (
         <div className="relative inline-block" ref={dropdownRef}>
           <button
             className="flex items-center w-[42px] h-[42px] rounded-full bg-transparent p-0 transition-all relative"

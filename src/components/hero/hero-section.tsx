@@ -2,19 +2,17 @@ import React from "react";
 import { useAppSelector } from "../../hooks/hook.ts";
 import HeroBanner from "./hero-banner.tsx";
 import ProfileCard from "./profile-card.tsx";
+import {useNavigate} from "react-router-dom"
 
-interface HeroSectionProps {
-  isLoggedIn: boolean;
-  onLogin: () => void;
-}
-
-const HeroSection: React.FC<HeroSectionProps> = ({ onLogin }) => {
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+const HeroSection: React.FC = () => {
+  const { user, token } = useAppSelector((state) => state.auth);
+  const isActuallyLoggedIn = !!user?.email && !!token;
+  const navigate = useNavigate();
 
   return (
     <section className="flex gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
       <HeroBanner />
-      <ProfileCard isLoggedIn={isAuthenticated} onLogin={onLogin} user={user} />
+      <ProfileCard  isLoggedIn={isActuallyLoggedIn} onLogin={() => navigate("/login")} user={user} />
     </section>
   );
 };

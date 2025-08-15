@@ -86,6 +86,12 @@ const authSlice = createSlice({
 
       state.tokenExpiration = TokenService.getTokenExpiration(token);
     },
+    resetAuth: (state) => {
+      state.user = null;
+      state.token = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -102,8 +108,6 @@ const authSlice = createSlice({
 
           const data: any = action.payload;
 
-         
-
           if (data.access) {
             console.log("🔑 Case 1: access 토큰 방식");
             console.log("📧 email:", data.email);
@@ -115,8 +119,6 @@ const authSlice = createSlice({
               name: null,
               role: data.role || null,
             };
-
-            console.log("👤 생성된 user:", user);
 
             authSlice.caseReducers.setCredentials(state, {
               type: "auth/setCredentials",
@@ -176,7 +178,7 @@ const authSlice = createSlice({
         (action) => action.type === "persist/REHYDRATE" && action.key === "auth",
         (state) => {
           state.isHydrated = true;
-          console.log("✅ persist/REHYDRATE 완료: auth 상태 복원됨");
+          state.isAuthenticated = !!(state.user?.email && state.token);
         }
       )
       .addMatcher(
@@ -193,7 +195,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError, setCredentials, updateToken } =
+export const { logout, clearError, setCredentials, updateToken,resetAuth } =
   authSlice.actions;
 export default authSlice.reducer;
 

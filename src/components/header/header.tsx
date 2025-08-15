@@ -1,36 +1,64 @@
 import React, { useState } from "react";
 import { useAppSelector } from "../../hooks/hook.ts";
-import { useLogoutMutation } from "../../auth/authApiSlice.ts";
+import { useLogoutMutation,useLoginMutation } from "../../auth/authApiSlice.ts";
 import logoImg from "../../assets/logo.png";
 import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";
 import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
+import { resetAuth } from "../../auth/authSlice.ts";
+import { useAppDispatch } from "../../hooks/hook.ts";
+import { useNavigate } from "react-router-dom"; 
 
-interface HeaderProps {
-  isLoggedIn: boolean;
-  onLogin?: () => void;
-  onLogout?: () => void;
-  onGoToMain?: () => void;
-}
+// interface HeaderProps {
+//   isLoggedIn: boolean;
+//   onLogin?: () => void;
+//   onLogout?: () => void;
+//   onGoToMain?: () => void;
+// }
 
-const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
+const Header: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const [loginMutation] = useLoginMutation();
+  const [logoutMutation] = useLogoutMutation();
+
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { isAuthenticated, user, token, refreshToken } = useAppSelector(
     (state) => state.auth
   );
 
-  const [logoutMutation] = useLogoutMutation();
+  const isActuallyLoggedIn = isAuthenticated && 
+                          !!user?.email && 
+                          !!token && 
+                          token !== "null";
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // 검색 로직 구현
   };
 
-  const handleLogin = () => {
-    if (onLogin) {
-      onLogin();
+  // const handleLogin = () => {
+  //   if (onLogin) {
+  //     onLogin();
+  //   }
+  // };
+
+  const handleLogin = async (credentials: { email: string; password: string }) => {
+    try {
+      // 로그인 API 호출
+      const result = await loginMutation(credentials).unwrap();
+      
+      console.log("로그인 API 응답:", result);
+      
+      // 로그인 성공 콜백 실행
+      // if (onLogin) {
+      //   onLogin();
+      // }
+      
+    } catch (error) {
+      console.error("로그인 오류:", error);
     }
   };
 
@@ -46,15 +74,19 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
         refresh: refreshToken || undefined,
       }).unwrap();
 
+      localStorage.removeItem('persist:auth');
       console.log("✅ API 로그아웃 성공:", result);
     } catch (error) {
       console.error("❌ 로그아웃 API 오류:", error);
     }
 
-    if (onLogout) {
-      onLogout();
-      console.log("🔄 로컬 로그아웃 콜백 실행 완료");
-    }
+        // persistor 초기화
+        dispatch(resetAuth());
+
+    // if (onLogout) {
+    //   onLogout();
+    //   console.log("🔄 로컬 로그아웃 콜백 실행 완료");
+    // }
 
     console.log("🎉 로그아웃 프로세스 완료");
     alert("로그아웃 되었습니다.");
@@ -78,7 +110,7 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
-                  if (onGoToMain) onGoToMain();
+                  navigate('/');
                 }}
               >
                 <img
@@ -131,10 +163,6 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
                 </form>
 
                 <UserProfile
-                  isLoggedIn={isAuthenticated}
-                  onLogin={handleLogin}
-                  onLogout={handleLogout}
-                  user={user}
                 />
               </div>
             </div>
@@ -158,11 +186,7 @@ const Header: React.FC<HeaderProps> = ({ onLogin, onLogout, onGoToMain }) => {
 
       <MobileMenu
         isOpen={isMobileMenuOpen}
-        isLoggedIn={isAuthenticated}
         onClose={closeMobileMenu}
-        onLogin={handleLogin}
-        onLogout={handleLogout}
-        user={user}
       />
     </>
   );

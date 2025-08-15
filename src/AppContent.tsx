@@ -12,23 +12,21 @@ import TabSync from "./components/TabSync";
 import { selectAuthToken,selectCurrentUser,selectIsAuthenticated } from './auth/authSlice'
 
 function HomePage() {
-  const navigate = useNavigate();
-  return <HeroSection isLoggedIn={false} onLogin={() => navigate("/login")} />;
+  
+  return <HeroSection  />;
 }
 
 function AppContent() {
   const dispatch = useAppDispatch();
-//   const { isAuthenticated,isHydrated } = useAppSelector((state) => state.auth);
-
 const currentUser = useAppSelector(selectCurrentUser);
 const token = useAppSelector(selectAuthToken);
 const isAuthenticated = useAppSelector(selectIsAuthenticated);
 const { isHydrated } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
+  const isActuallyLoggedIn = !!currentUser?.email && !!token;
 
 
- 
-  const { currentTab } = useAppSelector((state) => state.page); // ✅ page 슬라이스에서 읽기
+  const { currentTab } = useAppSelector((state) => state.page); 
   console.log("현재 Redux currentTab:", currentTab);
 
   console.log("=== Auth 상태 디버깅 ===");
@@ -64,10 +62,6 @@ const { isHydrated } = useAppSelector((state) => state.auth);
     <>
       <TabSync />
       <Header
-        isLoggedIn={isAuthenticated}
-        onLogin={() => navigate("/login")}
-        onLogout={handleLogout}
-        onGoToMain={() => navigate("/")}
       />
       <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
         <Routes>
@@ -79,7 +73,7 @@ const { isHydrated } = useAppSelector((state) => state.auth);
           <Route
             path="/my-lectures"
             element={
-              isAuthenticated ? (
+              isActuallyLoggedIn ? (
                 <MyLectures />
               ) : (
                 <LoginPage onLoginSuccess={handleLoginSuccess} onGoToMain={() => navigate("/")} />
