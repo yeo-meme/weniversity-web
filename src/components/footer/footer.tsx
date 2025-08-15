@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import FooterLogo from "../../assets/footer-logo.png";
 import YoutubeIcon from "../../assets/icon-youtube.png";
 import InstaIcon from "../../assets/icon-insta.png";
@@ -8,9 +8,9 @@ import HomeIcon from "../../assets/icon-home.png";
 import DiscordIcon from "../../assets/icon-discord.png";
 
 const Footer: React.FC = () => {
-  const handleSocialClick = (platform: string) => {
+  const handleSocialClick = useCallback((platform: string) => {
     alert(`Weniversity ${platform} 준비중입니다.`);
-  };
+  }, []);
 
   const socialLinks = [
     { name: "홈페이지", icon: HomeIcon },
@@ -69,7 +69,7 @@ const Footer: React.FC = () => {
                 <img
                   src={social.icon}
                   alt={social.name}
-                  className="w-5 h-5 object-contain filter invert"
+                  className="w-5 h-5 object-contain"
                 />
               </button>
             ))}
@@ -80,4 +80,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer;
+export default React.memo(Footer);

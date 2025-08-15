@@ -54,4 +54,4 @@ const NotFoundPage: React.FC = () => {
   );
 };
 
-export default NotFoundPage;
+export default React.memo(NotFoundPage);
