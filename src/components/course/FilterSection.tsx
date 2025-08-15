@@ -20,7 +20,7 @@ const FilterRow = memo<{
   filterType: keyof CourseFilters;
   onFilterChange: (filterType: keyof CourseFilters, value: string) => void;
 }>(({ title, options, activeValues, filterType, onFilterChange }) => (
-  <div className="flex items-center p-5 border-b border-gray-200">
+  <div className="flex items-center p-5 border-gray-200">
     <h3 className="font-bold text-gray-700 mr-5 w-20">{title}</h3>
     <div className="flex flex-wrap gap-2 overflow-x-auto custom-scrollbar">
       {options.map(option => (
