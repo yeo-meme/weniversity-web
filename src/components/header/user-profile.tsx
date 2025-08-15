@@ -3,18 +3,17 @@ import { useAppDispatch } from "../../hooks/hook";
 import { goToMyLectures } from "../../store/slices/lecture-slice";
 import profileImg from "../../assets/profile-img.png";
 
-interface User {
-  id?: number;
-  email: string;
-  name?: string;
-  role?: string;
-}
 
 interface UserProfileProps {
   isLoggedIn: boolean;
   onLogin: () => void;
   onLogout: () => void;
-  user?: User | null;
+  user?: {
+    id?: number | null;
+    email: string;
+    name?: string | null;
+    role?: string | null;
+  } | null;
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({

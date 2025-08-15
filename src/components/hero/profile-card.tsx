@@ -7,17 +7,17 @@ import { VideoIcon, UserIcon } from "../common/icon.tsx";
 
 import { useNavigate } from "react-router-dom";
 
-interface User {
-  id?: number;
-  email: string;
-  name?: string;
-  role?: string;
-}
+
 
 interface ProfileCardProps {
   isLoggedIn: boolean;
   onLogin: () => void;
-  user?: User | null;
+  user?: {
+    id?: number | null;
+    email: string;
+    name?: string | null;
+    role?: string | null;
+  } | null;
 }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({

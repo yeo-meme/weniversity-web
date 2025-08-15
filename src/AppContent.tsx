@@ -74,7 +74,7 @@ const { isHydrated } = useAppSelector((state) => state.auth);
           <Route path="/" element={<HomePage />} />
           <Route
             path="/login"
-            element={<LoginPage onLoginSuccess={handleLoginSuccess} />}
+            element={<LoginPage onLoginSuccess={handleLoginSuccess} onGoToMain={() => navigate("/")}/>}
           />
           <Route
             path="/my-lectures"
@@ -82,7 +82,7 @@ const { isHydrated } = useAppSelector((state) => state.auth);
               isAuthenticated ? (
                 <MyLectures />
               ) : (
-                <LoginPage onLoginSuccess={handleLoginSuccess} />
+                <LoginPage onLoginSuccess={handleLoginSuccess} onGoToMain={() => navigate("/")} />
               )
             }
           />

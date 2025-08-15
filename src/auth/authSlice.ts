@@ -5,10 +5,10 @@ import { TokenService } from "./token-service.ts";
 import type { RootState } from "../store/store.ts";
 
 interface User {
-  id: number | null;        
+  id?: number | null;       
   email: string;
-  name: string | null;      
-  role: string | null; 
+  name?: string | null;      
+  role?: string | null; 
 }
 
 interface AuthState {
@@ -100,23 +100,9 @@ const authSlice = createSlice({
           state.loading = false;
           state.error = null;
 
-          const data = action.payload;
+          const data: any = action.payload;
 
-          if (data.access) {
-
-           
-
-            console.log("🔑 Case 1: access 토큰 방식");
-            console.log("📧 email:", data.email);
-            console.log("🎯 role:", data.role);
-            console.log("🚫 id:", data.id);        // 확인
-            console.log("🚫 name:", data.name);    // 확인
-          }
-      
-          if (data.success && data.data?.token) {
-            console.log("🔑 Case 2: data.token 방식");
-            console.log("📬 data.user:", data.data.user);
-          }
+         
 
           if (data.access) {
             console.log("🔑 Case 1: access 토큰 방식");
@@ -145,6 +131,7 @@ const authSlice = createSlice({
               id: data.data.user.id,
               email: data.data.user.email,
               name: data.data.user.name,
+              role: data.data.user.role || null,
             };
 
             authSlice.caseReducers.setCredentials(state, {
