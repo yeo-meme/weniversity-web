@@ -22,8 +22,8 @@ const LectureFilter: React.FC<LectureFilterProps> = ({
       onClick={handleClick}
       className={`flex items-center justify-center min-w-[70px] px-3 transition-colors ${
         isActive
-          ? "text-blue-600 font-bold"
-          : " text-gray-500 hover:text-blue-600"
+          ? "text-primary font-bold"
+          : " text-gray500 hover:text-blue-600"
       }`}
     >
       {label}

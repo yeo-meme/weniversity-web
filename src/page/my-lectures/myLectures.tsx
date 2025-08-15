@@ -74,7 +74,7 @@ const MyLectures = () => {
       <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
         <h2 className="text-[40px] font-bold mb-6">내 강의 목록</h2>
         <div className="text-center py-12">
-          <p className="text-gray-500">강의 목록을 불러오는 중...</p>
+          <p className="text-gray500">강의 목록을 불러오는 중...</p>
         </div>
       </div>
     );
@@ -85,11 +85,11 @@ const MyLectures = () => {
       <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
         <h2 className="text-[40px] font-bold mb-6">내 강의 목록</h2>
         <div className="text-center py-12">
-          <p className="text-red-500">강의 목록을 불러오는데 실패했습니다.</p>
-          <p className="text-sm text-gray-500 mt-2">{getErrorMessage(error)}</p>
+          <p className="text-error">강의 목록을 불러오는데 실패했습니다.</p>
+          <p className="text-sm text-gray500 mt-2">{getErrorMessage(error)}</p>
           <button
             onClick={() => refetch()}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            className="mt-4 px-4 py-2 bg-primary text-white rounded hover:bg-blue-600"
           >
             다시 시도
           </button>
@@ -104,9 +104,9 @@ const MyLectures = () => {
     <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
       <h2 className="text-[40px] font-bold mb-6">내 강의 목록</h2>
 
-      <div className="border-y-2 border-gray-200 mb-8">
-        <div className="flex items-center p-5 border-b border-gray-200">
-          <h3 className="font-bold text-gray-700 mr-5 w-20">상태</h3>
+      <div className="border-y-2 border-gray200 mb-8">
+        <div className="flex items-center p-5 border-b border-gray200">
+          <h3 className="font-bold text-main-text mr-5 w-20">상태</h3>
           <div className="flex flex-wrap gap-2">
             {statusOptions.map((status) => (
               <LectureFilter
@@ -121,7 +121,7 @@ const MyLectures = () => {
         </div>
 
         <div className="flex items-center p-5">
-          <h3 className="font-bold text-gray-700 mr-5 w-20">유형</h3>
+          <h3 className="font-bold text-main-text mr-5 w-20">유형</h3>
           <div className="flex flex-wrap gap-2">
             {subjectOptions.map((subject) => (
               <LectureFilter
@@ -156,12 +156,12 @@ const MyLectures = () => {
 
       {lectures.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-500">조건에 맞는 강의가 없습니다.</p>
+          <p className="text-gray500">조건에 맞는 강의가 없습니다.</p>
         </div>
       )}
 
       {lecturesData && (
-        <div className="text-sm text-gray-600 mt-4">
+        <div className="text-sm text-gray500 mt-4">
           총 {lecturesData.count}개의 강의
         </div>
       )}
