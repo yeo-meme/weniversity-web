@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../hooks/redux-hooks";
 import { setActiveFilter, clearAllFilters } from "../../store/courseSlice";
@@ -66,20 +66,23 @@ const CategoryMenu: React.FC = () => {
     },
   ];
 
-  const handleCategoryClick = (category: CategoryItem) => {
-    dispatch(clearAllFilters());
+  const handleCategoryClick = useCallback(
+    (category: CategoryItem) => {
+      dispatch(clearAllFilters());
 
-    if (category.id !== "all") {
-      dispatch(
-        setActiveFilter({
-          filterType: "categories",
-          value: category.filterValue,
-        })
-      );
-    }
+      if (category.id !== "all") {
+        dispatch(
+          setActiveFilter({
+            filterType: "categories",
+            value: category.filterValue,
+          })
+        );
+      }
 
-    navigate("/courses");
-  };
+      navigate("/courses");
+    },
+    [dispatch, navigate]
+  );
 
   return (
     <section className="w-full max-w-[880px] mx-auto px-5 py-8">
@@ -118,4 +121,4 @@ const CategoryMenu: React.FC = () => {
   );
 };
 
-export default CategoryMenu;
+export default React.memo(CategoryMenu);

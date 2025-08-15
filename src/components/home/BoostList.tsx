@@ -10,20 +10,17 @@ import CourseCard from "../course/CourseCard";
 import CourseCardSkeleton from "../course/CourseCardSkeleton";
 import RightIcon from "../../assets/icon-right.png";
 
-// 상수 분리
 const SKELETON_COUNT = 3;
 const BOOST_COMMUNITY_FILTER = "부스트 커뮤니티";
 
 const BoostList: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-
-  // 필요한 상태만 구조분해할당
   const { boostCourses, boostLoading, boostError } = useAppSelector(
     state => state.homeCourse
   );
 
-  // 더보기 버튼 클릭 핸들러 최적화 (useCallback 사용)
+  // 더보기 버튼 클릭 핸들러
   const handleMoreClick = useCallback(() => {
     dispatch(clearAllFilters());
     dispatch(
@@ -35,7 +32,7 @@ const BoostList: React.FC = () => {
     navigate("/courses");
   }, [dispatch, navigate]);
 
-  // 스켈레톤 배열 메모화
+  // 스켈레톤 배열
   const skeletonArray = useMemo(
     () =>
       Array.from({ length: SKELETON_COUNT }).map((_, index) => (
@@ -44,7 +41,7 @@ const BoostList: React.FC = () => {
     []
   );
 
-  // 강의 카드 목록 메모화
+  // 강의 카드 목록
   const courseCards = useMemo(
     () =>
       boostCourses.map(course => (
@@ -53,18 +50,18 @@ const BoostList: React.FC = () => {
     [boostCourses]
   );
 
-  // 빈 상태 조건 메모화
+  // 빈 상태
   const isEmpty = useMemo(
     () => !boostLoading && boostCourses.length === 0 && !boostError,
     [boostLoading, boostCourses.length, boostError]
   );
 
-  // 데이터 fetch effect
+  // 데이터 fetch
   useEffect(() => {
     dispatch(fetchBoostCourses());
   }, [dispatch]);
 
-  // 클린업 effect
+  // 클린업
   useEffect(() => {
     return () => {
       dispatch(resetHomeCoursesState());
@@ -105,7 +102,7 @@ const BoostList: React.FC = () => {
           </div>
         )}
 
-        {/* 강의 카드 그리드 */}
+        {/* 강의 카드 */}
         <div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
           role="list"
