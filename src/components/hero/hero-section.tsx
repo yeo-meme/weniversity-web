@@ -3,7 +3,6 @@ import HeroBanner from "./hero-banner.tsx";
 import ProfileCard from "./profile-card.tsx";
 
 interface HeroSectionProps {
-  isLoggedIn: boolean;
   onLogin: () => void;
 }
 

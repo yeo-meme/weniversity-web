@@ -13,7 +13,6 @@ import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
 
 interface HeaderProps {
-  isLoggedIn: boolean;
   onLogin?: () => void;
   onLogout?: () => void;
   onGoToMain?: () => void;
