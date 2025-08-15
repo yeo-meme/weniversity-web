@@ -9,25 +9,27 @@ import Header from "./components/header/header";
 import HeroSection from "./components/hero/hero-section";
 import TabSync from "./components/TabSync";
 
-import { selectAuthToken,selectCurrentUser,selectIsAuthenticated } from './auth/authSlice'
+import {
+  selectAuthToken,
+  selectCurrentUser,
+  selectIsAuthenticated,
+} from "./auth/authSlice";
 
 function HomePage() {
   const navigate = useNavigate();
-  return <HeroSection isLoggedIn={false} onLogin={() => navigate("/login")} />;
+  return <HeroSection onLogin={() => navigate("/login")} />;
 }
 
 function AppContent() {
   const dispatch = useAppDispatch();
-//   const { isAuthenticated,isHydrated } = useAppSelector((state) => state.auth);
+  //   const { isAuthenticated,isHydrated } = useAppSelector((state) => state.auth);
 
-const currentUser = useAppSelector(selectCurrentUser);
-const token = useAppSelector(selectAuthToken);
-const isAuthenticated = useAppSelector(selectIsAuthenticated);
-const { isHydrated } = useAppSelector((state) => state.auth);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const token = useAppSelector(selectAuthToken);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const { isHydrated } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
 
-
- 
   const { currentTab } = useAppSelector((state) => state.page); // ✅ page 슬라이스에서 읽기
   console.log("현재 Redux currentTab:", currentTab);
 
@@ -64,7 +66,6 @@ const { isHydrated } = useAppSelector((state) => state.auth);
     <>
       <TabSync />
       <Header
-        isLoggedIn={isAuthenticated}
         onLogin={() => navigate("/login")}
         onLogout={handleLogout}
         onGoToMain={() => navigate("/")}
@@ -74,7 +75,12 @@ const { isHydrated } = useAppSelector((state) => state.auth);
           <Route path="/" element={<HomePage />} />
           <Route
             path="/login"
-            element={<LoginPage onLoginSuccess={handleLoginSuccess} onGoToMain={() => navigate("/")}/>}
+            element={
+              <LoginPage
+                onLoginSuccess={handleLoginSuccess}
+                onGoToMain={() => navigate("/")}
+              />
+            }
           />
           <Route
             path="/my-lectures"
@@ -82,7 +88,10 @@ const { isHydrated } = useAppSelector((state) => state.auth);
               isAuthenticated ? (
                 <MyLectures />
               ) : (
-                <LoginPage onLoginSuccess={handleLoginSuccess} onGoToMain={() => navigate("/")} />
+                <LoginPage
+                  onLoginSuccess={handleLoginSuccess}
+                  onGoToMain={() => navigate("/")}
+                />
               )
             }
           />
