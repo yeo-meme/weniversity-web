@@ -9,7 +9,7 @@ const TabSync = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log("🔍 TabSync: 현재 경로", location.pathname); // ✅ 로그 추가
+    console.log(" TabSync: 현재 경로", location.pathname); 
 
     const path = location.pathname;
     if (path === "/") {

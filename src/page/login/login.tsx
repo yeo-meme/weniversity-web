@@ -5,6 +5,8 @@ import logoIcon from "../../assets/logo-icon.png";
 import githubIcon from "../../assets/github-mark.png";
 import googleIcon from "../../assets/google.png";
 
+import { selectIsAuthenticated,selectAuthError } from "../../auth/authSlice";
+
 interface LoginFormData {
   email: string;
   password: string;
@@ -21,7 +23,8 @@ const LoginPage: React.FC<{
 }> = ({ onLoginSuccess, onGoToMain }) => {
   const [login, { isLoading }] = useLoginMutation();
 
-  const { isAuthenticated, error } = useAppSelector((state) => state.auth);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const error = useAppSelector(selectAuthError); 
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",

@@ -123,7 +123,14 @@ const MyLectures = () => {
   };
 
   console.log(localStorage.getItem('persist:auth'));
-  
+  console.log(localStorage.getItem('persist:page'));
+
+  const authStr = localStorage.getItem('persist:auth');
+if (authStr) {
+  const auth = JSON.parse(authStr);
+  const user = JSON.parse(auth.user);
+  console.log("💾 persist:auth.user:", user);
+}
 
   return (
     <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">

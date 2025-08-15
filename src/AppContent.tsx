@@ -9,6 +9,8 @@ import Header from "./components/header/header";
 import HeroSection from "./components/hero/hero-section";
 import TabSync from "./components/TabSync";
 
+import { selectAuthToken,selectCurrentUser,selectIsAuthenticated } from './auth/authSlice'
+
 function HomePage() {
   const navigate = useNavigate();
   return <HeroSection isLoggedIn={false} onLogin={() => navigate("/login")} />;
@@ -16,13 +18,26 @@ function HomePage() {
 
 function AppContent() {
   const dispatch = useAppDispatch();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+//   const { isAuthenticated,isHydrated } = useAppSelector((state) => state.auth);
+
+const currentUser = useAppSelector(selectCurrentUser);
+const token = useAppSelector(selectAuthToken);
+const isAuthenticated = useAppSelector(selectIsAuthenticated);
+const { isHydrated } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
 
-  const { currentTab } = useAppSelector((state) => state.page); // ✅ page 슬라이스에서 읽기
 
-  // 🔍 디버깅용 로그
-  console.log("📌 현재 Redux currentTab:", currentTab);
+ 
+  const { currentTab } = useAppSelector((state) => state.page); // ✅ page 슬라이스에서 읽기
+  console.log("현재 Redux currentTab:", currentTab);
+
+  console.log("=== Auth 상태 디버깅 ===");
+  console.log("🔒 isAuthenticated:", isAuthenticated);
+  console.log("📧 user.email:", currentUser?.email);
+  console.log("🎫 token 존재:", !!token);
+  console.log("👤 전체 user:", currentUser?.role);
+  console.log("🎯 currentTab:", currentTab);
+  console.log("========================");
 
   const handleLoginSuccess = () => {
     dispatch(setCurrentTab("home"));
@@ -36,6 +51,14 @@ function AppContent() {
   };
 
   console.log(localStorage.getItem("persist:auth"));
+
+  if (!isHydrated) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div>로딩 중...</div>
+      </div>
+    );
+  }
 
   return (
     <>

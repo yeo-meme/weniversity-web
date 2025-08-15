@@ -22,9 +22,15 @@ const authPersistConfig = {
   whitelist: ["token", "refreshToken", "user"], 
 };
 
+const pagePersistConfig = {
+  key: "page", 
+  storage,
+  whitelist: ["currentTab"], 
+};
+
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
-  page: pageReducer,
+  page: persistReducer(pagePersistConfig, pageReducer),
   [authApiSlice.reducerPath]: authApiSlice.reducer,
 });
 
@@ -39,10 +45,17 @@ export const store = configureStore({
 });
 
 
-export const persistor = persistStore(store, null, () => {
-  const state = store.getState();
-  console.log("Persist: 복원 완료!");
-  console.log("localStorage에서 복원된 auth 상태:", state.auth);
+export const persistor = persistStore(store);
+
+persistor.subscribe(() => {
+  const bootstrapped = persistor.getState().bootstrapped;
+  if (bootstrapped) {
+    const state = store.getState();
+    console.log("REHYDRATE 완료!");
+    console.log("auth:", state.auth);
+    console.log("page:", state.page);
+    console.log("👤 user:", state.auth.user);
+  }
 });
 
 export type RootState = ReturnType<typeof store.getState>;
