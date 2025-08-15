@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useAppSelector } from "../../hooks/redux-hooks";
-import { useLoginMutation } from "../../auth/auth-api-slice";
+import { useAppSelector } from "../../hooks/hook";
+import { useLoginMutation } from "../../auth/authApiSlice";
 import logoIcon from "../../assets/logo-icon.png";
 import githubIcon from "../../assets/github-mark.png";
 import googleIcon from "../../assets/google.png";
+
+import { selectIsAuthenticated,selectAuthError } from "../../auth/authSlice";
 
 interface LoginFormData {
   email: string;
@@ -21,7 +23,8 @@ const LoginPage: React.FC<{
 }> = ({ onLoginSuccess, onGoToMain }) => {
   const [login, { isLoading }] = useLoginMutation();
 
-  const { isAuthenticated, error } = useAppSelector((state) => state.auth);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const error = useAppSelector(selectAuthError); 
 
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
@@ -34,6 +37,7 @@ const LoginPage: React.FC<{
   useEffect(() => {
     if (isAuthenticated) {
       console.log("로그인 성공! 위니버시티에 오신 것을 환영합니다! 🎉");
+      console.log("➡️ handleLoginSuccess() 호출 → navigate('/')");
       onLoginSuccess();
     }
   }, [isAuthenticated, onLoginSuccess]);
@@ -92,14 +96,11 @@ const LoginPage: React.FC<{
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     try {
       await login(formData).unwrap();
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("로그인 실패:", error);
     }
   };
 

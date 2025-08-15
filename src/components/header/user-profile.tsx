@@ -1,18 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useAppDispatch } from "../../hooks/hook";
+import { goToMyLectures } from "../../store/slices/lecture-slice";
 import profileImg from "../../assets/profile-img.png";
 
-interface User {
-  id?: number;
-  email: string;
-  name?: string;
-  role?: string;
-}
 
 interface UserProfileProps {
   isLoggedIn: boolean;
   onLogin: () => void;
   onLogout: () => void;
-  user?: User | null;
+  user?: {
+    id?: number | null;
+    email: string;
+    name?: string | null;
+    role?: string | null;
+  } | null;
 }
 
 const UserProfile: React.FC<UserProfileProps> = ({
@@ -23,6 +24,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const dispatch = useAppDispatch();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
@@ -30,6 +32,11 @@ const UserProfile: React.FC<UserProfileProps> = ({
 
   const handleLogout = () => {
     onLogout();
+    setIsDropdownOpen(false);
+  };
+
+  const handleGoToMyLectures = () => {
+    dispatch(goToMyLectures());
     setIsDropdownOpen(false);
   };
 
@@ -96,6 +103,10 @@ const UserProfile: React.FC<UserProfileProps> = ({
               <a
                 href="#"
                 className="block py-2.5 pl-5 pr-0 no-underline text-main-text bg-transparent text-sm font-medium cursor-pointer hover:bg-gray100"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleGoToMyLectures();
+                }}
               >
                 내 강의 목록
               </a>

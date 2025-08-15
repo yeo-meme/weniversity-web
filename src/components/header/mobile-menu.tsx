@@ -4,12 +4,7 @@ import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
 
-interface User {
-  id?: number;
-  email: string;
-  name?: string;
-  role?: string;
-}
+
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -17,7 +12,12 @@ interface MobileMenuProps {
   onClose: () => void;
   onLogin: () => void;
   onLogout: () => void;
-  user?: User | null;
+  user?: {
+    id?: number | null;
+    email: string;
+    name?: string | null;
+    role?: string | null;
+  } | null;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
