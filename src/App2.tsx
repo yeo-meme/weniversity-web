@@ -7,6 +7,7 @@ import LoginPage from "./page/login/login.tsx";
 import HomePage from "./page/main/HomePage.tsx";
 import Layout from "./page/main/Layout.tsx";
 import NotFoundPage from "./page/NotFoundPage.tsx";
+import SearchPage from "./page/search/SearchPage.tsx";
 
 function App2() {
   return (
@@ -18,6 +19,7 @@ function App2() {
           <Route path="mypage" element={<MyPage />} />
           <Route path="courses" element={<CoursePage />} />
           <Route path="courses/:courseId" element={<CourseDetailPage />} />
+          <Route path="search" element={<SearchPage />} />
         </Route>
 
         {/* 레이아웃이 필요없는 독립적인 페이지들 */}

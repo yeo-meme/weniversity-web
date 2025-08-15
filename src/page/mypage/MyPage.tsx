@@ -323,4 +323,4 @@ const MyPage: React.FC = () => {
   );
 };
 
-export default React.memo(MyPage);
+export default MyPage;

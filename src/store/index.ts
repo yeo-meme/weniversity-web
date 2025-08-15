@@ -6,6 +6,7 @@ import courseReducer from "./courseSlice";
 import courseDetailReducer from "./courseDetailSlice";
 import homeCourseReducer from "./homeCourseSlice";
 import authReducer from "../auth/auth-slice";
+import searchReducer from "./searchSlice";
 import { authApiSlice } from "../auth/auth-api-slice";
 
 export const store = configureStore({
@@ -18,6 +19,7 @@ export const store = configureStore({
     course: courseReducer,
     homeCourse: homeCourseReducer,
     courseDetail: courseDetailReducer,
+    search: searchReducer,
   },
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware().concat(authApiSlice.middleware),

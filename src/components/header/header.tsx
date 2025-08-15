@@ -15,11 +15,24 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuth();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // 검색 로직 구현
+
+    const query = searchQuery.trim();
+    if (query) {
+      // 검색 페이지로 이동하면서 검색어를 URL 파라미터로 전달
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+    }
+  };
+
+  const handleMobileSearch = () => {
+    const query = prompt("검색어를 입력하세요:");
+    if (query && query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+    }
   };
 
   const handleLogin = () => {
@@ -86,6 +99,8 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
                   <input
                     type="search"
                     placeholder="검색어를 입력하세요"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
                     className="w-48 md:w-56 lg:w-64 xl:w-80 h-[42px] py-2.5 pl-5 pr-0 border-none bg-gray100 rounded-[10px] outline-none text-sm"
                   />
                   <button
@@ -108,7 +123,8 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
           <div className="min-[835px]:hidden max-[834px]:flex max-[834px]:gap-5">
             <button
               className="w-7 h-7"
-              type="submit"
+              type="button"
+              onClick={handleMobileSearch}
               style={{ backgroundImage: `url(${searchIcon})` }}
             ></button>
 

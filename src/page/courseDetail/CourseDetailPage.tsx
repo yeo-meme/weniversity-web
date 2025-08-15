@@ -237,4 +237,4 @@ const CourseDetailPage: React.FC = () => {
   );
 };
 
-export default React.memo(CourseDetailPage);
+export default CourseDetailPage;
