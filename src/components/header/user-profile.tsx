@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useAppDispatch } from "../../hooks/redux-hooks";
-import { goToMyLectures } from "../../store/lecture-slice";
+import { useAppDispatch } from "../../hooks/hook";
+import { goToMyLectures } from "../../store/slices/lecture-slice";
 import profileImg from "../../assets/profile-img.png";
 
 interface User {

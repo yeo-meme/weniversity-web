@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useAppSelector } from "../../hooks/redux-hooks";
-import { useLogoutMutation } from "../../auth/auth-api-slice";
+import { useAppSelector } from "../../hooks/hook.ts";
+import { useLogoutMutation } from "../../auth/authApiSlice.ts";
 import logoImg from "../../assets/logo.png";
 import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";

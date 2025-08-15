@@ -1,9 +1,11 @@
 import React from "react";
-import { useAppDispatch } from "../../hooks/redux-hooks";
-import { goToMyLectures } from "../../store/lecture-slice";
+import { useAppDispatch } from "../../hooks/hook.ts";
+import { goToMyLectures } from "../../store/slices/lecture-slice.ts";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
+
+import { useNavigate } from "react-router-dom";
 
 interface User {
   id?: number;
@@ -24,6 +26,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
   user,
 }) => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const getUserDisplayName = () => {
     if (user?.name) {
@@ -41,6 +44,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
 
   const handleGoToMyLectures = () => {
     dispatch(goToMyLectures());
+    navigate("/my-lectures");
   };
 
   if (isLoggedIn) {

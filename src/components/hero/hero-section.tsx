@@ -1,5 +1,5 @@
 import React from "react";
-import { useAppSelector } from "../../hooks/redux-hooks";
+import { useAppSelector } from "../../hooks/hook.ts";
 import HeroBanner from "./hero-banner.tsx";
 import ProfileCard from "./profile-card.tsx";
 

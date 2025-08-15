@@ -1,6 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import { authApiSlice } from "./auth-api-slice.ts";
+import { authApiSlice } from "./authApiSlice.ts";
 import { TokenService } from "./token-service.ts";
 
 interface User {
@@ -35,6 +35,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
+      console.log("🔴 Persist: 로그아웃 → localStorage에서 auth 제거");
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
@@ -55,6 +56,8 @@ const authSlice = createSlice({
         refreshToken?: string;
       }>
     ) => {
+      console.log("🟢 Persist: 로그인 성공 → auth 상태 업데이트 및 저장 준비");
+      console.log("📥 저장될 데이터:", action.payload);
       const { token, user, refreshToken } = action.payload;
 
       state.token = token;
@@ -85,6 +88,7 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addMatcher(authApiSlice.endpoints.login.matchPending, (state) => {
+        console.log("✅ API 로그인 성공 → persist 저장 트리거");
         state.loading = true;
         state.error = null;
       })

@@ -122,6 +122,9 @@ const MyLectures = () => {
     console.log("재수강");
   };
 
+  console.log(localStorage.getItem('persist:auth'));
+  
+
   return (
     <div className="flex flex-col gap-5 p-5 max-[834px]:p-4 max-[834px]:gap-4 max-[834px]:flex-col mt-[40px]">
       <h2 className="text-[40px] font-bold mb-6">내 강의 목록</h2>
