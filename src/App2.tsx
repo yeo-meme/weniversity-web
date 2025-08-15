@@ -6,6 +6,7 @@ import MyPage from "./page/mypage/MyPage.tsx";
 import LoginPage from "./page/login/login.tsx";
 import HomePage from "./page/main/HomePage.tsx";
 import Layout from "./page/main/Layout.tsx";
+import NotFoundPage from "./page/NotFoundPage.tsx";
 
 function App2() {
   return (
@@ -24,7 +25,7 @@ function App2() {
         <Route path="register" element={<RegisterPage />} />
 
         {/* 404 페이지 */}
-        <Route path="*" element={<div>404 - 페이지를 찾을 수 없습니다</div>} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </HashRouter>
   );
