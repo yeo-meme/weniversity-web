@@ -65,7 +65,8 @@ const CourseInfo: React.FC<CourseInfoProps> = ({
     [courseDetail]
   );
 
-  const formatPrice = useCallback((price: number) => {
+  const formatPrice = useCallback((price: number | undefined) => {
+    if (price === undefined) return "정보 없음";
     if (price === 0) return "무료 강의";
     if (price === -1) return "국비 지원 강의";
     if (price > 0) return `₩ ${price.toLocaleString()}`;

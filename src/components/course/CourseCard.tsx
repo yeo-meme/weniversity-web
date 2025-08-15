@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import type { Course } from "../../types/course/course";
 import HeartIconHover from "../../assets/icon-heart-hover.png";
 import HeartIcon from "../../assets/icon-heart.png";
@@ -29,9 +29,17 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
   };
 
   const getTypeLabel = (type: string) => {
-    if (type === "vod") return "일반";
+    if (type === "vod") return "VOD";
     if (type === "boost") return "부스트 커뮤니티";
   };
+
+  const formatPrice = useCallback((price: number | undefined) => {
+    if (price === undefined) return "정보 없음";
+    if (price === 0) return "무료 강의";
+    if (price === -1) return "국비 지원 강의";
+    if (price > 0) return `₩ ${price.toLocaleString()}`;
+    return "";
+  }, []);
 
   return (
     <div className="rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 course-card cursor-pointer">
@@ -96,8 +104,13 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         </div>
 
         {/* 코스 설명 */}
-        <p className="text-sm text-gray-900 line-clamp-2">
+        <p className="text-sm text-gray-900 line-clamp-2 mt-4 p-5 min-h-[80px]">
           {course.description}
+        </p>
+
+        {/* 가격 정보 */}
+        <p className="text-sm font-medium text-gray-900 mt-4">
+          {formatPrice(course.price)}
         </p>
       </div>
     </div>
