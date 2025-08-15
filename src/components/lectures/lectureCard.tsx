@@ -54,8 +54,8 @@ const LectureCard: React.FC<LectureCardProps> = ({
             key={index}
             className={`tag px-3 py-1.5 rounded-md text-sm font-semibold ${
               tag.type === "type"
-                ? "tag-type text-white bg-[#47494d]"
-                : "tag-kind text-[#2e6ff2] bg-[#dee8ff]"
+                ? "tag-type text-white bg-gray700"
+                : "tag-kind text-primary bg-activation"
             }`}
           >
             {tag.text}
@@ -67,21 +67,21 @@ const LectureCard: React.FC<LectureCardProps> = ({
         <span className="line-clamp-2">{title}</span>
       </h3>
 
-      <div className="progress-wrapper w-full h-2.5 mb-3 bg-[#f3f5fa] rounded-sm overflow-hidden">
+      <div className="progress-wrapper w-full h-2.5 mb-3 bg-gray100 rounded-sm overflow-hidden">
         <div
-          className="progress-fill h-full bg-[#2e6ff2] rounded-sm transition-all duration-300 ease-in-out"
+          className="progress-fill h-full bg-primary rounded-sm transition-all duration-300 ease-in-out"
           style={{ width: `${progressPercentage}%` }}
         />
       </div>
 
-      <span className="progress-text mb-5 text-[#47494d]">
+      <span className="progress-text mb-5 text-gray700">
         {currentProgress}/{totalLessons}강 ({progressPercentage}%)
       </span>
 
       <div className="lecture-btn-wrap flex gap-3">
         {isExpired ? (
           <button
-            className="lecture-btn flex gap-2 items-center border rounded-[10px] py-[11px] px-5 text-[#121314] bg-white border-[#d9dbe0] font-medium justify-center"
+            className="lecture-btn flex gap-2 items-center border rounded-[10px] py-[11px] px-5 text-main-text bg-white border-gray200 font-medium justify-center"
             onClick={onReapplyClick}
           >
             다시 수강 신청하기
@@ -89,7 +89,7 @@ const LectureCard: React.FC<LectureCardProps> = ({
         ) : (
           <>
             <button
-              className="lecture-btn flex gap-2 items-center border-none rounded-[10px] py-[11px] px-5 text-white bg-[#2e6ff2] font-medium"
+              className="lecture-btn flex gap-2 items-center border-none rounded-[10px] py-[11px] px-5 text-white bg-primary font-medium"
               onClick={onLearnClick}
             >
               <VideoIcon />
@@ -97,7 +97,7 @@ const LectureCard: React.FC<LectureCardProps> = ({
             </button>
 
             <button
-              className="lecture-btn flex gap-2 items-center border rounded-[10px] py-[11px] px-5 text-[#121314] bg-white border-[#d9dbe0] font-medium"
+              className="lecture-btn flex gap-2 items-center border rounded-[10px] py-[11px] px-5 text-main-text bg-white border-gray200 font-medium"
               onClick={onDetailClick}
             >
               강의 상세
