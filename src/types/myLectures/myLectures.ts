@@ -31,7 +31,10 @@ export interface MyLectureFilters {
 
 export interface MyLectureState {
   myLectures: MyLecture[];
-  filters: MyLectureFilters;
+  filters: {
+    types: string[];
+    statuses: string[];
+  };
   activeFilters: {
     types: string[];
     statuses: string[];
@@ -65,6 +68,8 @@ export interface EnrollCourseRequest {
 export interface EnrollCourseResponse {
   success: boolean;
   message: string;
-  enrollment_id?: string;
-  course_id: string;
+  enrollment_id: number;
+  course_id: number;
+  is_enrolled: boolean;
+  status: string;
 }

@@ -179,7 +179,7 @@ const CourseDetailPage: React.FC = () => {
       } catch (error) {
         const errorMessage =
           typeof error === "string" ? error : "수강신청에 실패했습니다.";
-        alert(`수강신청 실패: ${errorMessage}`);
+        alert(errorMessage);
       }
     },
     [dispatch, courseId, navigate]
@@ -234,13 +234,6 @@ const CourseDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen mt-14">
-      {/* 수강신청 에러 메시지 표시 */}
-      {enrollError && (
-        <div className="bg-red-50 border border-red-200 rounded-md p-4 mx-4 mb-4">
-          <p className="text-sm text-red-600">{enrollError}</p>
-        </div>
-      )}
-
       {/* 강의 헤더 */}
       <CourseHeader />
 

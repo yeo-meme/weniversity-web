@@ -101,6 +101,41 @@ export const fetchMyLectures = createAsyncThunk<
   }
 );
 
+const hasCourseIdAllPages = async (
+  token: string,
+  targetId: string
+): Promise<boolean> => {
+  let url = "http://13.125.180.222/api/my-courses/";
+
+  while (url) {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("수강 목록을 불러오는데 실패했습니다.");
+    }
+
+    const data = await res.json();
+    // 현재 페이지에서 찾으면 true 반환 → 바로 종료
+    const found = data.results.some(
+      (item: { course: { course_id: string } }) =>
+        String(item.course.course_id) === targetId
+    );
+
+    if (found) return true;
+
+    // 다음 페이지로 이동
+    url = data.next;
+  }
+
+  return false;
+};
+
 // 수강 신청 API
 export const enrollCourse = createAsyncThunk<
   EnrollCourseResponse,
@@ -115,6 +150,12 @@ export const enrollCourse = createAsyncThunk<
 
       if (!token) {
         throw new Error("인증 토큰이 없습니다.");
+      }
+
+      // 중복 체크 (모든 페이지 탐색)
+      const isExist = await hasCourseIdAllPages(token, courseId);
+      if (isExist) {
+        throw new Error("이미 수강신청했던 강의입니다.");
       }
 
       const response = await fetch(
