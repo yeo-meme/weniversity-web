@@ -1,15 +1,31 @@
 import { useCallback } from "react";
 import { useLogoutMutation } from "../auth/authApiSlice";
-import { clearError, logout } from "../auth/authSlice";
+import { clearError, logout, updateUser } from "../auth/authSlice";
 import { useAppDispatch, useAppSelector } from "./hook";
 import { persistor } from "../store/index";
 import { fetchLikedCourses } from "../store/myPageSlice";
 import { setLikedCourses } from "../store/courseSlice";
 
+interface User {
+  id?: number | null;
+  email: string;
+  name?: string | null;
+  role?: string | null;
+  profile_image_url?: string;
+}
+
 export const useAuth = () => {
   const dispatch = useAppDispatch();
   const authState = useAppSelector(state => state.auth);
   const [logoutMutation] = useLogoutMutation();
+
+  // 사용자 정보 부분 업데이트
+  const updateUserInfo = useCallback(
+    (updates: Partial<User>) => {
+      dispatch(updateUser(updates));
+    },
+    [dispatch]
+  );
 
   // 좋아요한 강의 목록 로드
   const loadLikedCourses = useCallback(async () => {
@@ -67,6 +83,7 @@ export const useAuth = () => {
     handleLogout,
     clearAuthError,
     loadLikedCourses,
+    updateUserInfo,
     // 토큰이 유효할 때만 인증됨으로 간주
     isAuthenticated: authState.isHydrated && authState.isAuthenticated,
   };

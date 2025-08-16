@@ -69,6 +69,12 @@ const authSlice = createSlice({
       state.tokenExpiration = TokenService.getTokenExpiration(token);
     },
 
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
+    },
+
     updateToken: (
       state,
       action: PayloadAction<{
@@ -225,6 +231,7 @@ export const {
   logout,
   clearError,
   setCredentials,
+  updateUser,
   updateToken,
   validateTokenOnRehydrate,
 } = authSlice.actions;

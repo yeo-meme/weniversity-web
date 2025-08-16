@@ -83,7 +83,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
       <form onSubmit={onSubmit} className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:gap-12">
           {/* 프로필 이미지 */}
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center">
             <div className="relative w-40 h-40">
               <div className="w-full h-full rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-300">
                 <img

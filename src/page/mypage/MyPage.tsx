@@ -23,6 +23,7 @@ import ProfileSettings from "./ProfileSettings";
 import PaymentHistory from "./PaymentHistory";
 import AccountManagement from "./AccoountManagement";
 import LoadingMessage from "../../components/courseDetail/LoadingMessage";
+// import { useAuth } from "../../hooks/useAuth";
 
 type TabType = "profile" | "certificates" | "payments" | "account";
 
@@ -31,7 +32,7 @@ const MyPage: React.FC = () => {
   const { profile, loading, error, success } = useAppSelector(
     state => state.myPage
   );
-
+  // const { updateUserInfo } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [formData, setFormData] = useState<ProfileFormData>({
     name: "",
@@ -228,10 +229,21 @@ const MyPage: React.FC = () => {
       if (!isProfileFormValid(messages)) {
         return;
       }
-
       // 업데이트 시작
       isUpdatingRef.current = true;
       dispatch(updateProfile(formData));
+
+      // const { name, profile_image } = formData;
+      // const createProfileImageUrl = (fileName?: string): string =>
+      //   `http://13.125.180.222/media/profiles/${fileName?.replace(
+      //     /(\.[^.]+)$/,
+      //     "_$1"
+      //   )}`;
+
+      // updateUserInfo({
+      //   name: name,
+      //   profile_image_url: createProfileImageUrl(profile_image?.name),
+      // });
     },
     [formData, dispatch]
   );
