@@ -5,18 +5,11 @@ import searchIcon from "../../assets/icon-search.png";
 import hamburgerIcon from "../../assets/icon-hamburger.png";
 import UserProfile from "./user-profile.tsx";
 import MobileMenu from "./mobile-menu.tsx";
-import { useAuth } from "../../hooks/useAuth";
 
-interface HeaderProps {
-  isLoggedIn: boolean;
-  onLogout?: () => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
+const Header: React.FC = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const { user } = useAuth();
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -35,16 +28,6 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
     }
   };
 
-  const handleLogin = () => {
-    navigate("/login");
-  };
-
-  const handleLogout = async () => {
-    if (onLogout) {
-      await onLogout();
-    }
-  };
-
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -59,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
         <div className="flex items-center min-[835px]:justify-center min-[835px]:h-[70px] min-[835px]:px-4 max-[834px]:justify-between max-[834px]:w-full max-[834px]:h-14 max-[834px]:px-4 max-w-[1190px] max-[834px]:max-w-[calc(100%-32px)] mx-auto">
           <div className="min-[835px]:flex min-[835px]:items-center min-[835px]:w-full min-[835px]:justify-between max-[834px]:contents">
             <h1 className="min-[835px]:flex-shrink-0 min-[835px]:w-34 md:w-36 lg:w-40 xl:w-[202px]">
-              <a href="#" onClick={() => navigate("/")}>
+              <a href="/">
                 <img
                   src={logoImg}
                   alt="logo"
@@ -73,7 +56,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
                 <ul className="flex gap-4 md:gap-6 lg:gap-8 xl:gap-10 list-none whitespace-nowrap">
                   <li>
                     <a
-                      href="#"
+                      href="/"
                       className="text-main-text no-underline text-sm lg:text-base"
                     >
                       위니버시티 소개
@@ -81,7 +64,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
                   </li>
                   <li>
                     <a
-                      href="#"
+                      href="/"
                       className="text-main-text no-underline text-sm lg:text-base"
                     >
                       수강생 이야기
@@ -110,12 +93,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
                     <img src={searchIcon} alt="검색" className="w-[21px]" />
                   </button>
                 </form>
-
-                <UserProfile
-                  isLoggedIn={isLoggedIn}
-                  onLogout={handleLogout}
-                  user={user}
-                />
+                <UserProfile />
               </div>
             </div>
           </div>
@@ -137,14 +115,7 @@ const Header: React.FC<HeaderProps> = ({ isLoggedIn, onLogout }) => {
         </div>
       </header>
 
-      <MobileMenu
-        isOpen={isMobileMenuOpen}
-        isLoggedIn={isLoggedIn}
-        onClose={closeMobileMenu}
-        onLogin={handleLogin}
-        onLogout={handleLogout}
-        user={user}
-      />
+      <MobileMenu isOpen={isMobileMenuOpen} onClose={closeMobileMenu} />
     </>
   );
 };

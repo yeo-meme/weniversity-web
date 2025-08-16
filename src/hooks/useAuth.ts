@@ -1,7 +1,8 @@
 import { useCallback } from "react";
-import { useAppSelector, useAppDispatch } from "./redux-hooks";
-import { logout, clearError } from "../auth/auth-slice";
-import { useLogoutMutation } from "../auth/auth-api-slice";
+import { useLogoutMutation } from "../auth/authApiSlice";
+import { clearError, logout } from "../auth/authSlice";
+import { useAppDispatch, useAppSelector } from "./hook";
+import { persistor } from "../store/index";
 
 export const useAuth = () => {
   const dispatch = useAppDispatch();
@@ -25,6 +26,11 @@ export const useAuth = () => {
     } finally {
       // API 성공/실패 여부와 관계없이 로컬 상태 정리
       dispatch(logout());
+
+      // persist 저장소에서도 auth 데이터 제거
+      persistor.purge();
+
+      alert("로그아웃 했습니다!");
       console.log("🎉 로그아웃 프로세스 완료");
     }
   }, [dispatch, logoutMutation, authState.token, authState.refreshToken]);
@@ -37,5 +43,7 @@ export const useAuth = () => {
     ...authState,
     handleLogout,
     clearAuthError,
+    // hydration이 완료되었고 토큰이 유효할 때만 인증됨으로 간주
+    isAuthenticated: authState.isHydrated && authState.isAuthenticated,
   };
 };

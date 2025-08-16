@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
+import { useAppDispatch, useAppSelector } from "../../hooks/hook";
 import { register, resetRegisterState } from "../../store/registerSlice";
 import type {
   RegisterFormData,

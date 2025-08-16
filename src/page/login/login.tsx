@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useLoginMutation } from "../../auth/auth-api-slice";
 import logoIcon from "../../assets/logo-icon.png";
 import githubIcon from "../../assets/github-mark.png";
 import googleIcon from "../../assets/google.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useLoginMutation } from "../../auth/authApiSlice";
 
 interface LoginFormData {
   email: string;
@@ -19,7 +19,7 @@ interface FormErrors {
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
-  const { isAuthenticated, error } = useAuth();
+  const { isAuthenticated, isHydrated, error } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -27,12 +27,13 @@ const LoginPage: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // hydration이 완료된 후에만 로그인 상태 확인
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isHydrated && isAuthenticated) {
       alert("로그인 성공! 위니버시티에 오신 것을 환영합니다! 🎉");
       navigate("/");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, isHydrated, navigate]);
 
   useEffect(() => {
     if (error) {
@@ -88,14 +89,11 @@ const LoginPage: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      return;
-    }
-
+    if (!validateForm()) return;
     try {
       await login(formData).unwrap();
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("로그인 실패:", error);
     }
   };
 
@@ -105,6 +103,15 @@ const LoginPage: React.FC = () => {
   const handleSocialLogin = (provider: "github" | "google") => {
     console.log(`Social login with ${provider}`);
   };
+
+  // hydration이 완료되지 않았다면 로딩 표시
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">앱 초기화 중...</div>
+      </div>
+    );
+  }
 
   return (
     <>

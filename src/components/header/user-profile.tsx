@@ -1,35 +1,25 @@
 import React, { useState, useRef, useEffect } from "react";
 import profileImg from "../../assets/profile-img.png";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.ts";
 
-interface User {
-  id?: number;
-  email: string;
-  name?: string;
-  role?: string;
-}
-
-interface UserProfileProps {
-  isLoggedIn: boolean;
-  onLogout: () => void;
-  user?: User | null;
-}
-
-const UserProfile: React.FC<UserProfileProps> = ({
-  isLoggedIn,
-  onLogout,
-  user,
-}) => {
+const UserProfile: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { user, isAuthenticated, handleLogout } = useAuth();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleLogout = () => {
-    onLogout();
+  const handleLogoutWithDropDownClose = () => {
+    handleLogout();
+    setIsDropdownOpen(false);
+  };
+
+  const handleGoToMyLectures = () => {
+    navigate("/my-lectures");
     setIsDropdownOpen(false);
   };
 
@@ -51,8 +41,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
 
   return (
     <div>
-      {/* 로그인 전 버튼 */}
-      {!isLoggedIn && (
+      {!isAuthenticated && (
         <button
           className="rounded-[10px] py-[11px] px-3 lg:px-5 text-white bg-primary whitespace-nowrap text-sm"
           type="button"
@@ -62,8 +51,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
         </button>
       )}
 
-      {/* 로그인 후 프로필 버튼 + 드롭다운 */}
-      {isLoggedIn && (
+      {isAuthenticated && (
         <div className="relative inline-block" ref={dropdownRef}>
           <button
             className="flex items-center w-[42px] h-[42px] rounded-full bg-transparent p-0 transition-all relative"
@@ -94,13 +82,17 @@ const UserProfile: React.FC<UserProfileProps> = ({
           >
             <nav>
               <a
-                href="#/mycourses"
+                href="/mycourses"
                 className="block py-2.5 pl-5 pr-0 no-underline text-main-text bg-transparent text-sm font-medium cursor-pointer hover:bg-gray100"
+                onClick={e => {
+                  e.preventDefault();
+                  handleGoToMyLectures();
+                }}
               >
                 내 강의 목록
               </a>
               <a
-                href="#/mypage"
+                href="/mypage"
                 className="block py-2.5 pl-5 pr-0 no-underline text-main-text bg-transparent text-sm font-medium cursor-pointer hover:bg-gray100"
               >
                 마이페이지
@@ -109,7 +101,7 @@ const UserProfile: React.FC<UserProfileProps> = ({
               <button
                 className="block py-2.5 pl-5 pr-0 text-main-text bg-transparent border-none text-left cursor-pointer text-sm font-medium w-full hover:bg-gray100"
                 type="button"
-                onClick={handleLogout}
+                onClick={handleLogoutWithDropDownClose}
               >
                 로그아웃
               </button>

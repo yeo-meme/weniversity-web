@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useAppDispatch, useAppSelector } from "../../hooks/redux-hooks";
+import { useAppDispatch, useAppSelector } from "../../hooks/hook";
 import {
   resetSearchState,
   searchCourses,

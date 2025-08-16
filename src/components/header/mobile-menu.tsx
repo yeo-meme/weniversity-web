@@ -1,34 +1,20 @@
 import React from "react";
+import { useNavigate } from "react-router";
 import closeIcon from "../../assets/icon-close.png";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
-
-interface User {
-  id?: number;
-  email: string;
-  name?: string;
-  role?: string;
-}
+import { useAuth } from "../../hooks/useAuth.ts";
 
 interface MobileMenuProps {
   isOpen: boolean;
-  isLoggedIn: boolean;
   onClose: () => void;
-  onLogin: () => void;
-  onLogout: () => void;
-  user?: User | null;
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({
-  isOpen,
-  isLoggedIn,
-  onClose,
-  onLogin,
-  onLogout,
-  user,
-}) => {
-  // 사용자 이름 표시 로직
+const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, handleLogout } = useAuth();
+
   const getUserDisplayName = () => {
     if (user?.name) {
       return `${user.name}님`;
@@ -36,11 +22,16 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       const username = user.email.split("@")[0];
       return `${username}님`;
     }
-    return "위니브 소울곰";
+    return "열정 만수르";
   };
 
   const getUserEmail = () => {
     return user?.email || "paul-lab@naver.com";
+  };
+
+  const handleGoToMyLectures = () => {
+    navigate("/my-lectures");
+    onClose();
   };
 
   return (
@@ -71,15 +62,15 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <div className="w-[100px] h-[100px] overflow-hidden rounded-full border border-gray200 mb-3">
               <img
                 className="w-full h-full object-cover"
-                src={isLoggedIn ? profileImg : profileNoneImg}
+                src={isAuthenticated ? profileImg : profileNoneImg}
                 alt="프로필 이미지"
               />
             </div>
             <h2 className="mb-1 text-base font-semibold">
-              {isLoggedIn ? getUserDisplayName() : "호기심 많은 개발자님"}
+              {isAuthenticated ? getUserDisplayName() : "호기심 많은 개발자님"}
             </h2>
             <p className="text-gray700 leading-[22px] text-center mb-6">
-              {isLoggedIn ? (
+              {isAuthenticated ? (
                 getUserEmail()
               ) : (
                 <>
@@ -90,10 +81,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </p>
           </section>
 
-          {!isLoggedIn ? (
+          {!isAuthenticated ? (
             <button
               className="rounded-[10px] py-[14px] px-[94.5px] text-white bg-primary text-sm"
-              onClick={onLogin}
+              onClick={() => navigate("/login")}
             >
               로그인
             </button>
@@ -101,15 +92,19 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <ul className="flex flex-col items-start gap-4 w-[180px] mx-auto">
               <li>
                 <a
-                  href="#/mycourses"
+                  href="/mycourses"
                   className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
+                  onClick={e => {
+                    e.preventDefault();
+                    handleGoToMyLectures();
+                  }}
                 >
                   <VideoIcon />내 강의 목록 보기
                 </a>
               </li>
               <li>
                 <a
-                  href="#/mypage"
+                  href="/mypage"
                   className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
                 >
                   <UserIcon />
@@ -124,7 +119,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           <ul className="flex flex-col list-none">
             <li>
               <a
-                href="#"
+                href="/"
                 className="block px-5 py-2.5 text-sm font-medium text-main-text no-underline hover:bg-gray-100 transition-colors"
               >
                 위니버시티 소개
@@ -132,7 +127,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </li>
             <li>
               <a
-                href="#"
+                href="/"
                 className="block px-5 py-2.5 text-sm font-medium text-main-text no-underline hover:bg-gray-100 transition-colors"
               >
                 수강생 후기
@@ -141,11 +136,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           </ul>
         </nav>
 
-        {isLoggedIn && (
+        {isAuthenticated && (
           <div className="w-full border-b border-gray200  py-[8px]">
             <button
               className="block w-full text-left px-5 py-2.5 text-sm font-medium text-main-text hover:bg-gray-100 transition-colors"
-              onClick={onLogout}
+              onClick={handleLogout}
             >
               로그아웃
             </button>

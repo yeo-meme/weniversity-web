@@ -3,21 +3,12 @@ import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.ts";
 
-interface User {
-  id?: number;
-  email: string;
-  name?: string;
-  role?: string;
-}
-
-interface ProfileCardProps {
-  isLoggedIn: boolean;
-  user?: User | null;
-}
-
-const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, user }) => {
+const ProfileCard: React.FC = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+
   const getUserDisplayName = () => {
     if (user?.name) {
       return `${user.name}님`;
@@ -32,7 +23,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, user }) => {
     return user?.email || "paul-lab@naver.com";
   };
 
-  if (isLoggedIn) {
+  const handleGoToMyLectures = () => {
+    navigate("/my-lectures");
+  };
+
+  if (isAuthenticated) {
     return (
       <article className="flex flex-col justify-center items-center w-[290px] p-8 box-border bg-white border border-gray200 rounded-[10px] text-center max-[834px]:hidden">
         <div className="w-[100px] h-[100px] overflow-hidden rounded-full border border-gray200 mb-3">
@@ -50,15 +45,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ isLoggedIn, user }) => {
         <ul className="flex flex-col justify-center items-start gap-4 list-none">
           <li>
             <a
-              href="#/mycourses"
+              href="/mycourses"
               className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
+              onClick={e => {
+                e.preventDefault();
+                handleGoToMyLectures();
+              }}
             >
               <VideoIcon />내 강의 목록 보기
             </a>
           </li>
           <li>
             <a
-              href="#/mypage"
+              href="/mypage"
               className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
             >
               <UserIcon />

@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../hooks/redux-hooks";
+import { useAppDispatch } from "../../hooks/hook";
 import { setActiveFilter, clearAllFilters } from "../../store/courseSlice";
 import categoryAll from "../../assets/category_all.png";
 import categoryBack from "../../assets/category_back.png";
