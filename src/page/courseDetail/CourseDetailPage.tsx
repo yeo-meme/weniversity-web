@@ -23,9 +23,7 @@ const CourseDetailPage: React.FC = () => {
   const { courseDetail, activeTab, loading, error } = useAppSelector(
     state => state.courseDetail
   );
-  const { loading: enrollLoading, error: enrollError } = useAppSelector(
-    state => state.myLecture
-  );
+  const { loading: enrollLoading } = useAppSelector(state => state.myLecture);
 
   // 각 섹션의 ref
   const sectionRefs = useRef<{ [key in TabType]: HTMLDivElement | null }>({
