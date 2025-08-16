@@ -9,6 +9,7 @@ interface User {
   email: string;
   name?: string | null;
   role?: string | null;
+  profile_image_url?: string;
 }
 
 interface AuthState {
@@ -118,12 +119,13 @@ const authSlice = createSlice({
             console.log("🔑 Case 1: access 토큰 방식");
             console.log("📧 email:", data.email);
             console.log("🎯 role:", data.role);
-
+            console.log("로그인시 ", data);
             const user = {
               id: null,
-              email: data.email || "",
-              name: null,
+              email: data.email || null,
+              name: data.name || null,
               role: data.role || null,
+              profile_image_url: data.profile_image_url || null,
             };
 
             console.log("👤 생성된 user:", user);

@@ -28,7 +28,7 @@ export const toggleCourseLike = createAsyncThunk<
       }
 
       const response = await fetch(
-        `http://13.125.180.222/api/courses/${courseId}/like`,
+        `http://13.125.180.222/api/courses/${courseId}/like/`,
         {
           method: isLiked ? "DELETE" : "POST",
           headers: {

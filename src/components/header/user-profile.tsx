@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import profileImg from "../../assets/profile-img.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth.ts";
+import profileImg from "../../assets/profile-img.png";
 
 const UserProfile: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -21,6 +21,14 @@ const UserProfile: React.FC = () => {
   const handleGoToMyLectures = () => {
     navigate("/my-lectures");
     setIsDropdownOpen(false);
+  };
+
+  const getUserProfile = () => {
+    return user?.profile_image_url || profileImg;
+  };
+
+  const getUserTitle = () => {
+    return user?.email ? `${user.email}님의 프로필` : "사용자 프로필";
   };
 
   useEffect(() => {
@@ -57,10 +65,10 @@ const UserProfile: React.FC = () => {
             className="flex items-center w-[42px] h-[42px] rounded-full bg-transparent p-0 transition-all relative"
             type="button"
             onClick={toggleDropdown}
-            title={user?.email ? `${user.email}님의 프로필` : "사용자 프로필"}
+            title={getUserTitle()}
           >
             <img
-              src={profileImg}
+              src={getUserProfile()}
               alt="사용자 프로필"
               className="w-full h-full object-cover rounded-full"
             />

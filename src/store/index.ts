@@ -11,6 +11,7 @@ import homeCourseReducer from "./homeCourseSlice";
 import authReducer from "../auth/authSlice";
 import { authApiSlice } from "../auth/authApiSlice";
 import searchReducer from "./searchSlice";
+import myLectureReducer from "./myLecturesSlice";
 
 const authPersistConfig = {
   key: "auth",
@@ -24,7 +25,6 @@ const authPersistConfig = {
   ],
 };
 
-// root reducer 구성
 const rootReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
   authApi: authApiSlice.reducer,
@@ -35,6 +35,7 @@ const rootReducer = combineReducers({
   homeCourse: homeCourseReducer,
   courseDetail: courseDetailReducer,
   search: searchReducer,
+  myLecture: myLectureReducer,
 });
 
 export const store = configureStore({

@@ -6,6 +6,7 @@ import {
   toggleChapterExpansion,
   resetCourseDetailState,
 } from "../../store/courseDetailSlice";
+import { enrollCourse } from "../../store/myLecturesSlice";
 import type { TabType } from "../../types/courseDetail/courseDetail";
 import CourseHeader from "../../components/courseDetail/CourseHeader";
 import CourseInfo from "../../components/courseDetail/CourseInfo";
@@ -21,6 +22,9 @@ const CourseDetailPage: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { courseDetail, activeTab, loading, error } = useAppSelector(
     state => state.courseDetail
+  );
+  const { loading: enrollLoading, error: enrollError } = useAppSelector(
+    state => state.myLecture
   );
 
   // 각 섹션의 ref
@@ -95,6 +99,8 @@ const CourseDetailPage: React.FC = () => {
         (section): section is NonNullable<typeof section> => section !== null
       );
 
+    if (sections.length === 0) return;
+
     const visibleSections = sections.filter(
       section => section.visibilityRatio >= 0.15
     );
@@ -108,12 +114,14 @@ const CourseDetailPage: React.FC = () => {
         dispatch(setActiveTab(mostVisibleSection.id));
       }
     } else {
-      const closestSection = sections.reduce((prev, current) =>
-        Math.abs(current.top) < Math.abs(prev.top) ? current : prev
-      );
+      if (sections.length > 0) {
+        const closestSection = sections.reduce((prev, current) =>
+          Math.abs(current.top) < Math.abs(prev.top) ? current : prev
+        );
 
-      if (closestSection && closestSection.id !== activeTab) {
-        dispatch(setActiveTab(closestSection.id));
+        if (closestSection && closestSection.id !== activeTab) {
+          dispatch(setActiveTab(closestSection.id));
+        }
       }
     }
   }, [courseDetail, dispatch, activeTab]);
@@ -155,14 +163,29 @@ const CourseDetailPage: React.FC = () => {
 
   // 수강신청 핸들러
   const handleEnrollment = useCallback(
-    (title: string) => {
-      alert(`"${title}" 수강신청이 완료되었습니다.`);
-      navigate("/");
+    async (title: string) => {
+      if (!courseId) {
+        alert("강의 정보를 찾을 수 없습니다.");
+        return;
+      }
+
+      try {
+        const result = await dispatch(enrollCourse({ courseId })).unwrap();
+
+        if (result.success) {
+          alert(`"${title}" 수강신청이 완료되었습니다.`);
+          navigate("/my-lectures");
+        }
+      } catch (error) {
+        const errorMessage =
+          typeof error === "string" ? error : "수강신청에 실패했습니다.";
+        alert(`수강신청 실패: ${errorMessage}`);
+      }
     },
-    [navigate]
+    [dispatch, courseId, navigate]
   );
 
-  // 강의 데이터 fetch
+  // 강의 데이터
   useEffect(() => {
     if (courseId) {
       dispatch(fetchCourseDetail(courseId));
@@ -196,9 +219,12 @@ const CourseDetailPage: React.FC = () => {
     };
   }, [courseDetail, handleScroll]);
 
-  // 로딩 상태
-  if (loading) {
-    return <LoadingMessage message="강의 정보를 불러오는 중..." />;
+  // 로딩 상태 (강의 상세 정보 또는 수강신청)
+  if (loading || enrollLoading) {
+    const message = enrollLoading
+      ? "수강신청 처리 중..."
+      : "강의 정보를 불러오는 중...";
+    return <LoadingMessage message={message} />;
   }
 
   // 강의 정보가 없는 경우
@@ -208,6 +234,13 @@ const CourseDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen mt-14">
+      {/* 수강신청 에러 메시지 표시 */}
+      {enrollError && (
+        <div className="bg-red-50 border border-red-200 rounded-md p-4 mx-4 mb-4">
+          <p className="text-sm text-red-600">{enrollError}</p>
+        </div>
+      )}
+
       {/* 강의 헤더 */}
       <CourseHeader />
 

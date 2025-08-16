@@ -27,13 +27,17 @@ const ProfileCard: React.FC = () => {
     navigate("/my-lectures");
   };
 
+  const getUserProfile = () => {
+    return user?.profile_image_url || profileImg;
+  };
+
   if (isAuthenticated) {
     return (
       <article className="flex flex-col justify-center items-center w-[290px] p-8 box-border bg-white border border-gray200 rounded-[10px] text-center max-[834px]:hidden">
         <div className="w-[100px] h-[100px] overflow-hidden rounded-full border border-gray200 mb-3">
           <img
             className="w-full h-full object-cover"
-            src={profileImg}
+            src={getUserProfile()}
             alt="사용자 프로필"
           />
         </div>
