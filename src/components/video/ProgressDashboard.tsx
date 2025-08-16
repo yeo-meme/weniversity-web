@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { User, CheckCircle } from "lucide-react";
 import {
-  WatchProgress,
-  UserProgressSummary,
-  Chapter,
+  // WatchProgress,
+  // UserProgressSummary,
+  // Chapter,
 } from "../../types/videoTypes";
 import { WatchProgressService } from "../../services/WatchProgressService";
-import { chaptersData } from "../../data/chapters";
+// import { chaptersData } from "../../data/chapters";
 import { formatWatchTime } from "../../utils/formatters";
 
 interface ProgressDashboardProps {

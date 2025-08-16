@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { baseQueryWithReauth } from "./base-query";
-import type { UserData } from "./token-service.ts";
+import { baseQueryWithReauth } from "./baseQuery.ts";
+import type { UserData } from "./tokenService.ts";
 
 export interface LoginRequest {
   email: string;

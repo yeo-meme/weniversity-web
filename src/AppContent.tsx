@@ -9,24 +9,28 @@ import Header from "./components/header/header";
 import HeroSection from "./components/hero/hero-section";
 import TabSync from "./components/TabSync";
 
-import { selectAuthToken,selectCurrentUser,selectIsAuthenticated } from './auth/authSlice'
+import StudyLayoutPlayer from "./components/video/StudyLayoutPlayer"; // 경로 예시
+
+import {
+  selectAuthToken,
+  selectCurrentUser,
+  selectIsAuthenticated,
+} from "./auth/authSlice";
 
 function HomePage() {
-  
-  return <HeroSection  />;
+  return <HeroSection />;
 }
 
 function AppContent() {
   const dispatch = useAppDispatch();
-const currentUser = useAppSelector(selectCurrentUser);
-const token = useAppSelector(selectAuthToken);
-const isAuthenticated = useAppSelector(selectIsAuthenticated);
-const { isHydrated } = useAppSelector((state) => state.auth);
+  const currentUser = useAppSelector(selectCurrentUser);
+  const token = useAppSelector(selectAuthToken);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const { isHydrated } = useAppSelector((state) => state.auth);
   const navigate = useNavigate();
   const isActuallyLoggedIn = !!currentUser?.email && !!token;
 
-
-  const { currentTab } = useAppSelector((state) => state.page); 
+  const { currentTab } = useAppSelector((state) => state.page);
   console.log("현재 Redux currentTab:", currentTab);
 
   console.log("=== Auth 상태 디버깅 ===");
@@ -42,11 +46,11 @@ const { isHydrated } = useAppSelector((state) => state.auth);
     navigate("/");
   };
 
-  const handleLogout = () => {
-    dispatch(logout());
-    dispatch(setCurrentTab("home"));
-    navigate("/");
-  };
+  // const handleLogout = () => {
+  //   dispatch(logout());
+  //   dispatch(setCurrentTab("home"));
+  //   navigate("/");
+  // };
 
   console.log(localStorage.getItem("persist:auth"));
 
@@ -61,14 +65,18 @@ const { isHydrated } = useAppSelector((state) => state.auth);
   return (
     <>
       <TabSync />
-      <Header
-      />
+      <Header />
       <main className="max-w-[1190px] max-[834px]:max-w-[calc(100% - 32px)] mx-auto">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route
             path="/login"
-            element={<LoginPage onLoginSuccess={handleLoginSuccess} onGoToMain={() => navigate("/")}/>}
+            element={
+              <LoginPage
+                onLoginSuccess={handleLoginSuccess}
+                onGoToMain={() => navigate("/")}
+              />
+            }
           />
           <Route
             path="/my-lectures"
@@ -76,11 +84,15 @@ const { isHydrated } = useAppSelector((state) => state.auth);
               isActuallyLoggedIn ? (
                 <MyLectures />
               ) : (
-                <LoginPage onLoginSuccess={handleLoginSuccess} onGoToMain={() => navigate("/")} />
+                <LoginPage
+                  onLoginSuccess={handleLoginSuccess}
+                  onGoToMain={() => navigate("/")}
+                />
               )
             }
           />
           <Route path="*" element={<HomePage />} />
+          <Route path="/studyplayer" element={<StudyLayoutPlayer />} />
         </Routes>
       </main>
     </>

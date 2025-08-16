@@ -1,5 +1,7 @@
 import React from "react";
 import { VideoIcon } from "../common/icon.tsx";
+import { useNavigate } from "react-router-dom";
+
 
 interface Tag {
   text: string;
@@ -33,8 +35,15 @@ const LectureCard: React.FC<LectureCardProps> = ({
   onDetailClick,
   onReapplyClick,
 }) => {
+  const navigate = useNavigate();
+
+  const handleLectureClick = () => {
+    navigate(`/studyplayer`); // URL 경로는 필요에 맞게 설정
+  };
+
   return (
-    <article className="lecture-card max-w-[380px] flex flex-col">
+    <article className="lecture-card max-w-[380px] flex flex-col"
+    onClick={() => handleLectureClick()}>
       <div className="thumbnail-wrapper relative w-[380px] h-[200px] mb-5">
         <img
           src={thumbnailSrc}

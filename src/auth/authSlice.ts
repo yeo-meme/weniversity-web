@@ -1,14 +1,14 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { authApiSlice } from "./authApiSlice.ts";
-import { TokenService } from "./token-service.ts";
+import { TokenService } from "./tokenService.ts";
 import type { RootState } from "../store/store.ts";
 
 interface User {
-  id?: number | null;       
+  id?: number | null;
   email: string;
-  name?: string | null;      
-  role?: string | null; 
+  name?: string | null;
+  role?: string | null;
 }
 
 interface AuthState {
@@ -64,10 +64,10 @@ const authSlice = createSlice({
       state.token = token;
       state.user = user;
       state.refreshToken = refreshToken || state.refreshToken;
-      state.isAuthenticated = !!(action.payload.user?.email && action.payload.token);;
+      state.isAuthenticated = !!(
+        action.payload.user?.email && action.payload.token
+      );
       state.tokenExpiration = TokenService.getTokenExpiration(token);
-
-
     },
 
     updateToken: (
@@ -175,14 +175,16 @@ const authSlice = createSlice({
         authSlice.caseReducers.logout(state);
       })
       .addMatcher(
-        (action) => action.type === "persist/REHYDRATE" && action.key === "auth",
+        (action) =>
+          action.type === "persist/REHYDRATE" && action.key === "auth",
         (state) => {
           state.isHydrated = true;
           state.isAuthenticated = !!(state.user?.email && state.token);
         }
       )
       .addMatcher(
-        (action) => action.type === "persist/REHYDRATE" && action.key === "auth",
+        (action) =>
+          action.type === "persist/REHYDRATE" && action.key === "auth",
         (state) => {
           state.isHydrated = true;
           state.isAuthenticated = !!(state.user?.email && state.token);
@@ -191,14 +193,13 @@ const authSlice = createSlice({
           console.log("🎫 토큰:", state.token);
           console.log("🔓 인증 상태:", state.isAuthenticated);
         }
-      )
+      );
   },
 });
 
-export const { logout, clearError, setCredentials, updateToken,resetAuth } =
+export const { logout, clearError, setCredentials, updateToken, resetAuth } =
   authSlice.actions;
 export default authSlice.reducer;
-
 
 export const selectIsAuthenticated = (state: RootState) => {
   return !!(state.auth.user?.email && state.auth.token);

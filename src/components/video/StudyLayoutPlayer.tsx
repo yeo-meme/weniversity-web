@@ -3,23 +3,23 @@ import {
   Play,
   Clock,
   CheckCircle,
-  ChevronRight,
-  ChevronDown,
+  // ChevronRight,
+  // ChevronDown,
   X,
 } from "lucide-react";
-import { ProgressCalculator } from "../../utils/progressCalculator";
-import { ProgressTracker } from "../../services/ProgressTracker";
-import type {
-  LocalProgressCache,
-  LocalchaterCache,
-} from "../../types/progress.types";
+// import { ProgressCalculator } from "../../utils/progressCalculator";
+// import { ProgressTracker } from "../../services/ProgressTracker";
+// import type {
+//   LocalProgressCache,
+//   LocalchaterCache,
+// } from "../../types/progress.types";
 
 import { localChapterToWatchProgress } from "../../utils/convertCacheToWatchProgress";
 import type { SimpleProgressCache } from "../../services/SimpleProgressCache";
 import { loadCache, updateCache } from "../../services/SimpleProgressCache";
 import { convertWatchProgressToCache } from "../../utils/convertCacheToWatchProgress";
 
-import { useAppDispatch, useAppSelector } from "../../store/store";
+import { useAppDispatch, useAppSelector } from "../../hooks/hook";
 import { 
   useGetLecturesQuery,
   useLazyGetLecturesQuery,

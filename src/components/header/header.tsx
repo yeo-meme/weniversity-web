@@ -29,10 +29,10 @@ const Header: React.FC = () => {
     (state) => state.auth
   );
 
-  const isActuallyLoggedIn = isAuthenticated && 
-                          !!user?.email && 
-                          !!token && 
-                          token !== "null";
+  // const isActuallyLoggedIn = isAuthenticated && 
+  //                         !!user?.email && 
+  //                         !!token && 
+  //                         token !== "null";
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,52 +45,52 @@ const Header: React.FC = () => {
   //   }
   // };
 
-  const handleLogin = async (credentials: { email: string; password: string }) => {
-    try {
-      // 로그인 API 호출
-      const result = await loginMutation(credentials).unwrap();
+  // const handleLogin = async (credentials: { email: string; password: string }) => {
+  //   try {
+  //     // 로그인 API 호출
+  //     const result = await loginMutation(credentials).unwrap();
       
-      console.log("로그인 API 응답:", result);
+  //     console.log("로그인 API 응답:", result);
       
-      // 로그인 성공 콜백 실행
-      // if (onLogin) {
-      //   onLogin();
-      // }
+  //     // 로그인 성공 콜백 실행
+  //     // if (onLogin) {
+  //     //   onLogin();
+  //     // }
       
-    } catch (error) {
-      console.error("로그인 오류:", error);
-    }
-  };
+  //   } catch (error) {
+  //     console.error("로그인 오류:", error);
+  //   }
+  // };
 
-  const handleLogout = async () => {
-    try {
-      console.log("🚪 로그아웃 시작 - 토큰 확인:", {
-        accessToken: token ? "있음" : "없음",
-        refreshToken: refreshToken ? "있음" : "없음",
-      });
+  // const handleLogout = async () => {
+  //   try {
+  //     console.log("🚪 로그아웃 시작 - 토큰 확인:", {
+  //       accessToken: token ? "있음" : "없음",
+  //       refreshToken: refreshToken ? "있음" : "없음",
+  //     });
 
-      const result = await logoutMutation({
-        access: token || undefined,
-        refresh: refreshToken || undefined,
-      }).unwrap();
+  //     const result = await logoutMutation({
+  //       access: token || undefined,
+  //       refresh: refreshToken || undefined,
+  //     }).unwrap();
 
-      localStorage.removeItem('persist:auth');
-      console.log("✅ API 로그아웃 성공:", result);
-    } catch (error) {
-      console.error("❌ 로그아웃 API 오류:", error);
-    }
+  //     localStorage.removeItem('persist:auth');
+  //     console.log("✅ API 로그아웃 성공:", result);
+  //   } catch (error) {
+  //     console.error("❌ 로그아웃 API 오류:", error);
+  //   }
 
-        // persistor 초기화
-        dispatch(resetAuth());
+  //       // persistor 초기화
+  //       dispatch(resetAuth());
 
-    // if (onLogout) {
-    //   onLogout();
-    //   console.log("🔄 로컬 로그아웃 콜백 실행 완료");
-    // }
+  //   // if (onLogout) {
+  //   //   onLogout();
+  //   //   console.log("🔄 로컬 로그아웃 콜백 실행 완료");
+  //   // }
 
-    console.log("🎉 로그아웃 프로세스 완료");
-    alert("로그아웃 되었습니다.");
-  };
+  //   console.log("🎉 로그아웃 프로세스 완료");
+  //   alert("로그아웃 되었습니다.");
+  // };
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -184,10 +184,10 @@ const Header: React.FC = () => {
         </div>
       </header>
 
-      <MobileMenu
+      {/* <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={closeMobileMenu}
-      />
+      /> */}
     </>
   );
 };

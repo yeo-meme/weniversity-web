@@ -45,7 +45,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(authApiSlice.middleware),
+    }).concat(authApiSlice.middleware,lectureApiSlice.middleware),
 });
 
 

@@ -14,7 +14,7 @@ const UserProfile: React.FC = () => {
 
   const { user, token } = useAppSelector((state) => state.auth);
   const [logoutMutation] = useLogoutMutation();
-  const [loginMutation] = useLoginMutation();
+  // const [loginMutation] = useLoginMutation();
 
   const isActuallyLoggedIn = !!user?.email && !!token;
 
