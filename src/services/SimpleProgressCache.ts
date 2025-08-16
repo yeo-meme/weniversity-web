@@ -1,7 +1,7 @@
 import type { LocalProgressCache, LocalChapterCache } from '../types/progress.types';
 
-// 🔥 키 통일
-const LOCAL_CACHE_KEY = 'local_progress_cache';
+
+const LOCAL_CACHE_KEY = 'video_progress_cache';
 
 export type SimpleProgressCache = LocalProgressCache;
 

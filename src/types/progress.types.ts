@@ -5,11 +5,11 @@ export interface WatchProgress {
   userId: string;
   chapterId: number;
   courseId: number;
-  videoId: number;               // 🔥 새로 추가
-  chapterOrder: number;          // 🔥 새로 추가
-  videoOrder: number;            // 🔥 새로 추가
-  chapterIndex: number;          // 🔥 새로 추가
-  videoIndex: number;            // 🔥 새로 추가
+  videoId: number;               
+  chapterOrder: number;          
+  videoOrder: number;            
+  chapterIndex: number;          
+  videoIndex: number;            
   currentTime: number;
   totalDuration: number;
   watchedPercentage: number;
@@ -39,12 +39,11 @@ export interface LocalChapterCache {
   currentTime: number;
   totalDuration: number; 
   watchedPercentage: number;  
-  isCompleted: boolean;  // ✅ 추가
+  isCompleted: boolean;  
   lastUpdated: number;
   isDirty: boolean;
 }
 
-// 3. 코스별 캐시
 export interface LocalCourseCache {
   userId: string;
   courseId: number;
@@ -76,16 +75,6 @@ export interface UpdateWatchProgressParams {
   isCompleted?: boolean;
 }
 
-
-// export interface LastWatched {
-//   lastChapterId: number;
-//   lastVideoId: number;
-//   lastChapterOrder: number;
-//   lastVideoOrder: number;
-//   lastChapterIndex: number;
-//   lastVideoIndex: number;
-//   lastWatchedAt: string; // ISO 형식
-// }
 
 export interface CourseProgressStatistics {
   totalChapters: number;

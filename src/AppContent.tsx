@@ -9,7 +9,7 @@ import Header from "./components/header/header";
 import HeroSection from "./components/hero/hero-section";
 import TabSync from "./components/TabSync";
 
-import StudyLayoutPlayer from "./components/video/StudyLayoutPlayer"; // 경로 예시
+import StudyLayoutPlayer from "./components/video/StudyLayoutPlayerBasic"; // 경로 예시
 
 import {
   selectAuthToken,
