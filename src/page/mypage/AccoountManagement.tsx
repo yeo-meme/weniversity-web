@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import FindPasswordModal from "./findPasswordModal";
+import { useAuth } from "../../hooks/useAuth";
 
 const AccountManagement: React.FC = () => {
+  const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handlePasswordReset = () => {
@@ -25,7 +27,7 @@ const AccountManagement: React.FC = () => {
             <div className="relative">
               <input
                 type="email"
-                value="jaeho614a@gmail.com"
+                value={user?.email}
                 disabled
                 className="block w-[257px] px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500 cursor-not-allowed sm:text-sm"
               />
