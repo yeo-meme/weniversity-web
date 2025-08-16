@@ -1,42 +1,58 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { RootState } from "../store/index";
 import type {
   PasswordResetRequest,
   PasswordResetResponse,
   PasswordResetState,
 } from "../types/myPage/findPassword";
 
-// 비밀번호 재설정 이메일 전송 API
+// 비밀번호 재설정 이메일 전송
 export const sendPasswordResetEmail = createAsyncThunk<
   PasswordResetResponse,
-  PasswordResetRequest
->("passwordReset/sendEmail", async (requestData, { rejectWithValue }) => {
-  try {
-    const { email } = requestData;
+  PasswordResetRequest,
+  { state: RootState }
+>(
+  "passwordReset/sendEmail",
+  async (requestData, { rejectWithValue, getState }) => {
+    try {
+      const { email } = requestData;
+      const state = getState();
+      const token = state.auth.token;
 
-    const response = await fetch("http://13.125.180.222/api/password-reset/", {
-      method: "POST",
-      headers: {
+      const headers: Record<string, string> = {
         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email }),
-    });
+      };
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || "비밀번호 재설정 이메일 전송에 실패했습니다."
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        "http://13.125.180.222/api/password-reset/",
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ email }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || "비밀번호 재설정 이메일 전송에 실패했습니다."
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : "비밀번호 재설정 이메일 전송에 실패했습니다."
       );
     }
-
-    return await response.json();
-  } catch (error) {
-    return rejectWithValue(
-      error instanceof Error
-        ? error.message
-        : "비밀번호 재설정 이메일 전송에 실패했습니다."
-    );
   }
-});
+);
 
 const initialState: PasswordResetState = {
   loading: false,
