@@ -4,7 +4,47 @@ import type {
   UserProfile,
   ProfileFormData,
   MyPageState,
+  LikedCoursesResponse,
 } from "../types/myPage/myPage";
+
+// 좋아요한 강의 목록 가져오기
+export const fetchLikedCourses = createAsyncThunk<
+  LikedCoursesResponse,
+  void,
+  { state: RootState }
+>("myPage/fetchLikedCourses", async (_, { rejectWithValue, getState }) => {
+  try {
+    const state = getState();
+    const token = state.auth.token;
+
+    if (!token) {
+      throw new Error("인증 토큰이 없습니다.");
+    }
+
+    const response = await fetch(
+      "http://13.125.180.222/api/users/mypage/likes/",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    return rejectWithValue(
+      error instanceof Error
+        ? error.message
+        : "좋아요한 강의 목록을 불러오는데 실패했습니다."
+    );
+  }
+});
 
 // 프로필 정보 가져오기
 export const fetchProfile = createAsyncThunk<
@@ -93,6 +133,8 @@ const initialState: MyPageState = {
   loading: false,
   error: null,
   success: false,
+  likedCourses: [],
+  likedCoursesLoading: false,
 };
 
 const myPageSlice = createSlice({
@@ -140,6 +182,21 @@ const myPageSlice = createSlice({
         state.loading = false;
         state.error =
           (action.payload as string) || "프로필 수정에 실패했습니다.";
+      })
+      // 좋아요한 강의 목록 가져오기
+      .addCase(fetchLikedCourses.pending, state => {
+        state.likedCoursesLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchLikedCourses.fulfilled, (state, action) => {
+        state.likedCoursesLoading = false;
+        state.likedCourses = action.payload.results.map(item => item.course);
+      })
+      .addCase(fetchLikedCourses.rejected, (state, action) => {
+        state.likedCoursesLoading = false;
+        state.error =
+          (action.payload as string) ||
+          "좋아요한 강의 목록을 불러오는데 실패했습니다.";
       });
   },
 });

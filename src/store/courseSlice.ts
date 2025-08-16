@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { CourseState, ApiResponse } from "../types/course/course";
+import type { RootState } from "../store/index";
 
 interface FetchCoursesParams {
   page?: number;
@@ -9,6 +10,48 @@ interface FetchCoursesParams {
   levels?: string[];
   prices?: string[];
 }
+
+// 좋아요 토글 API
+export const toggleCourseLike = createAsyncThunk<
+  { course_id: string; is_liked: boolean },
+  { courseId: string; isLiked: boolean },
+  { state: RootState }
+>(
+  "course/toggleCourseLike",
+  async ({ courseId, isLiked }, { rejectWithValue, getState }) => {
+    try {
+      const state = getState();
+      const token = state.auth.token;
+
+      if (!token) {
+        throw new Error("인증 토큰이 없습니다.");
+      }
+
+      const response = await fetch(
+        `http://13.125.180.222/api/courses/${courseId}/like`,
+        {
+          method: isLiked ? "DELETE" : "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      return { course_id: data.course_id.toString(), is_liked: data.is_liked };
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "좋아요 처리에 실패했습니다."
+      );
+    }
+  }
+);
 
 // URL 파라미터 생성 함수
 const buildQueryParams = (params: FetchCoursesParams): string => {
@@ -121,6 +164,7 @@ const initialState: CourseState = {
   },
   loading: false,
   error: null,
+  likedCourses: [],
 };
 
 const courseSlice = createSlice({
@@ -187,6 +231,10 @@ const courseSlice = createSlice({
       };
       state.pagination.currentPage = 1;
     },
+    // 좋아요한 강의 목록 설정
+    setLikedCourses: (state, action: PayloadAction<string[]>) => {
+      state.likedCourses = action.payload;
+    },
   },
   extraReducers: builder => {
     builder
@@ -208,6 +256,24 @@ const courseSlice = createSlice({
         state.error =
           action.error.message || "코스 목록을 불러오는데 실패했습니다.";
         state.courses = [];
+      })
+      // 좋아요 토글 처리
+      .addCase(toggleCourseLike.fulfilled, (state, action) => {
+        const { course_id, is_liked } = action.payload;
+
+        if (is_liked) {
+          if (!state.likedCourses.includes(course_id)) {
+            state.likedCourses.push(course_id);
+          }
+        } else {
+          state.likedCourses = state.likedCourses.filter(
+            id => id !== course_id
+          );
+        }
+      })
+      .addCase(toggleCourseLike.rejected, (state, action) => {
+        state.error =
+          (action.payload as string) || "좋아요 처리에 실패했습니다.";
       });
   },
 });
@@ -218,6 +284,7 @@ export const {
   clearAllFilters,
   setCurrentPage,
   setItemsPerPage,
+  setLikedCourses,
 } = courseSlice.actions;
 
 export default courseSlice.reducer;

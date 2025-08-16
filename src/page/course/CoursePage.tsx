@@ -12,19 +12,22 @@ import FilterSection from "../../components/course/FilterSection";
 import CourseList from "../../components/course/CourseList";
 import FilterControls from "../../components/course/FilterControls";
 import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const CoursePage: React.FC = () => {
   const dispatch = useAppDispatch();
-  const [searchParams] = useSearchParams(); //
+  const [searchParams] = useSearchParams();
+  const { isAuthenticated, loadLikedCourses } = useAuth();
+
   const { courses, filters, activeFilters, pagination, loading, error } =
     useAppSelector(state => state.course);
 
-  // 메모이제이션된 courses 배열
+  // courses 배열
   const coursesToDisplay = useMemo(() => {
     return Array.isArray(courses) ? courses : [];
   }, [courses]);
 
-  // API 호출을 위한 파라미터 메모이제이션
+  // API 호출을 위한 파라미터
   const fetchParams = useMemo(
     () => ({
       page: pagination.currentPage,
@@ -41,6 +44,13 @@ const CoursePage: React.FC = () => {
       activeFilters.prices,
     ]
   );
+
+  // 로그인 상태가 변경될 때 좋아요한 강의 목록 로드
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadLikedCourses();
+    }
+  }, [isAuthenticated, loadLikedCourses]);
 
   // 코스 데이터 가져오기
   useEffect(() => {

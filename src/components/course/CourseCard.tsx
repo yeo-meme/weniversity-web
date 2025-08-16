@@ -2,18 +2,52 @@ import React, { useCallback, useState } from "react";
 import type { Course } from "../../types/course/course";
 import HeartIconHover from "../../assets/icon-heart-hover.png";
 import HeartIcon from "../../assets/icon-heart.png";
+import HeartPicked from "../../assets/icon-heart-picked.png";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useAppDispatch, useAppSelector } from "../../hooks/hook";
+import { toggleCourseLike } from "../../store/courseSlice";
 
 interface CourseCardProps {
   course: Course;
 }
 
 const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
-  const getLike = (id: string, event: React.MouseEvent) => {
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
+  const { isAuthenticated } = useAuth();
+  const likedCourses = useAppSelector(state => state.course.likedCourses);
+  const isLiked = likedCourses.includes(String(course.course_id));
+
+  const getLike = async (
+    courseId: string,
+    isLiked: boolean,
+    event: React.MouseEvent
+  ) => {
     event.stopPropagation();
-    console.log(`${id} 강의를 선택했습니다.`);
+
+    if (!isAuthenticated) {
+      alert("로그인이 필요한 서비스입니다.");
+      return;
+    }
+
+    if (isLikeLoading) {
+      console.log("이미 처리 중입니다.");
+      return;
+    }
+
+    setIsLikeLoading(true);
+
+    try {
+      await dispatch(toggleCourseLike({ courseId, isLiked })).unwrap();
+    } catch (error) {
+      console.error("좋아요 처리 중 오류:", error);
+      alert("좋아요 처리 중 오류가 발생했습니다.");
+    } finally {
+      setIsLikeLoading(false);
+    }
   };
 
   const navigateToCourseDetail = (id: string) => {
@@ -41,6 +75,11 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
     return "";
   }, []);
 
+  const getHeartImage = () => {
+    if (isLiked) return HeartPicked;
+    return isHovered ? HeartIconHover : HeartIcon;
+  };
+
   return (
     <div className="rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 course-card cursor-pointer">
       <div
@@ -51,14 +90,16 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         <img src={course.course_image} alt="강의이미지" />
 
         {/* 좋아요 이미지 */}
-        <img
-          src={isHovered ? HeartIconHover : HeartIcon}
-          alt="좋아요"
-          className="absolute top-4 right-4 transition-colors"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          onClick={event => getLike(course.course_id, event)}
-        />
+        {isAuthenticated && (
+          <img
+            src={getHeartImage()}
+            alt="좋아요"
+            className="absolute top-4 right-4 transition-all duration-200 cursor-pointer"
+            onMouseEnter={() => !isLiked && setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            onClick={event => getLike(course.course_id, isLiked, event)}
+          />
+        )}
       </div>
 
       {/* 코스 정보 */}

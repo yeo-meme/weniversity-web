@@ -19,7 +19,7 @@ interface FormErrors {
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
-  const { isAuthenticated, isHydrated, error } = useAuth();
+  const { isAuthenticated, isHydrated, error, loadLikedCourses } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
@@ -31,9 +31,11 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     if (isHydrated && isAuthenticated) {
       alert("로그인 성공! 위니버시티에 오신 것을 환영합니다! 🎉");
+      // 로그인 성공 후 좋아요한 강의 목록 로드
+      loadLikedCourses();
       navigate("/");
     }
-  }, [isAuthenticated, isHydrated, navigate]);
+  }, [isAuthenticated, isHydrated, navigate, loadLikedCourses]);
 
   useEffect(() => {
     if (error) {

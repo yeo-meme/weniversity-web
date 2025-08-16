@@ -42,6 +42,7 @@ export interface CourseState {
   pagination: PaginationState;
   loading: boolean;
   error: string | null;
+  likedCourses: string[];
 }
 
 export interface ApiResponse {
