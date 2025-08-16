@@ -84,3 +84,9 @@ body {
 input::placeholder {
   @apply text-gray500;
 }
+
+@layer base {
+  input[type="search"]::-webkit-search-cancel-button {
+    @apply appearance-none;
+  }
+}

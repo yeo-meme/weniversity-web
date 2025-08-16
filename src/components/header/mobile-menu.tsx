@@ -1,51 +1,35 @@
 import React from "react";
 import { useNavigate } from "react-router";
-import { useAppDispatch, useAppSelector } from "../../hooks/hook.ts";
-import {
-  selectIsAuthenticated,
-  selectCurrentUser,
-} from "../../auth/authSlice.ts";
-import { goToMyLectures } from "../../store/slices/lecture-slice.ts";
 import closeIcon from "../../assets/icon-close.png";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
+import { useAuth } from "../../hooks/useAuth.ts";
 
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  onLogin: () => void;
-  onLogout: () => void;
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({
-  isOpen,
-  onClose,
-  onLogin,
-  onLogout,
-}) => {
+const MobileMenu: React.FC<MobileMenuProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const currentUser = useAppSelector(selectCurrentUser);
+  const { user, isAuthenticated, handleLogout } = useAuth();
 
   const getUserDisplayName = () => {
-    if (currentUser?.name) {
-      return `${currentUser.name}님`;
-    } else if (currentUser?.email) {
-      const username = currentUser.email.split("@")[0];
+    if (user?.name) {
+      return `${user.name}님`;
+    } else if (user?.email) {
+      const username = user.email.split("@")[0];
       return `${username}님`;
     }
     return "열정 만수르";
   };
 
   const getUserEmail = () => {
-    return currentUser?.email || "paul-lab@naver.com";
+    return user?.email || "paul-lab@naver.com";
   };
 
   const handleGoToMyLectures = () => {
-    dispatch(goToMyLectures());
     navigate("/my-lectures");
     onClose();
   };
@@ -100,7 +84,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           {!isAuthenticated ? (
             <button
               className="rounded-[10px] py-[14px] px-[94.5px] text-white bg-primary text-sm"
-              onClick={onLogin}
+              onClick={() => navigate("/login")}
             >
               로그인
             </button>
@@ -108,9 +92,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             <ul className="flex flex-col items-start gap-4 w-[180px] mx-auto">
               <li>
                 <a
-                  href="#"
+                  href="/mycourses"
                   className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
-                  onClick={(e) => {
+                  onClick={e => {
                     e.preventDefault();
                     handleGoToMyLectures();
                   }}
@@ -120,7 +104,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/mypage"
                   className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
                 >
                   <UserIcon />
@@ -135,7 +119,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           <ul className="flex flex-col list-none">
             <li>
               <a
-                href="#"
+                href="/"
                 className="block px-5 py-2.5 text-sm font-medium text-main-text no-underline hover:bg-gray-100 transition-colors"
               >
                 위니버시티 소개
@@ -143,7 +127,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             </li>
             <li>
               <a
-                href="#"
+                href="/"
                 className="block px-5 py-2.5 text-sm font-medium text-main-text no-underline hover:bg-gray-100 transition-colors"
               >
                 수강생 후기
@@ -156,7 +140,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           <div className="w-full border-b border-gray200  py-[8px]">
             <button
               className="block w-full text-left px-5 py-2.5 text-sm font-medium text-main-text hover:bg-gray-100 transition-colors"
-              onClick={onLogout}
+              onClick={handleLogout}
             >
               로그아웃
             </button>
