@@ -1,43 +1,34 @@
 import React from "react";
-import { useAppDispatch, useAppSelector } from "../../hooks/hook.ts";
-import {
-  selectIsAuthenticated,
-  selectCurrentUser,
-} from "../../auth/authSlice.ts";
-import { goToMyLectures } from "../../store/slices/lecture-slice.ts";
 import profileNoneImg from "../../assets/profile-none.png";
 import profileImg from "../../assets/profile-img.png";
 import { VideoIcon, UserIcon } from "../common/icon.tsx";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth.ts";
 
-interface ProfileCardProps {
-  onLogin: () => void;
-}
-
-const ProfileCard: React.FC<ProfileCardProps> = ({ onLogin }) => {
-  const dispatch = useAppDispatch();
+const ProfileCard: React.FC = () => {
   const navigate = useNavigate();
-
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const currentUser = useAppSelector(selectCurrentUser);
+  const { user, isAuthenticated } = useAuth();
 
   const getUserDisplayName = () => {
-    if (currentUser?.name) {
-      return `${currentUser.name}님`;
-    } else if (currentUser?.email) {
-      const username = currentUser.email.split("@")[0];
+    if (user?.name) {
+      return `${user.name}님`;
+    } else if (user?.email) {
+      const username = user.email.split("@")[0];
       return `${username}님`;
     }
     return "열정 만수르";
   };
 
   const getUserEmail = () => {
-    return currentUser?.email || "paul-lab@naver.com";
+    return user?.email || "paul-lab@naver.com";
   };
 
   const handleGoToMyLectures = () => {
-    dispatch(goToMyLectures());
     navigate("/my-lectures");
+  };
+
+  const getUserProfile = () => {
+    return user?.profile_image_url || profileImg;
   };
 
   if (isAuthenticated) {
@@ -46,7 +37,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onLogin }) => {
         <div className="w-[100px] h-[100px] overflow-hidden rounded-full border border-gray200 mb-3">
           <img
             className="w-full h-full object-cover"
-            src={profileImg}
+            src={getUserProfile()}
             alt="사용자 프로필"
           />
         </div>
@@ -58,9 +49,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onLogin }) => {
         <ul className="flex flex-col justify-center items-start gap-4 list-none">
           <li>
             <a
-              href="#"
+              href="/mycourses"
               className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
-              onClick={(e) => {
+              onClick={e => {
                 e.preventDefault();
                 handleGoToMyLectures();
               }}
@@ -70,7 +61,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onLogin }) => {
           </li>
           <li>
             <a
-              href="#"
+              href="/mypage"
               className="flex items-center gap-3 text-gray500 font-medium cursor-pointer hover:text-main-text transition-colors"
             >
               <UserIcon />
@@ -99,8 +90,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onLogin }) => {
         커뮤니티와 함께 성장하세요.
       </p>
       <button
-        className="w-full bg-primary text-white border-none rounded-[10px] py-[14px] px-0 text-sm font-medium transition-colors hover:bg-[#3a7ce0] transition-colors duration-200 ease-in-out "
-        onClick={onLogin}
+        className="w-full bg-primary text-white border-none rounded-[10px] py-[14px] px-0 text-sm font-medium transition-colors hover:bg-[#3a7ce0] duration-200 ease-in-out "
+        onClick={() => navigate("/login")}
       >
         로그인
       </button>

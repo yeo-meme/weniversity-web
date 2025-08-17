@@ -2,13 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { authApiSlice } from "./authApiSlice.ts";
 import { TokenService } from "./tokenService.ts";
-import type { RootState } from "../store/store.ts";
+import { REHYDRATE } from "redux-persist";
 
 interface User {
   id?: number | null;
   email: string;
   name?: string | null;
   role?: string | null;
+  profile_image_url?: string;
 }
 
 interface AuthState {
@@ -37,8 +38,7 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    logout: (state) => {
-      console.log("🔴 Persist: 로그아웃 → localStorage에서 auth 제거");
+    logout: state => {
       state.isAuthenticated = false;
       state.user = null;
       state.token = null;
@@ -47,7 +47,7 @@ const authSlice = createSlice({
       state.tokenExpiration = null;
     },
 
-    clearError: (state) => {
+    clearError: state => {
       state.error = null;
     },
 
@@ -60,7 +60,6 @@ const authSlice = createSlice({
       }>
     ) => {
       const { token, user, refreshToken } = action.payload;
-
       state.token = token;
       state.user = user;
       state.refreshToken = refreshToken || state.refreshToken;
@@ -68,6 +67,12 @@ const authSlice = createSlice({
         action.payload.user?.email && action.payload.token
       );
       state.tokenExpiration = TokenService.getTokenExpiration(token);
+    },
+
+    updateUser: (state, action: PayloadAction<Partial<User>>) => {
+      if (state.user) {
+        state.user = { ...state.user, ...action.payload };
+      }
     },
 
     updateToken: (
@@ -86,11 +91,25 @@ const authSlice = createSlice({
 
       state.tokenExpiration = TokenService.getTokenExpiration(token);
     },
+
+    // 토큰 유효성 검사 및 정리
+    validateTokenOnRehydrate: state => {
+      if (state.token && !TokenService.isTokenValid(state.token)) {
+        console.log("🚨 저장된 토큰이 만료되었습니다. 상태를 초기화합니다.");
+        state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
+        state.refreshToken = null;
+        state.tokenExpiration = null;
+      } else if (state.token && state.user?.email) {
+        state.isAuthenticated = true;
+        console.log("✅ 유효한 토큰으로 로그인 상태 복원됨");
+      }
+    },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
-      .addMatcher(authApiSlice.endpoints.login.matchPending, (state) => {
-        console.log("✅ API 로그인 성공 → persist 저장 트리거");
+      .addMatcher(authApiSlice.endpoints.login.matchPending, state => {
         state.loading = true;
         state.error = null;
       })
@@ -106,12 +125,13 @@ const authSlice = createSlice({
             console.log("🔑 Case 1: access 토큰 방식");
             console.log("📧 email:", data.email);
             console.log("🎯 role:", data.role);
-
+            console.log("로그인시 ", data);
             const user = {
               id: null,
-              email: data.email || "",
-              name: null,
+              email: data.email || null,
+              name: data.name || null,
               role: data.role || null,
+              profile_image_url: data.profile_image_url || null,
             };
 
             console.log("👤 생성된 user:", user);
@@ -167,41 +187,52 @@ const authSlice = createSlice({
           });
         }
       )
-      .addMatcher(authApiSlice.endpoints.logout.matchFulfilled, (state) => {
+      .addMatcher(authApiSlice.endpoints.logout.matchFulfilled, state => {
         authSlice.caseReducers.logout(state);
       })
       .addMatcher(
-        (action) =>
-          action.type === "persist/REHYDRATE" && action.key === "auth",
-        (state) => {
-          state.isHydrated = true;
-          console.log("✅ persist/REHYDRATE 완료: auth 상태 복원됨");
-        }
-      )
-      .addMatcher(
-        (action) =>
-          action.type === "persist/REHYDRATE" && action.key === "auth",
-        (state) => {
-          state.isHydrated = true;
-          state.isAuthenticated = !!(state.user?.email && state.token);
-          console.log("✅ persist/REHYDRATE 완료");
-          console.log("📧 이메일:", state.user?.email);
-          console.log("🎫 토큰:", state.token);
-          console.log("🔓 인증 상태:", state.isAuthenticated);
+        (action): action is any => action.type === REHYDRATE,
+        (state, action) => {
+          if (action.key === "auth" && action.payload) {
+            const persistedState = action.payload.auth;
+
+            // 기본적으로 hydrated 상태로 설정
+            state.isHydrated = true;
+
+            console.log("🔄 Redux Persist: auth 상태 복원 중...");
+            console.log("📦 복원된 데이터:", persistedState);
+
+            // 토큰이 있다면 유효성 검사
+            if (persistedState?.token) {
+              if (TokenService.isTokenValid(persistedState.token)) {
+                console.log("✅ 유효한 토큰 발견 - 로그인 상태 유지");
+                state.isAuthenticated = true;
+                state.user = persistedState.user;
+                state.token = persistedState.token;
+                state.refreshToken = persistedState.refreshToken;
+                state.tokenExpiration = persistedState.tokenExpiration;
+              } else {
+                console.log("❌ 만료된 토큰 발견 - 로그아웃 상태로 설정");
+                // 만료된 토큰은 제거
+                state.isAuthenticated = false;
+                state.user = null;
+                state.token = null;
+                state.refreshToken = null;
+                state.tokenExpiration = null;
+              }
+            }
+          }
         }
       );
   },
 });
 
-export const { logout, clearError, setCredentials, updateToken } =
-  authSlice.actions;
+export const {
+  logout,
+  clearError,
+  setCredentials,
+  updateUser,
+  updateToken,
+  validateTokenOnRehydrate,
+} = authSlice.actions;
 export default authSlice.reducer;
-
-export const selectIsAuthenticated = (state: RootState) => {
-  return !!(state.auth.user?.email && state.auth.token);
-};
-
-export const selectCurrentUser = (state: RootState) => state.auth.user;
-export const selectAuthToken = (state: RootState) => state.auth.token;
-export const selectAuthLoading = (state: RootState) => state.auth.loading;
-export const selectAuthError = (state: RootState) => state.auth.error;

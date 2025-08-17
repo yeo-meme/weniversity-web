@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useAppSelector } from "../../hooks/hook";
-import { useLoginMutation } from "../../auth/authApiSlice";
 import logoIcon from "../../assets/logo-icon.png";
 import githubIcon from "../../assets/github-mark.png";
 import googleIcon from "../../assets/google.png";
-
-import { selectIsAuthenticated,selectAuthError } from "../../auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import { useLoginMutation } from "../../auth/authApiSlice";
 
 interface LoginFormData {
   email: string;
@@ -17,30 +16,26 @@ interface FormErrors {
   password?: string;
 }
 
-const LoginPage: React.FC<{
-  onLoginSuccess: () => void;
-  onGoToMain: () => void;
-}> = ({ onLoginSuccess, onGoToMain }) => {
+const LoginPage: React.FC = () => {
+  const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
-
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
-  const error = useAppSelector(selectAuthError); 
-
+  const { isAuthenticated, isHydrated, error, loadLikedCourses } = useAuth();
   const [formData, setFormData] = useState<LoginFormData>({
     email: "",
     password: "",
   });
-
   const [errors, setErrors] = useState<FormErrors>({});
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
+  // hydration이 완료된 후에만 로그인 상태 확인
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log("로그인 성공! 위니버시티에 오신 것을 환영합니다! 🎉");
-      console.log("➡️ handleLoginSuccess() 호출 → navigate('/')");
-      onLoginSuccess();
+    if (isHydrated && isAuthenticated) {
+      alert("로그인 성공! 위니버시티에 오신 것을 환영합니다! 🎉");
+      // 로그인 성공 후 좋아요한 강의 목록 로드
+      loadLikedCourses();
+      navigate("/");
     }
-  }, [isAuthenticated, onLoginSuccess]);
+  }, [isAuthenticated, isHydrated, navigate, loadLikedCourses]);
 
   useEffect(() => {
     if (error) {
@@ -67,13 +62,13 @@ const LoginPage: React.FC<{
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
 
     if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [name]: undefined,
       }));
@@ -111,6 +106,15 @@ const LoginPage: React.FC<{
     console.log(`Social login with ${provider}`);
   };
 
+  // hydration이 완료되지 않았다면 로딩 표시
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">앱 초기화 중...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       <main className="min-h-screen bg-white">
@@ -120,7 +124,7 @@ const LoginPage: React.FC<{
               src={logoIcon}
               alt="위니버시티 로고"
               className="w-auto h-auto cursor-pointer"
-              onClick={onGoToMain}
+              onClick={() => navigate("/")}
             />
           </div>
 
@@ -130,7 +134,7 @@ const LoginPage: React.FC<{
           </p>
 
           <form
-            onSubmit={(e) => {
+            onSubmit={e => {
               e.preventDefault();
               handleSubmit();
             }}
@@ -216,7 +220,10 @@ const LoginPage: React.FC<{
           </form>
 
           <div className="flex justify-center items-center mb-8 gap-2">
-            <button className="text-sm font-medium text-primary">
+            <button
+              className="text-sm font-medium text-primary"
+              onClick={() => navigate("/register")}
+            >
               이메일로 회원가입
             </button>
             <span className="text-gray500">|</span>
