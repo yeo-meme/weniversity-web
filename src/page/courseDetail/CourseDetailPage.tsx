@@ -15,11 +15,13 @@ import CourseContent from "../../components/courseDetail/CourseContent";
 import LoadingMessage from "../../components/courseDetail/LoadingMessage";
 import { ErrorMessage } from "../../components/courseDetail/ErrorMessage";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const CourseDetailPage: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { courseId } = useParams<{ courseId: string }>();
+  const { isAuthenticated } = useAuth();
   const { courseDetail, activeTab, loading, error } = useAppSelector(
     state => state.courseDetail
   );
@@ -124,28 +126,6 @@ const CourseDetailPage: React.FC = () => {
     }
   }, [courseDetail, dispatch, activeTab]);
 
-  // 탭 클릭 핸들러
-  const handleTabClick = useCallback(
-    (tabKey: TabType) => {
-      dispatch(setActiveTab(tabKey));
-      isScrollingProgrammatically.current = true;
-
-      const targetSection = sectionRefs.current[tabKey];
-      if (targetSection) {
-        const offsetTop = targetSection.offsetTop - 46;
-        window.scrollTo({
-          top: offsetTop,
-          behavior: "smooth",
-        });
-
-        setTimeout(() => {
-          isScrollingProgrammatically.current = false;
-        }, 1000);
-      }
-    },
-    [dispatch]
-  );
-
   // 챕터 토글 핸들러
   const handleChapterToggle = useCallback(
     (chapterId: number) => {
@@ -167,6 +147,12 @@ const CourseDetailPage: React.FC = () => {
         return;
       }
 
+      if (!isAuthenticated) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+        return;
+      }
+
       try {
         const result = await dispatch(enrollCourse({ courseId })).unwrap();
 
@@ -180,7 +166,39 @@ const CourseDetailPage: React.FC = () => {
         alert(errorMessage);
       }
     },
-    [dispatch, courseId, navigate]
+    [dispatch, courseId, navigate, isAuthenticated]
+  );
+
+  // 탭 클릭 핸들러
+  const handleTabClick = useCallback(
+    (tabKey: TabType) => {
+      if (tabKey === "apply") {
+        if (!courseDetail) {
+          alert("강의 정보를 불러오는 중입니다. 잠시 후 다시 시도해주세요.");
+          return;
+        }
+
+        handleEnrollment(courseDetail.title);
+        return;
+      } else {
+        dispatch(setActiveTab(tabKey));
+        isScrollingProgrammatically.current = true;
+
+        const targetSection = sectionRefs.current[tabKey];
+        if (targetSection) {
+          const offsetTop = targetSection.offsetTop - 46;
+          window.scrollTo({
+            top: offsetTop,
+            behavior: "smooth",
+          });
+
+          setTimeout(() => {
+            isScrollingProgrammatically.current = false;
+          }, 1000);
+        }
+      }
+    },
+    [dispatch, handleEnrollment, courseDetail]
   );
 
   // 강의 데이터
