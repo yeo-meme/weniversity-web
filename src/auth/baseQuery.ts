@@ -7,7 +7,7 @@ import type {
 import type { RootState } from "../store/index";
 
 export const baseQuery = fetchBaseQuery({
-  baseUrl: "http://13.125.180.222/api",
+  baseUrl: "/api",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
 
