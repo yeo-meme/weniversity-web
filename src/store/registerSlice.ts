@@ -18,7 +18,7 @@ export const register = createAsyncThunk<void, RegisterFormData>(
         birth_date: formData.birth_date,
       };
 
-      const response = await fetch("/users/register/", {
+      const response = await fetch("/api/users/register/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

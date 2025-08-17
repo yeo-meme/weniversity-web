@@ -21,7 +21,7 @@ export const fetchLikedCourses = createAsyncThunk<
       throw new Error("인증 토큰이 없습니다.");
     }
 
-    const response = await fetch("/users/mypage/likes/", {
+    const response = await fetch("/api/users/mypage/likes/", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -57,7 +57,7 @@ export const fetchProfile = createAsyncThunk<
       throw new Error("인증 토큰이 없습니다.");
     }
 
-    const response = await fetch("/users/mypage/", {
+    const response = await fetch("/api/users/mypage/", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -102,7 +102,7 @@ export const updateProfile = createAsyncThunk<
       requestData.append("profile_image", formData.profile_image);
     }
 
-    const response = await fetch("/users/mypage/", {
+    const response = await fetch("/api/users/mypage/", {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,

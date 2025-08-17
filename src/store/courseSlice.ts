@@ -27,7 +27,7 @@ export const toggleCourseLike = createAsyncThunk<
         throw new Error("인증 토큰이 없습니다.");
       }
 
-      const response = await fetch(`/courses/${courseId}/like/`, {
+      const response = await fetch(`/api/courses/${courseId}/like/`, {
         method: isLiked ? "DELETE" : "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ export const fetchCourses = createAsyncThunk<
       prices: activeFilters.prices,
     };
 
-    const baseUrl = "/courses/";
+    const baseUrl = "/api/courses/";
     const queryString = buildQueryParams(requestParams);
     const url = `${baseUrl}?${queryString}`;
 

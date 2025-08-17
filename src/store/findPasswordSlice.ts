@@ -27,7 +27,7 @@ export const sendPasswordResetEmail = createAsyncThunk<
         headers.Authorization = `Bearer ${token}`;
       }
 
-      const response = await fetch("/password-reset/", {
+      const response = await fetch("/api/password-reset/", {
         method: "POST",
         headers,
         body: JSON.stringify({ email }),
