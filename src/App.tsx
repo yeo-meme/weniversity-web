@@ -10,6 +10,7 @@ import Layout from "./page/main/Layout.tsx";
 import NotFoundPage from "./page/NotFoundPage.tsx";
 import SearchPage from "./page/search/SearchPage.tsx";
 import MyLecturesPage from "./page/myLectures/MyLecturesPage.tsx";
+import StudyPlayer from "./components/video/StudyLayoutPlayerBasic.tsx";
 import { useAuth } from "./hooks/useAuth.ts";
 
 // 로그인된 상태에서 접근하면 홈으로 리다이렉트
@@ -45,6 +46,7 @@ function App() {
               <Routes>
                 <Route path="mypage" element={<MyPage />} />
                 <Route path="my-lectures" element={<MyLecturesPage />} />
+                <Route path="studyplayer" element={<StudyPlayer />} />
               </Routes>
             </PrivateRoute>
           }

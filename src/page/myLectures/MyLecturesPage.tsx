@@ -69,12 +69,17 @@ const MyLecturesPage: React.FC = () => {
   // 강의 액션 핸들러
   const handleLearnClick = useCallback((lectureId: string) => {
     console.log("학습하기:", lectureId);
+    navigate('/studyplayer')
     // 실제 학습 페이지로 이동하는 로직 추가
   }, []);
 
   const handleDetailClick = useCallback(
+  
     (lectureId: string) => {
-      navigate(`/courses/${lectureId}`);
+      console.log("zmflzkjdfkljflksjf;ls클랙");
+      // navigate(`/courses/${lectureId}`);
+      navigate(`/studyplayer`)
+      
     },
     [navigate]
   );

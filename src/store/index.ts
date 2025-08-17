@@ -12,6 +12,7 @@ import authReducer from "../auth/authSlice";
 import { authApiSlice } from "../auth/authApiSlice";
 import searchReducer from "./searchSlice";
 import myLectureReducer from "./myLecturesSlice";
+import { lectureApiSlice } from './lectureApiSlice';
 
 const authPersistConfig = {
   key: "auth",
@@ -36,6 +37,7 @@ const rootReducer = combineReducers({
   courseDetail: courseDetailReducer,
   search: searchReducer,
   myLecture: myLectureReducer,
+  [lectureApiSlice.reducerPath]: lectureApiSlice.reducer,
 });
 
 export const store = configureStore({
@@ -53,7 +55,7 @@ export const store = configureStore({
           "persist/RESUME",
         ],
       },
-    }).concat(authApiSlice.middleware),
+    }).concat(authApiSlice.middleware,lectureApiSlice.middleware),
 });
 
 export const persistor = persistStore(store);
