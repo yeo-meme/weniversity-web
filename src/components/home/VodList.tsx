@@ -46,7 +46,7 @@ const VodList: React.FC = () => {
   }, [dispatch]);
 
   return (
-    <section className="w-full">
+    <section className="w-full mb-20">
       <div className="my-8 mx-4">
         <div className="flex items-center justify-between mb-8">
           <h3 className="text-2xl font-semibold text-gray-900">

@@ -264,13 +264,6 @@ const myLectureSlice = createSlice({
 
       state.pagination.currentPage = 1;
     },
-    clearAllFilters: state => {
-      state.activeFilters = {
-        types: [],
-        statuses: [],
-      };
-      state.pagination.currentPage = 1;
-    },
     updateLectureStatus: (
       state,
       action: PayloadAction<{ lectureId: string; status: MyLecture["status"] }>
@@ -338,7 +331,6 @@ const myLectureSlice = createSlice({
 export const {
   resetMyLectureState,
   setActiveFilter,
-  clearAllFilters,
   setCurrentPage,
   setItemsPerPage,
   updateLectureStatus,

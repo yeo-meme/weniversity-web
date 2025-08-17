@@ -3,7 +3,6 @@ import { useAppDispatch, useAppSelector } from "../../hooks/hook";
 import {
   fetchMyLectures,
   setActiveFilter,
-  clearAllFilters,
   resetMyLectureState,
   setCurrentPage,
 } from "../../store/myLecturesSlice";
@@ -67,11 +66,6 @@ const MyLecturesPage: React.FC = () => {
     [dispatch]
   );
 
-  // 필터 초기화 핸들러
-  const handleClearFilters = useCallback(() => {
-    dispatch(clearAllFilters());
-  }, [dispatch]);
-
   // 강의 액션 핸들러
   const handleLearnClick = useCallback((lectureId: string) => {
     console.log("학습하기:", lectureId);
@@ -88,13 +82,7 @@ const MyLecturesPage: React.FC = () => {
   const handleReapplyClick = useCallback((lectureId: string) => {
     console.log("재수강:", lectureId);
     // 재수강 신청 로직
-    // navigate(`/course/${lectureId}/enroll`);
   }, []);
-
-  // 활성 필터 확인
-  const hasActiveFilters = useMemo(() => {
-    return activeFilters.types.length > 0 || activeFilters.statuses.length > 0;
-  }, [activeFilters]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
@@ -160,18 +148,6 @@ const MyLecturesPage: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* 필터 초기화 버튼 */}
-        {hasActiveFilters && (
-          <div className="mb-4">
-            <button
-              onClick={handleClearFilters}
-              className="px-4 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              필터 초기화
-            </button>
-          </div>
-        )}
 
         {/* 강의 목록 */}
         <MyLectureList
