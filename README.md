@@ -4,7 +4,7 @@
   <img src="./public/images/project-logo.png" alt="프로젝트 로고">
 </div>
 
-> https://weniversity.netlify.app/ > <br/>
+> https://weniversity.netlify.app/ <br/>
 
 <br/>
 
@@ -67,7 +67,6 @@
 
 ![AWS](https://img.shields.io/badge/AWS_Lightsail-FF9900?style=flat-square&logo=amazon-aws&logoColor=white)<img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=amazon-ec2&logoColor=white"> ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white) ![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white) ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 
-
 ## Project Management
 
 ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
@@ -92,8 +91,6 @@
 
 # 📄 요구사항 및 기능 명세
 
-★필요시 작성 및 보강
-
 ## 요구사항
 
 - 요구사항 문서는 [여기](https://www.notion.so/1ceebf76ee8a81759905ef6c45fc9468?pvs=21)에서 확인해주세요.
@@ -114,34 +111,34 @@
 
 ### user
 
-| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
-| --- | --- | --- | --- | --- |
-| 회원가입 | `POST` | `/api/users/register/` |  |  |
-| 로그인(JWT) | `POST` | `/api/users/login/` |  | refresh token |
-| 토큰리프레쉬 | `POST` | `/api/users/refresh/` | **✅** | refresh token |
-| 로그아웃 | `POST` | **`/api/users/logout/`** | **✅** |  |
-| 마이페이지(프로필사진) 조회/변경 | `GET`/ `PUT` | `/api/users/mypage/` | **✅** |  |
-| 비밀번호 변경 | `PATCH` | `/api/users/mypage/change-password/` | **✅** |  |
-| 비밀번호 변경 이메일 발송 | `POST` | `api/password-reset/` | **✅** |  |
-| 내가 좋아요한 코스 리스트 | `GET` | `api/users/mypage/likes/` | **✅** |  |
+| Description                      | HTTP Method  | URL Pattern Endpoint                 | Authentication | note          |
+| -------------------------------- | ------------ | ------------------------------------ | -------------- | ------------- |
+| 회원가입                         | `POST`       | `/api/users/register/`               |                |               |
+| 로그인(JWT)                      | `POST`       | `/api/users/login/`                  |                | refresh token |
+| 토큰리프레쉬                     | `POST`       | `/api/users/refresh/`                | **✅**         | refresh token |
+| 로그아웃                         | `POST`       | **`/api/users/logout/`**             | **✅**         |               |
+| 마이페이지(프로필사진) 조회/변경 | `GET`/ `PUT` | `/api/users/mypage/`                 | **✅**         |               |
+| 비밀번호 변경                    | `PATCH`      | `/api/users/mypage/change-password/` | **✅**         |               |
+| 비밀번호 변경 이메일 발송        | `POST`       | `api/password-reset/`                | **✅**         |               |
+| 내가 좋아요한 코스 리스트        | `GET`        | `api/users/mypage/likes/`            | **✅**         |               |
 
 ### 강의/영상
 
-| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
-| --- | --- | --- | --- | --- |
-| 강의 목록 | `GET` | `/api/courses/` |  |  |
-| 강의 상세 | `GET` | `/api/courses/<id>/` |  |  |
-| 강의 필터 | `GET` | `/api/courses/?` |  |  |
-| 강의 좋아요 | `POST` | `/api/courses/int:course_id/like/` | **✅** |  |
-| 강의 좋아요 취소 | `DELETE` | `/api/courses/int:course_id/like/` | **✅** |  |
+| Description      | HTTP Method | URL Pattern Endpoint               | Authentication | note |
+| ---------------- | ----------- | ---------------------------------- | -------------- | ---- |
+| 강의 목록        | `GET`       | `/api/courses/`                    |                |      |
+| 강의 상세        | `GET`       | `/api/courses/<id>/`               |                |      |
+| 강의 필터        | `GET`       | `/api/courses/?`                   |                |      |
+| 강의 좋아요      | `POST`      | `/api/courses/int:course_id/like/` | **✅**         |      |
+| 강의 좋아요 취소 | `DELETE`    | `/api/courses/int:course_id/like/` | **✅**         |      |
 
 ### 수강 등록/진도
 
-| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
-| --- | --- | --- | --- | --- |
-| 내 수강 강의 | `GET` | `/api/my-courses/` | **✅** |  |
-| 수강 신청 | `POST` | `/api/courses/enroll/<int:course_id/>` | **✅** |  |
-| 내 수강 강의 필터 | `GET` | `/api/my-courses/?` | **✅** |  |
+| Description       | HTTP Method | URL Pattern Endpoint                   | Authentication | note |
+| ----------------- | ----------- | -------------------------------------- | -------------- | ---- |
+| 내 수강 강의      | `GET`       | `/api/my-courses/`                     | **✅**         |      |
+| 수강 신청         | `POST`      | `/api/courses/enroll/<int:course_id/>` | **✅**         |      |
+| 내 수강 강의 필터 | `GET`       | `/api/my-courses/?`                    | **✅**         |      |
 
 ## 권한 구조
 
@@ -160,8 +157,9 @@
 📦weniversity-web
 ┣ 📂dist
 ┣ 📂public
+┃ ┣ 📂images            #README용 이미지
 ┣ 📂src
-┃ ┣ 📂assets          #이미지
+┃ ┣ 📂assets            #공통 이미지
 ┃ ┣ 📂auth
 ┃ ┣ 📂components
 ┃ ┣ 📂hooks
@@ -192,7 +190,9 @@
 ┣ 📜tsconfig.node.json
 ┗ 📜vite.config.ts
 ```
-## BE 프로젝트 구조 
+
+## BE 프로젝트 구조
+
 repository: https://github.com/nanna0/weniversity-server
 
 ```
@@ -243,6 +243,7 @@ repository: https://github.com/nanna0/weniversity-server
 ┃ ┣ 📜urls.py
 ┃ ┣ 📜views.py
 ```
+
 ## WBS
 
 ```mermaid
@@ -322,6 +323,7 @@ gantt
 ```
 
 # 🗄 데이터베이스 모델링 (ERD)
+
 ```mermaid
 erDiagram
   auth_group {
@@ -506,35 +508,39 @@ erDiagram
 - 강의 상세 페이지
 
 ## 🌟 메인 기능
+
 - **👤 사용자 관리**:
+
   - JWT와 리프레시 토큰을 통해 안전하고 효율적인 사용자 인증 및 권한 관리 기능을 구현했습니다.
   - 회원가입, 로그인, 로그아웃, 비밀번호 찾기 이메일 발송 기능을 제공합니다.
   - 사용자 역할은 관리자, 수강생으로 구분됩니다.
 
 - **📚 강의 관리**:
+
   - 코스, 챕터, 비디오 3depth로 강의를 관리합니다.
   - 강의 유형별, 레벨별, 가격별, 분야별 필터 다중 검색 기능을 지원합니다.
   - 수강신청 및 수강 기간을 관리하며 내가 수강중인 강의 역시 유형별, 가격별로 필터 다중 검색을 지원합니다.
   - 강의 좋아요 기능과 내가 좋아요한 강의를 따로 조회할 수 있습니다.
 
 - **🧑🏻‍🏫 강사 관리**:
+
   - 관리자가 강사 프로필을 등록/수정/삭제/조회 관리할 수 있습니다.
 
 - **🎥 동영상 학습 시스템**:
-  - 
+
+  -
 
 - **📈 학습 진행 관리**:
+
   - 사용자는 자신의 학습 진행 상황을 확인하고, 동영상 시청 기록을 관리할 수 있습니다.
 
 - **🔒 권한 관리**:
+
   - 관리자와 사용자 역할에 따른 권한을 설정하고 관리할 수 있습니다.
 
-- **📝 미션 평가 시스템**:
-  - 
+- ## **📝 미션 평가 시스템**:
 
 ## 프로젝트 시연 영상
-
- <!-- 하단 gif 첨부 필요 -->
 
 ### 🔐비로그인 상태
 
@@ -543,16 +549,19 @@ erDiagram
   <img src="./public/images/demo-carousel.gif" alt="" width="50%" />
 - 메인 섹션 카테고리 클릭 → 페이지 이동
   <br/>
-  <img src="./public/images/demo-main-category.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-main-category.gif" alt="" width="50%" />
+- 카드 더보기 클릭 → 페이지 이동
+  <br/>
+  <img src="./public/images/demo-main-more.gif" alt="" width="50%" />
 - 필터 선택 → 리스트 반영, 초기화 버튼 클릭 시 전체 필터 선택 해제
   <br/>
-  <img src="./public/images/demo-filter-select.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-filter-select.gif" alt="" width="50%" />
   - 한 페이지에 9개 리스트 노출, 페이지네이션 구현, 10개가 되지 않으면 페이지네이션 ui 숨김
     <br/>
-    <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+    <img src="./public/images/demo-list-pagination.gif" alt="" width="50%" />
 - 강의 카드 클릭 → 상세페이지 이동 (강의 카드의 좋아요 버튼은 비로그인 상태라 보이지 않음)
   <br/>
-  <img src="./public/images/demo-detail-page.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-detail-page.gif" alt="" width="50%" />
 
 ### 📝회원가입
 
@@ -564,49 +573,58 @@ erDiagram
   <img src="./public/images/demo-signupn-enabled.gif" alt="" width="50%" />
 - 가입 이메일 중복 체크
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-signup-duplicate.gif" alt="" width="50%" />
 
 ### 🔑로그인 후 상태
 
 - 프로필 카드/헤더 변화
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-login-header.gif" alt="" width="50%" />
 - 좋아요 버튼 클릭 → 색상 채움/해제
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-login-like.gif" alt="" width="50%" />
 - 마이페이지 이미지 변경 & 미리보기
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
-- 비밀번호 재설정
+  <img src="./public/images/demo-login-profile-img.gif" alt="" width="50%" />
+- 비밀번호 재설정 → 가입한 메일로 비밀번호 재설정 메일 발송, 비밀번호 변경 가능
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-login-pw-reset.gif" alt="" width="50%" />
+  <img src="./public/images/demo-login-pw-reset2.gif" alt="" width="50%" />
 - 내 강의 목록 카드 클릭 → 상세페이지 이동 (내 강의 목록에서는 좋아요가 보이지 않음)
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-my-lecture-detail.gif" alt="" width="50%" />
+- 수강신청
+  <br/>
+  <img src="./public/images/demo-course-enroll.gif" alt="" width="50%" />
+- 상세페이지 이미지 상단 수강신청 버튼
+  <br/>
+  <img src="./public/images/demo-detail-page-enroll.gif" alt="" width="50%" />
 - 수강신청 중복 알림
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-course-enroll2.gif" alt="" width="50%" />
 
 ### 🌐공통 UI / 기타
 
 - 로그인/비로그인 접근 제한
   - 라우터 확인 → 로그인 필요 페이지 (ex. /my-lecture) 접근 시 로그인 페이지로 이동
     <br/>
-    <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+    <img src="./public/images/demo-login-access.gif" alt="" width="50%" />
 - 페이지 로딩 시 Skeleton UI
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-ui-skeleton.gif" alt="" width="50%" />
 - 필터 적용 후 좋아요 상태 반영
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-ui-like-sync.gif" alt="" width="50%" />
+- 상세페이지 이미지 상단의 메뉴 클릭 시 해당 섹션으로 이동, FAQ 아코디언
+  <br/>
+  <img src="./public/images/demo-detail-page2.gif" alt="" width="50%" />
 
 # 🐞 현재 문제점
 
 - **내 강의 목록 페이지 스크롤**
   - 수강신청 후 페이지 이동 시 스크롤 위치가 상단으로 초기화되지 않음
 - **마이페이지 이미지 업데이트**
-  - 마이페이지에서 이미지 변경 후 헤더, 프로필 카드에 바로 반영되지 않음
-  - 재로그인 시 정상 적용
+  - 마이페이지에서 이미지 변경 후 헤더, 프로필 카드에 반영되지 않음
 - **커리큘럼 / 강의 데이터 미입력**
   - 상세페이지 및 내 강의 목록 일부 강의 정보 미입력
   - DB 데이터 입력 시 해결
@@ -646,12 +664,12 @@ erDiagram
 <aside>구현해야 할 내용이 방대하여 막막했으나, 할 수 있는것과 해야 할 것을 구분하는 과정에서 팀원들과 원활한 소통으로 순조롭게 방향을 정할 수 있어서 감사했습니다.
 
 부족한 실력이지만 반복적인 구현과 해보지 않은것에 대한 도전을 통해 나날이 성장함을 느꼈습니다.
-가장 인상깊었던 작업은 사용자 인증 관리를 통해 JWT 인증 시스템을 구현하면서 Django REST Framework의 장점을 크게 느꼈고, permission 구현으로 권한 관리를 적용하며 이후 다시 프로젝트를 구성할 때 어떤식으로 접근하면 좋을지 감을 찾을 수 있었습니다. 
+가장 인상깊었던 작업은 사용자 인증 관리를 통해 JWT 인증 시스템을 구현하면서 Django REST Framework의 장점을 크게 느꼈고, permission 구현으로 권한 관리를 적용하며 이후 다시 프로젝트를 구성할 때 어떤식으로 접근하면 좋을지 감을 찾을 수 있었습니다.
 
 또 실제 서비스를 구현하기 위해 어떻게 앱 구조를 효율적으로 구성해야 하는가 고민을 많이 하였는데 완벽하진 않지만 다시 돌아보니 아쉬운 부분과 개선점이 명확히 보일 정도로 구조적인 측면에서 크게 성장했음을 느꼈습니다.
 
 이번 프로젝트를 통해 성장할 수 있었음에 감사하며, 앞으로 마주할 다양한 경험과 성장 또한 기대됩니다.
 개발은 참 재밌습니다. 부족한 실력에 위축감이 들 때도 있지만 시간이 해결해줄 것이라 긍정적으로 생각하며 다가가면 너무나 재밌는 분야입니다.
-다시 교육계로 돌아가 앞으로 만날 교육생들에게 더 의미있고 유익한 교육을 제공할 수 있을것이라 기대됩니다. 
+다시 교육계로 돌아가 앞으로 만날 교육생들에게 더 의미있고 유익한 교육을 제공할 수 있을것이라 기대됩니다.
 
 임신 기간동안 만삭이 다 될 때까지 대부분의 일상을 함께한 모두의 연구소 백엔드 과정, 성장을 위한 발걸음에 동행할 수 있어서 감사했습니다.</aside>
