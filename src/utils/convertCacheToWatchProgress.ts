@@ -2,6 +2,8 @@ import type {
   LocalChapterCache,
   WatchProgress,
   LocalProgressCache,
+  LocalCourseCache,
+  CourseProgressResponse
 } from "../types/progress.types";
 
 export function localChapterToWatchProgress(
@@ -51,6 +53,22 @@ export function convertWatchProgressToCache(
     lastUpdated: Date.now(),
     isDirty: false,
   };
+}
+
+// 서버에서받은 데이터 exit에서 변환 
+export function convertServerDataToLocalCourseCache(serverData: CourseProgressResponse, courseId: number): LocalCourseCache {
+  const localCourseCache: LocalCourseCache = {
+    userId: serverData.userId,
+    courseId,
+    chapterOrder: serverData.chapters.map(ch => ch.chapterId),
+    chapters: {},
+  };
+
+  serverData.chapters.forEach(chapter => {
+    localCourseCache.chapters[chapter.chapterId] = convertWatchProgressToCache(chapter);
+  });
+
+  return localCourseCache;
 }
 
 // 🔧 로컬 캐시 전체를 WatchProgress 배열로 변환
