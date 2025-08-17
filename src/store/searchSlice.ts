@@ -12,7 +12,7 @@ export const searchCourses = createAsyncThunk<SearchApiResponse, SearchParams>(
   async (params, { rejectWithValue }) => {
     try {
       const { title, page = 1 } = params;
-      const baseUrl = "/courses/";
+      const baseUrl = "/api/courses/";
       const queryParams = new URLSearchParams();
 
       queryParams.append("title", title);

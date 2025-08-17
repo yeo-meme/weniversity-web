@@ -15,7 +15,7 @@ export const fetchVodCourses = createAsyncThunk<ApiResponse>(
   "homeCourse/fetchVodCourses",
   async (_, { rejectWithValue }) => {
     try {
-      const baseUrl = "http://13.125.180.222/api/courses/";
+      const baseUrl = "/api/courses/";
       const queryParams = new URLSearchParams({
         page: "1",
         type: "vod", // VOD 필터
@@ -49,7 +49,7 @@ export const fetchBoostCourses = createAsyncThunk<ApiResponse>(
   "homeCourse/fetchBoostCourses",
   async (_, { rejectWithValue }) => {
     try {
-      const baseUrl = "/courses/";
+      const baseUrl = "/api/courses/";
       const queryParams = new URLSearchParams({
         page: "1",
         type: "boost", // 부스트 커뮤니티 필터

@@ -74,7 +74,7 @@ export const fetchMyLectures = createAsyncThunk<
         statuses: activeFilters.statuses,
       };
 
-      const baseUrl = "/my-courses/";
+      const baseUrl = "/api/my-courses/";
       const queryString = buildMyLectureQueryParams(requestParams);
       const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
 
@@ -105,7 +105,7 @@ const hasCourseIdAllPages = async (
   token: string,
   targetId: string
 ): Promise<boolean> => {
-  let url = "/my-courses/";
+  let url = "/api/my-courses/";
 
   while (url) {
     const res = await fetch(url, {
@@ -158,7 +158,7 @@ export const enrollCourse = createAsyncThunk<
         throw new Error("이미 수강신청했던 강의입니다.");
       }
 
-      const response = await fetch(`/courses/enroll/${courseId}/`, {
+      const response = await fetch(`/api/courses/enroll/${courseId}/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
