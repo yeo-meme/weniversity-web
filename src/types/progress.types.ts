@@ -1,5 +1,22 @@
 
-// 1. DB/ProgressTracker용 타입
+
+
+//서버 과목 데이터 용
+interface Chapter {
+  id: number;
+  title: string;
+  time: string;
+  duration: string;
+  durationSeconds: number;
+  videoFile: string;
+  completed: boolean;
+  
+  type?: 'video' | 'mission';          
+  missionId?: number;                  
+}
+
+
+// 시청률 디비 구조 
 export interface WatchProgress {
   id: string;
   userId: string;
@@ -20,6 +37,11 @@ export interface WatchProgress {
   firstWatchedAt: string;
   lastWatchedAt: string;
   completedAt: string | null;
+
+
+  missionId?: number;                   // 미션 ID (있으면 미션)
+  missionScore?: number;                // 미션 점수
+  missionPassed?: boolean;   
 }
 
 export interface LastWatched {

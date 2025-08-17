@@ -20,6 +20,9 @@ import type { SimpleProgressCache } from "../../services/SimpleProgressCache";
 import { loadCache, updateCache } from "../../services/SimpleProgressCache";
 import { convertWatchProgressToCache } from "../../utils/convertCacheToWatchProgress";
 
+
+import { useGetLecturesQuery } from "../../store/slices/lectureApiSlice";
+
 interface VideoPlayerProps {
   currentVideo: string;
   onTimeUpdate: (currentTime: number, duration: number) => void;
@@ -356,6 +359,18 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   courseData,
   userId = "user123",
 }) => {
+
+  //챕터 rdk
+  const { 
+    data: lecturesData, 
+    isLoading: lecturesLoading,
+    error: lecturesError 
+  } = useGetLecturesQuery({ page: 1, limit: 10 });
+
+  //챕터  api용 
+const [chapters, setChapters] = useState<Chapter[]>([]);  // 빈 배열로 시작
+const [isChaptersLoading, setIsChaptersLoading] = useState(true);
+
   //DB 백업 캐시
   const [cachedProgress, setCachedProgress] = useState<
     Record<number, WatchProgress>
@@ -384,7 +399,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   );
 
   // UI용 변수들
-  const courseTitle = courseData?.title || "프로그래밍 기초 강의";
+  const courseTitle = lecturesData?.results?.[0]?.title ||"프로그래밍 기초 강의";
   const currentChapter = chapters[currentChapterIndex];
   const totalDuration = chapters.reduce(
     (acc, chapter) => acc + chapter.durationSeconds,
@@ -627,6 +642,86 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     },
     [chapters, userId, getProgressFromCache]
   );
+
+  
+
+   //api용 useEffect **API 호출**: `useEffect`로 chapters 로드
+   useEffect(() => {
+    const fetchChapters = async () => {
+      try {
+        const response = await fetch(`/api/courses/${courseData?.id}/chapters/`);
+        const chaptersData = await response.json();
+        setChapters(chaptersData);
+        setIsChaptersLoading(false);
+      } catch (error) {
+        console.error('챕터 로드 실패:', error);
+        setIsChaptersLoading(false);
+      }
+    };
+  
+    if (courseData?.id) {
+      fetchChapters();
+    }
+  }, [courseData?.id]);
+
+
+  //RDK 챕터 로드
+  // 🔄 기존 fetch useEffect를 이걸로 교체
+  useEffect(() => {
+    console.log("📚 RTK Query 데이터 처리 시작");
+    console.log("lecturesLoading:", lecturesLoading);
+    console.log("lecturesData:", lecturesData);
+    
+    if (lecturesLoading) {
+      console.log("⏳ RTK Query 로딩 중...");
+      setIsChaptersLoading(true);
+      return;
+    }
+  
+    if (lecturesError) {
+      console.error("❌ RTK Query 에러:", lecturesError);
+      setChapters([]);
+      setIsChaptersLoading(false);
+      return;
+    }
+  
+    if (lecturesData?.results?.length > 0) {
+      console.log("✅ RTK Query 데이터 수신:", lecturesData);
+      
+      const firstLecture = lecturesData.results[0];
+      console.log("🎯 첫 번째 강의:", firstLecture);
+      
+      // 🔥 API 응답을 Chapter 형태로 변환
+      // (실제 API 구조에 맞게 조정 필요)
+      const apiChapters = firstLecture.lectures || firstLecture.chapters || [];
+      
+      const formattedChapters: Chapter[] = apiChapters.map((item: any, index: number) => ({
+        id: item.id || index + 1,
+        title: item.title || `챕터 ${index + 1}`,
+        time: item.time || "0:00",
+        duration: item.duration || "5:00", 
+        durationSeconds: item.durationSeconds || item.duration_seconds || 300,
+        videoFile: item.videoFile || item.video_url || item.video_file || `video${index + 1}.mp4`,
+        completed: false
+      }));
+  
+      console.log("🔄 변환된 챕터 데이터:", formattedChapters);
+      setChapters(formattedChapters);
+      setIsChaptersLoading(false);
+      
+      // 🔥 강의 제목도 업데이트
+      if (firstLecture.title) {
+        // courseTitle 업데이트 (기존 로직 유지)
+        console.log("📋 강의 제목 업데이트:", firstLecture.title);
+      }
+      
+    } else {
+      console.warn("⚠️ RTK Query 데이터 없음 또는 비어있음");
+      setChapters([]);
+      setIsChaptersLoading(false);
+    }
+  }, [lecturesData, lecturesLoading, lecturesError]);
+
 
   // 🔥 4. 통합된 초기화 함수
   const initializeProgress = useCallback(async (): Promise<void> => {
@@ -1697,7 +1792,6 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
 
   //   setLastSaveTime(now);
   // }
-
   return (
     <div className="flex h-screen bg-white">
       {/* 왼쪽 사이드바 */}
@@ -1721,7 +1815,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
           <div className="mb-2">
             <div className="p-3">
               <span className="font-medium text-gray-900 text-sm">
-                프로그래밍 기초 강의
+              {lecturesData?.results?.[0]?.title || courseTitle}
               </span>
             </div>
 
