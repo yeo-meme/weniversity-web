@@ -27,10 +27,6 @@ const ProfileCard: React.FC = () => {
     navigate("/my-lectures");
   };
 
-  const getUserProfile = () => {
-    return user?.profile_image_url || profileImg;
-  };
-
   if (isAuthenticated) {
     return (
       <article className="flex flex-col justify-center items-center w-[290px] p-8 box-border bg-white border border-gray200 rounded-[10px] text-center max-[834px]:hidden">

@@ -23,10 +23,6 @@ const UserProfile: React.FC = () => {
     setIsDropdownOpen(false);
   };
 
-  const getUserProfile = () => {
-    return user?.profile_image_url || profileImg;
-  };
-
   const getUserTitle = () => {
     return user?.email ? `${user.email}님의 프로필` : "사용자 프로필";
   };
