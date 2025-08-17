@@ -97,11 +97,11 @@ export class ProgressTracker {
             userId: progress.userId,
             courseId: progress.courseId,
             chapterId: progress.chapterId,
-            videoId: progress.videoId, // 🔥 추가
-            chapterOrder: progress.chapterOrder, // 🔥 추가
-            videoOrder: progress.videoOrder, // 🔥 추가
-            chapterIndex: progress.chapterIndex, // 🔥 추가
-            videoIndex: progress.videoIndex, // 🔥 추가
+            videoId: progress.videoId,
+            chapterOrder: progress.chapterOrder,
+            videoOrder: progress.videoOrder, 
+            chapterIndex: progress.chapterIndex, 
+            videoIndex: progress.videoIndex, 
             currentTime: progress.currentTime,
             totalDuration: progress.totalDuration,
             watchedPercentage: progress.watchedPercentage,

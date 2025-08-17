@@ -320,8 +320,6 @@ interface Chapter {
   completed: boolean;
 }
 
-
-
 const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   onClose,
   // courseData,
@@ -395,16 +393,16 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   console.log("  📋 currentChapter?.title:", currentChapter?.title);
   console.log("  📋 userId:", userId);
 
-  // 🔥 initializeEmptyState 함수는 정의되었지만 실제 호출 위치가 제한적
-  // const initializeEmptyState = useCallback((): void => {
-  //   setRealtimeCache({});
-  //   setCachedProgress({});
-  //   setCompletedChapters(new Set());
-  //   setChapterProgress({});
-  //   setStartTime(0);
-  //   setHasProgressData(false);
-  //   console.log("🆕 빈 상태로 초기화 완료");
-  // }, []);
+  // 새사용자 정의
+  const initializeEmptyState = useCallback((): void => {
+    setRealtimeCache({});
+    setCachedProgress({});
+    setCompletedChapters(new Set());
+    setChapterProgress({});
+    setStartTime(0);
+    setHasProgressData(false);
+    console.log("🆕 빈 상태로 초기화 완료");
+  }, []);
 
   // 🔥 사용되지 않음 - updateUIStatesFromCache에서 progressCache 설정하지만 실제 사용 안함
   const setInitialChapterStartTime = useCallback(
@@ -500,7 +498,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       // 🔹 cache에서 해당 코스 데이터 가져오기
       const legacyCourseCache = loadCache();
       console.log("🔄 [DEBUG] 코스 캐시:", legacyCourseCache);
-
+      
       if (legacyCourseCache?.chapters) {
         console.log(
           "🔄 [DEBUG] 챕터 데이터 있음:",
@@ -535,21 +533,21 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       if (chapters.length === 0) {
         return; // chapters 준비 안됨 - 레거시 결과만 사용
       }
-  
+
       const modernChapterProgress: Record<number, number> = {};
       const modernCompletedChapters = new Set<number>();
-  
+
       const modernCourseId = lecturesData?.results?.[0]?.course_id || 1;
       const modernUserCourseKey = `progress_${userId}_course${modernCourseId}`;
       const modernCourseCache = cache[modernUserCourseKey];
-  
+
       if (modernCourseCache?.chapters) {
         chapters.forEach((chapter, index) => {
           const chapterData = modernCourseCache.chapters[chapter.id];
-          
+
           if (chapterData) {
             modernChapterProgress[index] = chapterData.currentTime || 0;
-            
+
             if (chapterData.isCompleted) {
               modernCompletedChapters.add(index);
             }
@@ -557,17 +555,13 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
             modernChapterProgress[index] = 0;
           }
         });
-  
+
         // 모던 결과로 레거시 결과 덮어씀
         setChapterProgress(modernChapterProgress);
         setCompletedChapters(modernCompletedChapters);
       }
     },
-    [
-      userId,
-      lecturesData?.results[0].course_id,
-      chapters,
-    ]
+    [userId, lecturesData?.results[0].course_id, chapters]
   );
 
   // 🔥 5. 기존 checkExistingChapterProgress 개선
@@ -684,14 +678,15 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     }
   }, [lecturesData, lecturesLoading, lecturesError]);
 
+  //렉쳐받아서 시청률 디비 요청 
   // 사용자 첫로드 UI 진행률 로드 -진행률 디비 api 요청 및 컨버터
-  //로컬 스토리지 관리 별도 진행 
+  //로컬 스토리지 관리 별도 진행
   const initializeProgress = async (courseId: number) => {
     console.log("🚀 [DEBUG] initializeProgress 시작");
     console.log("🚀 [DEBUG] userId:", userId);
     console.log("🚀 [DEBUG] courseId 매개변수:", courseId);
 
-    if (!userId || !courseId || chapters.length === 0)  {
+    if (!userId || !courseId || chapters.length === 0) {
       console.warn("⚠️ userId 또는 courseId가 없어 초기화 생략");
       return;
     }
@@ -719,7 +714,6 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
           );
           console.log("📡 [DEBUG] 변환된 로컬 캐시:", formattedCache);
 
-
           const userCourseKey = `progress_${userId}_course${courseId}`;
           //실시간 캐시:LocalProgressCache 형태로 래핑
           setRealtimeCache((prev) => ({
@@ -727,7 +721,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
             [userCourseKey]: formattedCache, // courseId 키 추가
           }));
 
-          updateCache({ 
+          updateCache({
             ...loadCache(), // 기존 localStorage 데이터 유지
             [userCourseKey]: formattedCache,
           });
@@ -769,7 +763,6 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     }
   };
 
-  
   //컴포넌트 정리 끝
 
   //: 리팩터전 api 조회 테스트
@@ -887,15 +880,14 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   // 1. 메인 초기화 useEffect
   // 🔥 메인 초기화 useEffect
   useEffect(() => {
-    if (lecturesLoading){
+    if (lecturesLoading) {
       setIsChaptersLoading(true);
       return;
-    }  // 아직 로딩 중이면 대기
-
+    } // 아직 로딩 중이면 대기
 
     if (lecturesError) {
       setChapters([]);
-    setIsChaptersLoading(false);
+      setIsChaptersLoading(false);
       console.error("❌ 강의 목록 로드 실패:", lecturesError);
       return;
     }
@@ -917,10 +909,8 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
         console.log("✅ [Step 2] 진행률 초기화 실행:", {
           courseId: firstCourse.course_id,
           chaptersCount: chapters.length,
-          chapterTitles: chapters.map(ch => ch.title)
+          chapterTitles: chapters.map((ch) => ch.title),
         });
-
-
 
         // 🔥 진행률 초기화 실행 (courseId 넘겨줌)
         await initializeProgress(firstCourse.course_id);
@@ -953,12 +943,13 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       console.log("🗑️ [DEBUG] 메인 초기화 useEffect 클린업");
       isMounted = false;
     };
-  }, [lecturesLoading,      // RTK Query 로딩 상태
-    lecturesData,         // RTK Query 데이터
-    lecturesError,        // RTK Query 에러
-    isChaptersLoading,    // Chapter[] 변환 로딩 상태
-    chapters.length,      // Chapter[] 배열 길이 (데이터 존재 여부)
-    currentChapterIndex   // 현재 챕터 인덱스
+  }, [
+    lecturesLoading, // RTK Query 로딩 상태
+    lecturesData, // RTK Query 데이터
+    lecturesError, // RTK Query 에러
+    isChaptersLoading, // Chapter[] 변환 로딩 상태
+    chapters.length, // Chapter[] 배열 길이 (데이터 존재 여부)
+    currentChapterIndex, // 현재 챕터 인덱스
   ]);
 
   // 2. 챕터 변경 시 진행률 체크
@@ -1107,6 +1098,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     );
     console.log(`🔄 [DEBUG] setCurrentTime(${startTime}) 호출 완료`);
   }, [startTime]);
+
   // useEffect(() => {
   //   let isMounted = true; // 메모리 누수 방지
 
@@ -1733,8 +1725,6 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     setCurrentChapterIndex(chapterIndex);
     setCurrentTime(0);
     setIsVideoPlaying(false);
-
-   
   };
 
   // const saveProgressToLocalStorage = () => {
@@ -1854,7 +1844,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
                 durationString: chapter.duration,
                 progress: currentProgress,
                 // 비디오 실제 길이도 확인
-                expectedProgress: '5초면 몇%여야 하는지'
+                expectedProgress: "5초면 몇%여야 하는지",
               });
 
               return (
@@ -1901,8 +1891,8 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
                       <div className="w-full bg-gray-200 rounded-full h-1">
                         <div
                           className="bg-yellow-400 h-1 rounded-full transition-all duration-300"
-                          style={{ 
-                                 width: `${currentProgress}%`
+                          style={{
+                            width: `${currentProgress}%`,
                           }}
                         />
                       </div>
