@@ -37,7 +37,7 @@ const ProfileCard: React.FC = () => {
         <div className="w-[100px] h-[100px] overflow-hidden rounded-full border border-gray200 mb-3">
           <img
             className="w-full h-full object-cover"
-            src={getUserProfile()}
+            src={profileImg}
             alt="사용자 프로필"
           />
         </div>

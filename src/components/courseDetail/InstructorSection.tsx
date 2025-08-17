@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import type { CourseInstructor } from "../../types/courseDetail/courseDetail";
+import ProfileImage from "../../assets/profile-img.png";
 
 interface InstructorSectionProps {
   instructor: CourseInstructor;
@@ -42,7 +43,7 @@ const InstructorSection: React.FC<InstructorSectionProps> = ({
       <div className="flex flex-col md:flex-row items-center md:items-start gap-10">
         <div className="w-60 h-60 rounded-full overflow-hidden flex-shrink-0">
           <img
-            src={instructor.profile_image}
+            src={ProfileImage}
             alt="강사"
             className="w-full h-full object-cover"
           />

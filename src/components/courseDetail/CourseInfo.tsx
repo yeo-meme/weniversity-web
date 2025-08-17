@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import type { CourseDetailInfo } from "../../types/courseDetail/courseDetail";
 import ShareIcon from "../../assets/icon-Share.png";
+import ProfileImage from "../../assets/profile-img.png";
 
 interface CourseInfoProps {
   courseDetail: CourseDetailInfo;
@@ -100,7 +101,7 @@ const CourseInfo: React.FC<CourseInfoProps> = ({
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden">
                 <img
-                  src={courseDetail.instructors[0].profile_image}
+                  src={ProfileImage}
                   alt="강사"
                   className="w-full h-full object-cover"
                 />

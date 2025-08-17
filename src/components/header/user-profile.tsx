@@ -68,7 +68,7 @@ const UserProfile: React.FC = () => {
             title={getUserTitle()}
           >
             <img
-              src={getUserProfile()}
+              src={profileImg}
               alt="사용자 프로필"
               className="w-full h-full object-cover rounded-full"
             />
