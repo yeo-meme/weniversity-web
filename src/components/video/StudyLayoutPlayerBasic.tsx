@@ -1662,34 +1662,6 @@ const currentChapterProgress = Math.min(
     }
   };
 
-  // 🎥 비디오 끝남 핸들러
-  // const handleVideoEnded = () => {
-  //   console.log(`🏁 비디오 재생 완료: ${currentChapter.title}`);
-  //   setCompletedChapters((prev) => new Set([...prev, currentChapterIndex]));
-  //   setIsVideoPlaying(false);
-
-  //   if (hasProgressData) {
-  //     ProgressTracker.completeChapter(
-  //       userId,
-  //       currentChapter.id,
-  //       currentChapter.id
-  //     );
-  //     const summary = ProgressTracker.getUserProgressSummary(userId, courseId);
-  //     setProgressSummary(summary);
-  //     // setProgressSummary(summary);
-  //   }
-
-  //   if (currentChapterIndex < chapters.length - 1) {
-  //     console.log(
-  //       `➡️ 다음 챕터로 자동 이동: ${chapters[currentChapterIndex + 1].title}`
-  //     );
-  //     setCurrentTime(0);
-  //     setDuration(0);
-  //     setCurrentChapterIndex(currentChapterIndex + 1);
-  //   } else {
-  //     console.log(`🎊 모든 챕터 완료!`);
-  //   }
-  // };
 
    const handleVideoEnded = async() => {
     if (hasProgressData && currentChapter) {
@@ -1793,6 +1765,88 @@ const currentChapterProgress = Math.min(
     }
   };
 
+
+  const handleChapterClick = async (chapterId: number) => {
+    console.log(`🎯 챕터 클릭: ID ${chapterId}`);
+    
+    // 유효성 검사
+    const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
+    if (chapterIndex === -1) {
+      console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
+      return;
+    }
+  
+    const selectedChapter = chapters[chapterIndex];
+    
+    // 이미 현재 챕터면 아무것도 하지 않음
+    if (chapterIndex === currentChapterIndex) {
+      console.log("ℹ️ 이미 현재 챕터입니다.");
+      return;
+    }
+  
+    // 🔥 현재 재생 중인 영상이 있다면 진행률 저장
+    if (hasProgressData && currentChapter && isVideoPlaying) {
+      console.log("💾 현재 챕터 진행률 저장 중...");
+      
+      try {
+        const currentProgress = getProgressFromCache(currentChapter.id);
+        if (currentProgress) {
+          const chapterOrder = currentChapterIndex + 1;
+          const videoOrder = 1;
+          const currentChapterIndex_backup = currentChapterIndex;
+          const videoIndex = 0;
+          const currentChapterProgressTime = chapterProgress[currentChapterIndex] || 0;
+          const currentChapterDuration = currentChapter.durationSeconds || 1;
+          const currentChapterProgressPercent = Math.min(
+            100,
+            (currentChapterProgressTime / currentChapterDuration) * 100
+          );
+  
+          await ProgressTracker.saveProgress(
+            userId,
+            lecturesData?.results[0].course_id || 1,
+            currentChapter.id,
+            currentProgress as LocalChapterCache,
+            chapterOrder,
+            videoOrder,
+            currentChapterIndex_backup,
+            videoIndex,
+            currentChapterProgressTime,
+            currentChapterProgressPercent
+          );
+          
+          console.log("✅ 챕터 변경 전 진행률 저장 완료");
+        }
+      } catch (error) {
+        console.error("❌ 챕터 변경 전 진행률 저장 실패:", error);
+      }
+    }
+  
+    // 🔥 새 챕터로 전환
+    console.log(`🎬 챕터 전환: ${selectedChapter.title}`);
+    
+    // 영상 중지
+    setIsVideoPlaying(false);
+    
+    // 챕터 인덱스 변경 (이때 useEffect가 트리거되어 진행률 확인)
+    setCurrentChapterIndex(chapterIndex);
+    
+    // 새 챕터의 이어보기 시간 확인 (useEffect에서 처리되지만 명시적으로 호출)
+    const savedProgress = getProgressFromCache(chapterId);
+    if (savedProgress && savedProgress.currentTime > 0) {
+      console.log(`📖 이어보기: ${savedProgress.currentTime}초부터 시작`);
+      setStartTime(savedProgress.currentTime);
+      setCurrentTime(savedProgress.currentTime);
+      setHasProgressData(true);
+    } else {
+      console.log(`📝 새 영상: 처음부터 시작`);
+      setStartTime(0);
+      setCurrentTime(0);
+      setHasProgressData(false);
+    }
+  
+    console.log(`🎯 챕터 전환 완료: ${selectedChapter.title}`);
+  };
   // 로컬테스트 완료 : 챕터 이동 클릭 핸들러
   // const handleChapterClick = (chapterId: number) => {
   //   // saveProgressToLocalStorage();
@@ -1813,34 +1867,34 @@ const currentChapterProgress = Math.min(
   //   setIsVideoPlaying(false);
   // };
   // 2.api 테스트 챕터 변경 - 이전 챕터 진행률 저장
-  const handleChapterClick = async (chapterId: number) => {
-    // 🔥 NEW: 현재 챕터의 진행률을 서버에 저장
-    if (hasProgressData && currentChapter) {
-      const currentProgress = getProgressFromCache(currentChapter.id);
-      if (currentProgress) {
-        await ProgressTracker.saveProgress(
-          userId,
-          lecturesData?.results[0].course_id || 1,
-          currentChapter.id,
-          currentProgress as LocalChapterCache
-        );
-        console.log("✅ 챕터 변경 전 진행률 저장 완료");
-      }
-    }
+  // const handleChapterClick = async (chapterId: number) => {
+  //   // 🔥 NEW: 현재 챕터의 진행률을 서버에 저장
+  //   if (hasProgressData && currentChapter) {
+  //     const currentProgress = getProgressFromCache(currentChapter.id);
+  //     if (currentProgress) {
+  //       await ProgressTracker.saveProgress(
+  //         userId,
+  //         lecturesData?.results[0].course_id || 1,
+  //         currentChapter.id,
+  //         currentProgress as LocalChapterCache
+  //       );
+  //       console.log("✅ 챕터 변경 전 진행률 저장 완료");
+  //     }
+  //   }
 
-    const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
-    if (chapterIndex === -1) {
-      console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
-      return;
-    }
+  //   const chapterIndex = chapters.findIndex((ch) => ch.id === chapterId);
+  //   if (chapterIndex === -1) {
+  //     console.warn("❗ 유효하지 않은 챕터 ID:", chapterId);
+  //     return;
+  //   }
 
-    const selectedChapter = chapters[chapterIndex];
-    console.log(`🎬 챕터 선택: ${selectedChapter.title}`);
+  //   const selectedChapter = chapters[chapterIndex];
+  //   console.log(`🎬 챕터 선택: ${selectedChapter.title}`);
 
-    setCurrentChapterIndex(chapterIndex);
-    setCurrentTime(0);
-    setIsVideoPlaying(false);
-  };
+  //   setCurrentChapterIndex(chapterIndex);
+  //   setCurrentTime(0);
+  //   setIsVideoPlaying(false);
+  // };
 
   // const saveProgressToLocalStorage = () => {
   //   try {
