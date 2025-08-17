@@ -250,37 +250,71 @@
 
 ## 프로젝트 시연 영상
 
- <!-- gif 첨부 필요 -->
+ <!-- 하단 gif 첨부 필요 -->
 
 ### 🔐비로그인 상태
 
 - 메인 캐러셀 슬라이드
+  <br/>
+  <img src="./public/images/demo-carousel.gif" alt="" width="50%" />
 - 메인 섹션 카테고리 클릭 → 페이지 이동
-- 필터 선택 → 리스트 반영
-- VOD/부스트 카드 클릭 → 상세페이지 이동
-- 더보기 버튼 클릭 → 필터 적용 후 페이지 이동
+  <br/>
+  <img src="./public/images/demo-main-category.jpg" alt="" width="50%" />
+- 필터 선택 → 리스트 반영, 초기화 버튼 클릭 시 전체 필터 선택 해제
+  <br/>
+  <img src="./public/images/demo-filter-select.jpg" alt="" width="50%" />
+  - 한 페이지에 9개 리스트 노출, 페이지네이션 구현, 10개가 되지 않으면 페이지네이션 ui 숨김
+    <br/>
+    <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+- 강의 카드 클릭 → 상세페이지 이동 (강의 카드의 좋아요 버튼은 비로그인 상태라 보이지 않음)
+  <br/>
+  <img src="./public/images/demo-detail-page.jpg" alt="" width="50%" />
 
 ### 📝회원가입
 
 - 각 input 유효성 검사
+  <br/>
+  <img src="./public/images/demo-signup-validation.gif" alt="" width="50%" />
 - 모든 조건 충족 시 버튼 활성화
+  <br/>
+  <img src="./public/images/demo-signupn-enabled.gif" alt="" width="50%" />
 - 가입 이메일 중복 체크
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
 
 ### 🔑로그인 후 상태
 
 - 프로필 카드/헤더 변화
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
 - 좋아요 버튼 클릭 → 색상 채움/해제
-- 🖼 마이페이지 이미지 변경 & 미리보기
-- 비밀번호 재설정 모달 흐름
-- 내 강의 목록 카드 클릭 → 상세페이지 이동
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+- 마이페이지 이미지 변경 & 미리보기
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+- 비밀번호 재설정
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+- 내 강의 목록 카드 클릭 → 상세페이지 이동 (내 강의 목록에서는 좋아요가 보이지 않음)
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
 - 수강신청 중복 알림
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
 
 ### 🌐공통 UI / 기타
 
-- **로그인/비로그인 접근 제한**
+- 로그인/비로그인 접근 제한
   - 라우터 확인 → 로그인 필요 페이지 (ex. /my-lecture) 접근 시 로그인 페이지로 이동
-- **페이지 로딩 시 Skeleton UI**
-- **필터 적용 후 좋아요 상태 반영**
+    <br/>
+    <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+- 페이지 로딩 시 Skeleton UI
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+- 필터 적용 후 좋아요 상태 반영
+  <br/>
+  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
 
 # 🐞 현재 문제점
 
