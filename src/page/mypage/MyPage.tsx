@@ -22,10 +22,11 @@ import {
 import ProfileSettings from "./ProfileSettings";
 import PaymentHistory from "./PaymentHistory";
 import AccountManagement from "./AccoountManagement";
+import MissionResult from "./MissionResult";
 import LoadingMessage from "../../components/courseDetail/LoadingMessage";
 // import { useAuth } from "../../hooks/useAuth";
 
-type TabType = "profile" | "certificates" | "payments" | "account";
+type TabType = "profile" | "certificates" | "payments" | "account" | "mission";
 
 const MyPage: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -57,6 +58,7 @@ const MyPage: React.FC = () => {
       { key: "certificates" as TabType, label: "수료증 발급" },
       { key: "payments" as TabType, label: "결제 내역" },
       { key: "account" as TabType, label: "계정 관리" },
+      { key: "mission" as TabType, label: "미션 결과" },
     ],
     []
   );
@@ -282,6 +284,8 @@ const MyPage: React.FC = () => {
         return <PaymentHistory />;
       case "account":
         return <AccountManagement />;
+      case "mission":
+        return <MissionResult />;
       default:
         return null;
     }

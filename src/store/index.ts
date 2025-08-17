@@ -13,6 +13,8 @@ import { authApiSlice } from "../auth/authApiSlice";
 import searchReducer from "./searchSlice";
 import myLectureReducer from "./myLecturesSlice";
 import { lectureApiSlice } from './lectureApiSlice';
+import problemReducer from './problemSlice';
+import { missionApiSlice } from '../auth/missionApiSlice';
 
 const authPersistConfig = {
   key: "auth",
@@ -37,7 +39,9 @@ const rootReducer = combineReducers({
   courseDetail: courseDetailReducer,
   search: searchReducer,
   myLecture: myLectureReducer,
+  problem: problemReducer,
   [lectureApiSlice.reducerPath]: lectureApiSlice.reducer,
+  [missionApiSlice.reducerPath]: missionApiSlice.reducer,
 });
 
 export const store = configureStore({
@@ -55,7 +59,11 @@ export const store = configureStore({
           "persist/RESUME",
         ],
       },
-    }).concat(authApiSlice.middleware,lectureApiSlice.middleware),
+    }).concat(
+      authApiSlice.middleware,
+      lectureApiSlice.middleware,
+      missionApiSlice.middleware,
+    ),
 });
 
 export const persistor = persistStore(store);
