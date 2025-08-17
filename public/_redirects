@@ -2,3 +2,4 @@
 /media/* http://13.125.180.222/media/:splat 200
 /media/*    /.netlify/functions/media-proxy/:splat   200
 
+/*         /index.html                        200
