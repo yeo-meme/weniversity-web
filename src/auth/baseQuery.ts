@@ -4,10 +4,10 @@ import type {
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
-import type { RootState } from "../store/store";
+import type { RootState } from "../store/index";
 
 export const baseQuery = fetchBaseQuery({
-  baseUrl: "/api",
+  baseUrl: "http://13.125.180.222/api",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
 
