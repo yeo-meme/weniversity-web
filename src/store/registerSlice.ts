@@ -18,16 +18,13 @@ export const register = createAsyncThunk<void, RegisterFormData>(
         birth_date: formData.birth_date,
       };
 
-      const response = await fetch(
-        "http://13.125.180.222/api/users/register/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestData),
-        }
-      );
+      const response = await fetch("/users/register/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
+      });
 
       if (response.status === 400) {
         const errorData = await response.json().catch(() => ({}));

@@ -27,16 +27,13 @@ export const toggleCourseLike = createAsyncThunk<
         throw new Error("인증 토큰이 없습니다.");
       }
 
-      const response = await fetch(
-        `http://13.125.180.222/api/courses/${courseId}/like/`,
-        {
-          method: isLiked ? "DELETE" : "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`/courses/${courseId}/like/`, {
+        method: isLiked ? "DELETE" : "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -110,7 +107,7 @@ export const fetchCourses = createAsyncThunk<
       prices: activeFilters.prices,
     };
 
-    const baseUrl = "http://13.125.180.222/api/courses/";
+    const baseUrl = "/courses/";
     const queryString = buildQueryParams(requestParams);
     const url = `${baseUrl}?${queryString}`;
 

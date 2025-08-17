@@ -11,9 +11,7 @@ export const fetchCourseDetail = createAsyncThunk<CourseDetailInfo, string>(
   "courseDetail/fetchCourseDetail",
   async (courseId: string, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        `http://13.125.180.222/api/courses/${courseId}/`
-      );
+      const response = await fetch(`/courses/${courseId}/`);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);

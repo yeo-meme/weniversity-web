@@ -21,16 +21,13 @@ export const fetchLikedCourses = createAsyncThunk<
       throw new Error("인증 토큰이 없습니다.");
     }
 
-    const response = await fetch(
-      "http://13.125.180.222/api/users/mypage/likes/",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await fetch("/users/mypage/likes/", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,7 +57,7 @@ export const fetchProfile = createAsyncThunk<
       throw new Error("인증 토큰이 없습니다.");
     }
 
-    const response = await fetch("http://13.125.180.222/api/users/mypage/", {
+    const response = await fetch("/users/mypage/", {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -105,7 +102,7 @@ export const updateProfile = createAsyncThunk<
       requestData.append("profile_image", formData.profile_image);
     }
 
-    const response = await fetch("http://13.125.180.222/api/users/mypage/", {
+    const response = await fetch("/users/mypage/", {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,

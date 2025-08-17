@@ -49,7 +49,7 @@ export const fetchBoostCourses = createAsyncThunk<ApiResponse>(
   "homeCourse/fetchBoostCourses",
   async (_, { rejectWithValue }) => {
     try {
-      const baseUrl = "http://13.125.180.222/api/courses/";
+      const baseUrl = "/courses/";
       const queryParams = new URLSearchParams({
         page: "1",
         type: "boost", // 부스트 커뮤니티 필터
