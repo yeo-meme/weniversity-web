@@ -15,11 +15,12 @@ import type {
   LocalChapterCache,
 } from "../../types/progress.types";
 
-import { localChapterToWatchProgress } from "../../utils/convertCacheToWatchProgress";
 import type { SimpleProgressCache } from "../../services/SimpleProgressCache";
 import { loadCache, updateCache } from "../../services/SimpleProgressCache";
-import { convertWatchProgressToCache } from "../../utils/convertCacheToWatchProgress";
-
+import {
+  convertWatchProgressToCache,
+  localChapterToWatchProgress,
+} from "../../utils/convertCacheToWatchProgress";
 
 import { useGetLecturesQuery } from "../../store/slices/lectureApiSlice";
 
@@ -359,17 +360,16 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   courseData,
   userId = "user123",
 }) => {
-
   //챕터 rdk
-  const { 
-    data: lecturesData, 
+  const {
+    data: lecturesData,
     isLoading: lecturesLoading,
-    error: lecturesError 
+    error: lecturesError,
   } = useGetLecturesQuery({ page: 1, limit: 10 });
 
-  //챕터  api용 
-const [chapters, setChapters] = useState<Chapter[]>([]);  // 빈 배열로 시작
-const [isChaptersLoading, setIsChaptersLoading] = useState(true);
+  //챕터  api용
+  const [chapters, setChapters] = useState<Chapter[]>([]); // 빈 배열로 시작
+  const [isChaptersLoading, setIsChaptersLoading] = useState(true);
 
   //DB 백업 캐시
   const [cachedProgress, setCachedProgress] = useState<
@@ -393,18 +393,33 @@ const [isChaptersLoading, setIsChaptersLoading] = useState(true);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [lastSaveTime, setLastSaveTime] = useState(0);
 
+
+
   // 새 UI용 상태
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(
     new Set([1, 2])
   );
 
   // UI용 변수들
-  const courseTitle = lecturesData?.results?.[0]?.title ||"프로그래밍 기초 강의";
+  const courseTitle =
+    lecturesData?.results?.[0]?.title ||
+    courseData?.title ||
+    "프로그래밍 기초 강의";
+  const courseId = courseData?.id || lecturesData?.results?.[0]?.id || 1; // 🆕 courseId 추가
   const currentChapter = chapters[currentChapterIndex];
   const totalDuration = chapters.reduce(
     (acc, chapter) => acc + chapter.durationSeconds,
     0
   );
+
+    //순서 인덱스 
+    const chapterOrder = currentChapterIndex + 1;  // 챕터의 순서 (1부터)
+    const chapterIndex = currentChapterIndex;       // 챕터의 배열 인덱스 (0부터)
+    
+    // 🔥 비디오 정보 - 현재는 1챕터 = 1비디오 구조로 보임
+    // const videoId = currentChapter.id;              // 실제 비디오 ID
+    // const videoOrder = 1;                           // 해당 챕터 내 비디오 순서 (보통 1)
+    // const videoIndex = 0;  
 
   // 🔍 초기 상태 로그 (컴포넌트 렌더링 시마다 실행)
   console.log("🔍 [초기 상태 확인]");
@@ -643,27 +658,26 @@ const [isChaptersLoading, setIsChaptersLoading] = useState(true);
     [chapters, userId, getProgressFromCache]
   );
 
-  
+  //api용 useEffect **API 호출**: `useEffect`로 chapters 로드
+  // useEffect(() => {
+  //   const fetchChapters = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `/api/courses/${courseData?.id}/chapters/`
+  //       );
+  //       const chaptersData = await response.json();
+  //       setChapters(chaptersData);
+  //       setIsChaptersLoading(false);
+  //     } catch (error) {
+  //       console.error("챕터 로드 실패:", error);
+  //       setIsChaptersLoading(false);
+  //     }
+  //   };
 
-   //api용 useEffect **API 호출**: `useEffect`로 chapters 로드
-   useEffect(() => {
-    const fetchChapters = async () => {
-      try {
-        const response = await fetch(`/api/courses/${courseData?.id}/chapters/`);
-        const chaptersData = await response.json();
-        setChapters(chaptersData);
-        setIsChaptersLoading(false);
-      } catch (error) {
-        console.error('챕터 로드 실패:', error);
-        setIsChaptersLoading(false);
-      }
-    };
-  
-    if (courseData?.id) {
-      fetchChapters();
-    }
-  }, [courseData?.id]);
-
+  //   if (courseData?.id) {
+  //     fetchChapters();
+  //   }
+  // }, [courseData?.id]);
 
   //RDK 챕터 로드
   // 🔄 기존 fetch useEffect를 이걸로 교체
@@ -671,57 +685,61 @@ const [isChaptersLoading, setIsChaptersLoading] = useState(true);
     console.log("📚 RTK Query 데이터 처리 시작");
     console.log("lecturesLoading:", lecturesLoading);
     console.log("lecturesData:", lecturesData);
-    
+
     if (lecturesLoading) {
       console.log("⏳ RTK Query 로딩 중...");
       setIsChaptersLoading(true);
       return;
     }
-  
+
     if (lecturesError) {
       console.error("❌ RTK Query 에러:", lecturesError);
       setChapters([]);
       setIsChaptersLoading(false);
       return;
     }
-  
+
     if (lecturesData?.results?.length > 0) {
       console.log("✅ RTK Query 데이터 수신:", lecturesData);
-      
+
       const firstLecture = lecturesData.results[0];
       console.log("🎯 첫 번째 강의:", firstLecture);
-      
+
       // 🔥 API 응답을 Chapter 형태로 변환
       // (실제 API 구조에 맞게 조정 필요)
       const apiChapters = firstLecture.lectures || firstLecture.chapters || [];
-      
-      const formattedChapters: Chapter[] = apiChapters.map((item: any, index: number) => ({
-        id: item.id || index + 1,
-        title: item.title || `챕터 ${index + 1}`,
-        time: item.time || "0:00",
-        duration: item.duration || "5:00", 
-        durationSeconds: item.durationSeconds || item.duration_seconds || 300,
-        videoFile: item.videoFile || item.video_url || item.video_file || `video${index + 1}.mp4`,
-        completed: false
-      }));
-  
+
+      const formattedChapters: Chapter[] = apiChapters.map(
+        (item: any, index: number) => ({
+          id: item.id || index + 1,
+          title: item.title || `챕터 ${index + 1}`,
+          time: item.time || "0:00",
+          duration: item.duration || "5:00",
+          durationSeconds: item.durationSeconds || item.duration_seconds || 300,
+          videoFile:
+            item.videoFile ||
+            item.video_url ||
+            item.video_file ||
+            `video${index + 1}.mp4`,
+          completed: false,
+        })
+      );
+
       console.log("🔄 변환된 챕터 데이터:", formattedChapters);
       setChapters(formattedChapters);
       setIsChaptersLoading(false);
-      
+
       // 🔥 강의 제목도 업데이트
       if (firstLecture.title) {
         // courseTitle 업데이트 (기존 로직 유지)
         console.log("📋 강의 제목 업데이트:", firstLecture.title);
       }
-      
     } else {
       console.warn("⚠️ RTK Query 데이터 없음 또는 비어있음");
       setChapters([]);
       setIsChaptersLoading(false);
     }
   }, [lecturesData, lecturesLoading, lecturesError]);
-
 
   // 🔥 4. 통합된 초기화 함수
   const initializeProgress = useCallback(async (): Promise<void> => {
@@ -1452,28 +1470,44 @@ const [isChaptersLoading, setIsChaptersLoading] = useState(true);
 
     // 🔥 안전한 LocalChapterCache 객체 생성
     const safeLocalChapter: LocalChapterCache = {
-      currentTime: Math.floor(currentTime), // 정수로 변환
-      totalDuration: Math.floor(duration), // 정수로 변환
-      watchedPercentage: Math.min(100, (currentTime / duration) * 100), // 100% 초과 방지
-      isCompleted: currentTime / duration >= 0.9, // 90% 완료 체크
-      // lastUpdated: Date.now(), //
+      currentTime: Math.floor(currentTime),
+      totalDuration: Math.floor(duration),
+      watchedPercentage: Math.min(100, (currentTime / duration) * 100),
+      isCompleted: currentTime / duration >= 0.9,
+      lastUpdated: Date.now(),
+      isDirty: true,
     };
 
+    // 🔥 올바른 order/index 계산
+  const chapterOrder = currentChapterIndex + 1;  // 1, 2, 3, ...
+  const chapterIndex = currentChapterIndex;       // 0, 1, 2, ...
+  const videoId = currentChapter.id;              // 실제 비디오 ID
+  const videoOrder = 1;                           // 챕터 내 첫 번째 비디오
+  const videoIndex = 0;                           // 챕터 내 첫 번째 인덱스
 
- // 🔍 전송 데이터 로깅
- console.log("📤 -----에러체크----서버 전송 데이터:", {
-  userId,
-  courseId: courseData?.id || 1,
-  chapterId: currentChapter.id,
-  ...safeLocalChapter
-});
+    // 🔍 전송 데이터 로깅
+  console.log("📤 이어보기 저장 데이터:", {
+    userId,
+    courseId: courseData?.id || 1,
+    chapterId: currentChapter.id,
+    videoId,
+    chapterOrder,
+    chapterIndex,
+    videoOrder,
+    videoIndex,
+    "현재 재생 시간": currentTime,
+  });
 
     // 2) 서버에 저장 (ProgressTracker)
     ProgressTracker.saveProgress(
       userId,
       courseData?.id || 1,
       currentChapter.id,
-      safeLocalChapter // ✅ 검증된 데이터 전달
+      safeLocalChapter,
+      chapterOrder,    // 🔥 챕터 순서 (1부터)
+      videoOrder,      // 🔥 비디오 순서 (1부터)  
+      chapterIndex,    // 🔥 챕터 인덱스 (0부터)
+      videoIndex       // 🔥 비디오 인덱스 (0부터)
     )
       .then((result) => {
         if (result) {
@@ -1815,7 +1849,7 @@ const [isChaptersLoading, setIsChaptersLoading] = useState(true);
           <div className="mb-2">
             <div className="p-3">
               <span className="font-medium text-gray-900 text-sm">
-              {lecturesData?.results?.[0]?.title || courseTitle}
+                {lecturesData?.results?.[0]?.title || courseTitle}
               </span>
             </div>
 
