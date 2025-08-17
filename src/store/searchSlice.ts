@@ -12,7 +12,7 @@ export const searchCourses = createAsyncThunk<SearchApiResponse, SearchParams>(
   async (params, { rejectWithValue }) => {
     try {
       const { title, page = 1 } = params;
-      const baseUrl = "http://13.125.180.222/api/courses/";
+      const baseUrl = "/courses/";
       const queryParams = new URLSearchParams();
 
       queryParams.append("title", title);

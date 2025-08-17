@@ -27,14 +27,11 @@ export const sendPasswordResetEmail = createAsyncThunk<
         headers.Authorization = `Bearer ${token}`;
       }
 
-      const response = await fetch(
-        "http://13.125.180.222/api/password-reset/",
-        {
-          method: "POST",
-          headers,
-          body: JSON.stringify({ email }),
-        }
-      );
+      const response = await fetch("/password-reset/", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ email }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));

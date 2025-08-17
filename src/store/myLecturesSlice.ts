@@ -74,7 +74,7 @@ export const fetchMyLectures = createAsyncThunk<
         statuses: activeFilters.statuses,
       };
 
-      const baseUrl = "http://13.125.180.222/api/my-courses/";
+      const baseUrl = "/my-courses/";
       const queryString = buildMyLectureQueryParams(requestParams);
       const url = queryString ? `${baseUrl}?${queryString}` : baseUrl;
 
@@ -105,7 +105,7 @@ const hasCourseIdAllPages = async (
   token: string,
   targetId: string
 ): Promise<boolean> => {
-  let url = "http://13.125.180.222/api/my-courses/";
+  let url = "/my-courses/";
 
   while (url) {
     const res = await fetch(url, {
@@ -158,16 +158,13 @@ export const enrollCourse = createAsyncThunk<
         throw new Error("이미 수강신청했던 강의입니다.");
       }
 
-      const response = await fetch(
-        `http://13.125.180.222/api/courses/enroll/${courseId}/`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`/courses/enroll/${courseId}/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
