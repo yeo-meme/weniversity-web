@@ -338,7 +338,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   console.log("lecturesData:", lecturesData);
 
   //챕터  api용
-  const [chapters, setChapters] = useState<Chapter[]>([]); // 빈 배열로 시작
+  const [chapters, setChapters] = useState<Chapter[]>([]); 
   const [isChaptersLoading, setIsChaptersLoading] = useState(true);
 
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
@@ -593,7 +593,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     },
     [chapters, userId, getProgressFromCache]
   );
-
+  
   //api용 useEffect **API 호출**: `useEffect`로 chapters 로드
   // useEffect(() => {
   //   const fetchChapters = async () => {
@@ -622,6 +622,8 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     console.log("lecturesLoading:", lecturesLoading);
     console.log("lecturesData:", lecturesData);
 
+ 
+    
     if (lecturesLoading) {
       console.log("⏳ RTK Query 로딩 중...");
       setIsChaptersLoading(true);
@@ -678,7 +680,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     }
   }, [lecturesData, lecturesLoading, lecturesError]);
 
-  //렉쳐받아서 시청률 디비 요청 
+  //렉쳐받아서 시청률 디비 요청 첫 로드
   // 사용자 첫로드 UI 진행률 로드 -진행률 디비 api 요청 및 컨버터
   //로컬 스토리지 관리 별도 진행
   const initializeProgress = async (courseId: number) => {
@@ -1437,6 +1439,15 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     const videoOrder = 1; // 챕터 내 첫 번째 비디오
     const videoIndex = 0; // 챕터 내 첫 번째 인덱스
 
+
+    const currentChapterProgressTime = chapterProgress[chapterIndex] || 0;
+const currentChapterDuration = currentChapter.durationSeconds || 1;
+const currentChapterProgress = Math.min(
+  100,
+  (currentChapterProgressTime / currentChapterDuration) * 100
+);
+
+
     // 🔍 전송 데이터 로깅
     console.log("📤 이어보기 저장 데이터:", {
       userId,
@@ -1459,7 +1470,9 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       chapterOrder, // 🔥 챕터 순서 (1부터)
       videoOrder, // 🔥 비디오 순서 (1부터)
       chapterIndex, // 🔥 챕터 인덱스 (0부터)
-      videoIndex // 🔥 비디오 인덱스 (0부터)
+      videoIndex, // 🔥 비디오 인덱스 (0부터)
+      currentChapterProgressTime,
+      currentChapterProgress
     )
       .then((result) => {
         if (result) {
@@ -1650,31 +1663,133 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   };
 
   // 🎥 비디오 끝남 핸들러
-  const handleVideoEnded = () => {
-    console.log(`🏁 비디오 재생 완료: ${currentChapter.title}`);
-    setCompletedChapters((prev) => new Set([...prev, currentChapterIndex]));
-    setIsVideoPlaying(false);
+  // const handleVideoEnded = () => {
+  //   console.log(`🏁 비디오 재생 완료: ${currentChapter.title}`);
+  //   setCompletedChapters((prev) => new Set([...prev, currentChapterIndex]));
+  //   setIsVideoPlaying(false);
 
-    if (hasProgressData) {
-      ProgressTracker.completeChapter(
-        userId,
-        currentChapter.id,
-        currentChapter.id
-      );
-      const summary = ProgressTracker.getUserProgressSummary(userId, courseId);
-      setProgressSummary(summary);
-      // setProgressSummary(summary);
+  //   if (hasProgressData) {
+  //     ProgressTracker.completeChapter(
+  //       userId,
+  //       currentChapter.id,
+  //       currentChapter.id
+  //     );
+  //     const summary = ProgressTracker.getUserProgressSummary(userId, courseId);
+  //     setProgressSummary(summary);
+  //     // setProgressSummary(summary);
+  //   }
+
+  //   if (currentChapterIndex < chapters.length - 1) {
+  //     console.log(
+  //       `➡️ 다음 챕터로 자동 이동: ${chapters[currentChapterIndex + 1].title}`
+  //     );
+  //     setCurrentTime(0);
+  //     setDuration(0);
+  //     setCurrentChapterIndex(currentChapterIndex + 1);
+  //   } else {
+  //     console.log(`🎊 모든 챕터 완료!`);
+  //   }
+  // };
+
+   const handleVideoEnded = async() => {
+    if (hasProgressData && currentChapter) {
+      const videoDuration = currentChapter.durationSeconds || 1;
+      
+      // 완료된 챕터의 최종 진행률 저장 (100%)
+      const completedProgress: LocalChapterCache = {
+        currentTime: videoDuration,
+        totalDuration: videoDuration,
+        watchedPercentage: 100,
+        isCompleted: true,
+        lastUpdated: Date.now(),
+        isDirty: true,
+      };
+  
+      // 서버에 완료 상태 저장
+      try {
+        const chapterOrder = currentChapterIndex + 1;
+        const videoOrder = 1;
+        const chapterIndex = currentChapterIndex;
+        const videoIndex = 0;
+        const currentChapterProgressTime = videoDuration;
+        const currentChapterProgress = 100;
+  
+        await ProgressTracker.saveProgress(
+          userId,
+          lecturesData?.results[0].course_id || 1,
+          currentChapter.id,
+          completedProgress,
+          chapterOrder,
+          videoOrder,
+          chapterIndex,
+          videoIndex,
+          currentChapterProgressTime,
+          currentChapterProgress
+        );
+        
+        // 로컬 UI 상태도 업데이트
+        setChapterProgress((prev) => ({
+          ...prev,
+          [currentChapterIndex]: videoDuration,
+        }));
+  
+        console.log("✅ 챕터 완료 저장 성공");
+      } catch (error) {
+        console.error("❌ 챕터 완료 저장 실패:", error);
+      }
+  
+      // 전체 진행률 요약 업데이트
+      try {
+        const summary = ProgressTracker.getUserProgressSummary(userId, courseId);
+        setProgressSummary(summary);
+      } catch (error) {
+        console.error("❌ 진행률 요약 업데이트 실패:", error);
+      }
     }
-
+  
+    // 🔥 자동 다음 영상 재생 로직
     if (currentChapterIndex < chapters.length - 1) {
-      console.log(
-        `➡️ 다음 챕터로 자동 이동: ${chapters[currentChapterIndex + 1].title}`
-      );
-      setCurrentTime(0);
-      setDuration(0);
-      setCurrentChapterIndex(currentChapterIndex + 1);
+      const nextChapterIndex = currentChapterIndex + 1;
+      const nextChapter = chapters[nextChapterIndex];
+      
+      console.log(`➡️ 자동 다음 챕터 재생: ${nextChapter.title}`);
+      
+      // 3초 후 자동 재생 (사용자가 취소할 수 있도록)
+      const autoPlayDelay = 3000;
+      let countdownTimer: NodeJS.Timeout;
+      
+      // 카운트다운 표시 (옵션)
+      console.log(`⏰ ${autoPlayDelay/1000}초 후 다음 영상이 자동 재생됩니다...`);
+      
+      countdownTimer = setTimeout(() => {
+        // 다음 챕터로 이동
+        setCurrentChapterIndex(nextChapterIndex);
+        setCurrentTime(0);
+        setStartTime(0); // 다음 영상은 처음부터 시작
+        setIsVideoPlaying(false); // VideoPlayer가 자동으로 재생 시작
+        
+        console.log(`🎬 다음 챕터 자동 재생 시작: ${nextChapter.title}`);
+      }, autoPlayDelay);
+  
+      // 사용자가 수동으로 챕터를 변경하면 자동재생 취소
+      return () => {
+        if (countdownTimer) {
+          clearTimeout(countdownTimer);
+          console.log("⏹️ 자동 재생 취소됨");
+        }
+      };
+      
     } else {
-      console.log(`🎊 모든 챕터 완료!`);
+      // 마지막 영상 완료
+      console.log(`🎊 모든 챕터 완료! 수고하셨습니다.`);
+      
+      // 전체 코스 완료 처리 (옵션)
+      try {
+        // 코스 완료 상태를 서버에 저장하는 로직 추가 가능
+        console.log("🏆 전체 코스 학습 완료!");
+      } catch (error) {
+        console.error("❌ 코스 완료 처리 실패:", error);
+      }
     }
   };
 

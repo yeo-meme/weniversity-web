@@ -7,6 +7,7 @@ import type {
   LocalProgressCache,
 } from "../types/progress.types";
 import { localChapterToWatchProgress } from "../utils/convertCacheToWatchProgress";
+import { loadCache } from "./LocalProgressCache";
 // import { convertCacheToWatchProgress } from "../utils/convertCacheToWatchProgress";
 // import { toSeconds } from '../utils/time';
 
@@ -73,18 +74,27 @@ export class ProgressTracker {
     chapterOrder: number = 0,
     videoOrder: number = 0,
     chapterIndex: number = 0,
-    videoIndex: number = 0
+    videoIndex: number = 0,
   ): Promise<WatchProgress | null> {
     try {
+
+      const cache = loadCache(); // SimpleProgressCache
+      console.log("📦 [DEBUG] Loaded cache:", cache);
+
+      const localChapter: LocalChapterCache = cache[chapterIndex] || {
+        currentTime: 0,
+        totalDuration: 1, // 기본값
+        watchedPercentage: 0,
+        isCompleted: false,
+      };
+      console.log(`📌 [DEBUG] Chapter index ${chapterIndex} data:`, localChapter);
+
       const progress = localChapterToWatchProgress(
         userId,
         courseId,
         chapterId,
         chapterId, // videoId (현재는 chapterId와 동일)
         chapterOrder, // 🔥 실제 order 전달
-        videoOrder, // 🔥 실제 order 전달
-        chapterIndex, // 🔥 실제 index 전달
-        videoIndex, // 🔥 실제 index 전달
         localChapter
       );
       // 서버에 Upsert 요청 (create/update 구분 없음)

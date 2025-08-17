@@ -14,6 +14,20 @@ export function localChapterToWatchProgress(
   localChapter: LocalChapterCache
 ): WatchProgress {
   const now = Date.now();
+  
+  // 🔥 로그 출력
+  console.log(`📝 [localChapterToWatchProgress] chapterIndex ${chapterIndex}`, {
+    id: chapterId,
+    chapterOrder: chapterIndex + 1,
+    videoOrder: chapterIndex + 1,
+    chapterIndex,
+    videoIndex: chapterIndex,
+    currentTime: localChapter.currentTime,
+    totalDuration: localChapter.totalDuration,
+    watchedPercentage: localChapter.watchedPercentage,
+    isCompleted: localChapter.isCompleted
+  });
+
 
   return {
     id: `${userId}_${chapterId}`,
