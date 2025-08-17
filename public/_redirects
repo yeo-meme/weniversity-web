@@ -1,3 +1,4 @@
 /api/*  http://13.125.180.222/api/:splat  200
 /media/* http://13.125.180.222/media/:splat 200
+
 /media/*    /.netlify/functions/media-proxy/:splat   200
