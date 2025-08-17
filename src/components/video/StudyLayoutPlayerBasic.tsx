@@ -71,44 +71,6 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setIsPaused(true);
   }, [currentVideo, startTime]);
 
-  //이벤트 리스너 등록만 담당 (한 번만)
-  // useEffect(() => {
-  //   const video = videoRef.current;
-  //   if (!video) return;
-
-  //   const handleLoadedMetadata = () => {
-  //     setDuration(video.duration);
-
-  //     // ⭐️ 핵심: startTime 적용 및 UI 상태 동기화
-  //     if (startTime > 0) {
-  //       e.currentTarget.currentTime = startTime;
-  //       setCurrentTime(startTime); // 🔥 UI 상태도 즉시 동기화
-  //       console.log(`✅ 시작 지점 설정: ${startTime.toFixed(1)}초`);
-  //     } else {
-  //       setCurrentTime(0);
-  //       console.log(`✅ 처음부터 시작: 0초`);
-  //     }
-
-  //     // onLoadedMetadata는 useCallback으로 안정화된 함수 사용
-  //     onLoadedMetadata?.();
-  //   };
-
-  //   video.addEventListener("loadedmetadata", handleLoadedMetadata);
-
-  //   return () => {
-  //     video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-  //   };
-  // }, [currentVideo]);
-  // const formatTime = (seconds: number): string => {
-  //   const hrs = Math.floor(seconds / 3600);
-  //   const mins = Math.floor((seconds % 3600) / 60);
-  //   const secs = Math.floor(seconds % 60);
-  //   return hrs > 0
-  //     ? `${hrs}:${mins.toString().padStart(2, "0")}:${secs
-  //         .toString()
-  //         .padStart(2, "0")}`
-  //     : `${mins}:${secs.toString().padStart(2, "0")}`;
-  // };
 
   const handlePlayPause = () => {
     const video = videoRef.current;
@@ -224,7 +186,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   };
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full max-w-5xl mx-auto">
       <video
         ref={videoRef}
         src={`/public/video/${currentVideo}`}
@@ -239,7 +201,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         onLoadedData={handleLoadedData}
         controls={false}
         autoPlay={autoPlay}
-        className="w-full h-full object-contain max-h-[600px]"
+        className="w-full h-full object-cover"
       >
         <source src={`/video/${currentVideo}`} type="video/mp4" />
         브라우저가 video 태그를 지원하지 않습니다.
@@ -2102,7 +2064,7 @@ const currentChapterProgress = Math.min(
         </div>
 
         {/* 비디오 플레이어 영역 */}
-        <div className="flex-1 bg-black relative">
+        <div className="flex-1 bg-black relative flex items-center min-h-0">
           {currentChapter ? (
             <VideoPlayer
               currentVideo={currentChapter.videoFile}
