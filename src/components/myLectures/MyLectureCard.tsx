@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { VideoIcon } from "../common/icon";
 import type { MyLecture } from "../../types/myLectures/myLectures";
+import LectureImage from "../../assets/OG.png";
 
 interface LectureCardProps {
   lecture: MyLecture;
@@ -19,7 +20,7 @@ const MyLectureCard: React.FC<LectureCardProps> = memo(
       type,
       // tags
     } = lecture;
-    const imageSource = course.course_image || "/default-lecture-thumbnail.png";
+    // const imageSource = course.course_image || "/default-lecture-thumbnail.png";
     const progressPercentage = parseFloat(progress) || 0;
     const currentProgress = Math.floor((progressPercentage / 100) * 15);
     const totalLessons = 15;
@@ -48,7 +49,7 @@ const MyLectureCard: React.FC<LectureCardProps> = memo(
       <article className="lecture-card w-full max-w-[380px] flex flex-col rounded-lg border border-gray-200 bg-white overflow-hidden shadow-sm hover:shadow-md transition-shadow">
         <div className="thumbnail-wrapper relative w-full h-[200px]">
           <img
-            src={imageSource}
+            src={LectureImage}
             className="thumbnail-img w-full h-full object-cover"
             alt={`${course.title} 강의 썸네일`}
             onError={e => {
