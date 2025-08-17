@@ -62,11 +62,11 @@
 ### DB
 
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
-(개발기본)
 
 ### 배포 (Backend)
 
-![AWS](https://img.shields.io/badge/AWS_Lightsail-FF9900?style=flat-square&logo=amazon-aws&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS_Lightsail-FF9900?style=flat-square&logo=amazon-aws&logoColor=white)<img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=amazon-ec2&logoColor=white"> ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white) ![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white) ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
+
 
 ## Project Management
 
@@ -112,63 +112,36 @@
 
 ## API 명세
 
-- 앱 분리 구조
+### user
 
-  | 앱 이름        | 역할 설명                                |
-  | -------------- | ---------------------------------------- |
-  | `users`        | 회원가입, 로그인, 역할 구분, 사용자 정보 |
-  | `courses`      | 강의, 영상, 분류 관리                    |
-  | `enrollments`  | 수강 등록 및 수강 상태                   |
-  | `missions`     | 과제/문제 및 제출/채점                   |
-  | `certificates` | 수료증 생성 및 다운로드                  |
-  | `progress`     | 영상 진도율, 시청 기록                   |
-  | `analytics`    | 관리자 대시보드: 통계, 접속 로그         |
+| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
+| --- | --- | --- | --- | --- |
+| 회원가입 | `POST` | `/api/users/register/` |  |  |
+| 로그인(JWT) | `POST` | `/api/users/login/` |  | refresh token |
+| 토큰리프레쉬 | `POST` | `/api/users/refresh/` | **✅** | refresh token |
+| 로그아웃 | `POST` | **`/api/users/logout/`** | **✅** |  |
+| 마이페이지(프로필사진) 조회/변경 | `GET`/ `PUT` | `/api/users/mypage/` | **✅** |  |
+| 비밀번호 변경 | `PATCH` | `/api/users/mypage/change-password/` | **✅** |  |
+| 비밀번호 변경 이메일 발송 | `POST` | `api/password-reset/` | **✅** |  |
+| 내가 좋아요한 코스 리스트 | `GET` | `api/users/mypage/likes/` | **✅** |  |
 
-### User API (완료)
+### 강의/영상
 
-| 기능                      | 메서드    | 엔드포인트                           | 비고                                                                                          |
-| ------------------------- | --------- | ------------------------------------ | --------------------------------------------------------------------------------------------- |
-| 회원가입                  | POST      | `/api/users/register/`               |                                                                                               |
-| 로그인(JWT)               | POST      | `/api/users/login/`                  |                                                                                               |
-| 토큰 리프레시             | POST      | `/api/users/refresh/`                |                                                                                               |
-| 로그아웃                  | POST      | `/api/users/logout/`                 | Headers: access, refresh 토큰                                                                 |
-| 마이페이지 조회/수정      | GET / PUT | `/api/users/mypage/`                 | GET: Authorization: Bearer <access_token>, PUT: multipart/form-data로 profile_image 포함 가능 |
-| 비밀번호 변경             | PATCH     | `/api/users/mypage/change-password/` | Body: {"current_password": "...", "new_password": "..."}                                      |
-| 비밀번호 변경 이메일 발송 | POST      | `/api/password-reset/`               | Body: {"email": "..."}                                                                        |
-| 내가 좋아요한 코스 리스트 | GET       | `/api/users/mypage/likes/`           | 로그인 필요                                                                                   |
+| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
+| --- | --- | --- | --- | --- |
+| 강의 목록 | `GET` | `/api/courses/` |  |  |
+| 강의 상세 | `GET` | `/api/courses/<id>/` |  |  |
+| 강의 필터 | `GET` | `/api/courses/?` |  |  |
+| 강의 좋아요 | `POST` | `/api/courses/int:course_id/like/` | **✅** |  |
+| 강의 좋아요 취소 | `DELETE` | `/api/courses/int:course_id/like/` | **✅** |  |
 
-### 강의/영상 (완료)
+### 수강 등록/진도
 
-| 기능             | 메서드 | 엔드포인트                           | 비고                                               |
-| ---------------- | ------ | ------------------------------------ | -------------------------------------------------- |
-| 강의 목록        | GET    | `/api/courses/`                      |                                                    |
-| 강의 상세        | GET    | `/api/courses/<id>/`                 | chapter, video 목록까지 조회 가능                  |
-| 강의 필터        | GET    | `/api/courses/?`                     | title, level, category, type, price_type 필터 지원 |
-| 강의 좋아요      | POST   | `/api/courses/<int:course_id>/like/` | 로그인 필요                                        |
-| 강의 좋아요 취소 | DELETE | `/api/courses/<int:course_id>/like/` | 로그인 필요                                        |
-
-### 수강등록/진도 (완료)
-
-| 기능              | 메서드 | 엔드포인트                             | 비고                                                                 |
-| ----------------- | ------ | -------------------------------------- | -------------------------------------------------------------------- |
-| 내 수강 강의      | GET    | `/api/my-courses/`                     | Headers: Authorization: Bearer <access_token>, type/status 필터 가능 |
-| 수강 신청         | POST   | `/api/courses/enroll/<int:course_id>/` | Headers: Authorization: Bearer <access_token>                        |
-| 내 수강 강의 필터 | GET    | `/api/my-courses/?`                    | Headers: Authorization: Bearer <access_token>, type/status 필터 가능 |
-
-### 문제풀이
-
-| 기능         | 메서드 | 엔드포인트                   |
-| ------------ | ------ | ---------------------------- |
-| 문제 목록    | GET    | `/api/missions/<course_id>/` |
-| 답안 제출    | POST   | `/api/submissions/`          |
-| 내 채점 결과 | GET    | `/api/submissions/my/`       |
-
-### 수료증
-
-| 기능                | 메서드 | 엔드포인트                                |
-| ------------------- | ------ | ----------------------------------------- |
-| 수료증 보기         | GET    | `/api/certificates/my/`                   |
-| 수료증 PDF 다운로드 | GET    | `/api/certificates/<course_id>/download/` |
+| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
+| --- | --- | --- | --- | --- |
+| 내 수강 강의 | `GET` | `/api/my-courses/` | **✅** |  |
+| 수강 신청 | `POST` | `/api/courses/enroll/<int:course_id/>` | **✅** |  |
+| 내 수강 강의 필터 | `GET` | `/api/my-courses/?` | **✅** |  |
 
 ## 권한 구조
 
@@ -179,7 +152,7 @@
 
 # 📅 프로젝트 구조 및 개발 일정
 
-## 프로젝트 구조
+## FE 프로젝트 구조
 
  <!-- 임시 구조 트리입니다. 수정 필요 -->
 
@@ -219,14 +192,309 @@
 ┣ 📜tsconfig.node.json
 ┗ 📜vite.config.ts
 ```
+## BE 프로젝트 구조 
+repository: https://github.com/nanna0/weniversity-server
 
+```
+📦weniversity-server
+┣ app/ # Django project root
+┣ 📂.github
+┃ ┣ 📂workflows
+┃ ┃ ┣ 📜main.yaml
+┣ 📂venv
+┣ 📂weniversity
+┃ ┣ 📜**init**.py
+┃ ┣ 📜asgi.py
+┃ ┣ 📜settings.py
+┃ ┣ 📜urls.py
+┃ ┣ 📜wsgi.py
+┃ 📜.env
+┃ 📜.gitignore
+┃ 📜db.sqlite3
+┃ 📜manage.py
+┃ 📜README.md
+┃ 📜requirements.txt
+┣ 📂media
+┃ ┣ 📂course
+┃ ┣ 📂instructor_profiles
+┃ ┣ 📂profiles
+┃ ┣ 📂video
+┣ 📂users
+┃ ┣ 📂migrations
+┃ ┃ ┣ 📜**init**.py
+┃ ┣ 📂templates
+┃ ┃ ┣ 📂emails
+┃ ┃ ┃ ┣ 📜password_reset_form.html
+┃ ┣ 📜**init**.py
+┃ ┣ 📜admin.py
+┃ ┣ 📜models.py
+┃ ┣ 📜permissions.py
+┃ ┣ 📜serializers.py
+┃ ┣ 📜urls.py
+┃ ┣ 📜views.py
+┣ 📂courses
+┃ ┣ 📂migrations
+┃ ┃ ┣ 📜**init**.py
+┃ ┣ 📜**init**.py
+┃ ┣ 📜admin.py
+┃ ┣ 📜filters.py
+┃ ┣ 📜models.py
+┃ ┣ 📜serializers.py
+┃ ┣ 📜urls.py
+┃ ┣ 📜views.py
+```
 ## WBS
 
- <!-- 추가 -->
+```mermaid
+gantt
+    dateFormat  YYYY-MM-DD
+    title       weniversity 프로젝트 WBS
+    excludes    weekends
+
+    section 프로젝트 준비 (나영)
+    프로젝트 킥오프 미팅                :2025-07-29, 1d
+    요구사항 분석 및 기술 스택 결정       :2025-07-29, 1d
+    ERD 작성                          :2025-07-29, 1d
+
+    section 배포 환경 설정 (나영)
+    main.yaml 파일 작성                :2025-07-31, 1d
+    GitHub CI/CD Action 설정          :2025-07-31, 1d
+    배포 서버 Ubuntu 설정              :2025-07-31, 1d
+    Nginx·Gunicorn 설정               :2025-07-31, 1d
+
+    section 모델 작성 (나영)
+    users 모델 작성                    :2025-07-30, 1d
+    Instructor 모델 작성               :2025-08-06, 1d
+    courses 모델 작성                  :2025-08-07, 1d
+    chapter 모델 작성                  :2025-08-07, 1d
+    videos 모델 작성                   :2025-08-07, 1d
+    Enrollment 모델 작성               :2025-08-12, 1d
+    missions 모델 작성                 :2025-08-12, 1d
+
+    section user 앱 (나영)
+    회원가입 기능 구현                  :2025-08-01, 1d
+    로그인/로그아웃 기능 구현             :2025-08-01, 1d
+    사용자 프로필 CRUD 구현             :2025-08-02, 1d
+    프로필 이미지 랜덤 설정 구현           :2025-08-02, 1d
+    권한 설정 구현                     :2025-08-03, 1d
+    비밀번호 변경 이메일 전송 로직 구현     :2025-08-03, 1d
+    users 앱 단위 테스트               :2025-08-04, 1d
+
+    section courses 앱 (나영)
+    과목 CRUD 기능 어드민 구현           :2025-08-05, 1d
+    과목 필터 검색 및 페이지네이션 구현     :2025-08-05, 1d
+    강사 CRUD 기능 어드민 구현           :2025-08-06, 1d
+    강사 프로필 등록, course 연결        :2025-08-07, 1d
+    과목 필터 다중검색 구현              :2025-08-08, 1d
+    과목 가격별 범위 구현                :2025-08-11, 1d
+    과목 조회 기능 구현                 :2025-08-12, 1d
+    chapter, video 단위 구현            :2025-08-12, 1d
+    courses 앱 단위 테스트              :2025-08-13, 1d
+
+    section enrollment(my-course) 앱 (나영)
+    수강신청 구현                      :2025-08-13, 1d
+    내가 신청한 과목 조회·수강률 구현      :2025-08-13, 1d
+    강의 좋아요·내가 좋아한 강의 리스트     :2025-08-14, 1d
+    내가 신청한 강의 필터 검색 구현        :2025-08-14, 1d
+    enrollment 앱 단위 테스트           :2025-08-14, 1d
+
+    section missions 앱 (여밈)
+    미션 발급/제출 기본 플로우            :2025-08-15, 1d
+
+    section videos 앱 (여밈)
+    동영상 업로드/스트리밍 기본 기능        :2025-08-15, 1d
+
+    section 통합 및 테스트
+    앱 간 통합 작업                    :2025-08-15, 1d
+    통합 테스트                        :2025-08-15, 1d
+    사용자 시나리오 기반 전체 테스트        :2025-08-16, 1d
+    성능 테스트                        :2025-08-16, 1d
+
+    section 마무리
+    발견된 버그 수정                   :2025-08-16, 1d
+    최종 점검                         :2025-08-16, 1d
+
+    section 프로젝트 마무리
+    최종 테스트 및 QA                 :2025-08-17, 1d
+    프로젝트 문서화 완료                :2025-08-17, 1d
+    최종 발표 자료 준비                :2025-08-17, 1d
+
+```
 
 # 🗄 데이터베이스 모델링 (ERD)
+```mermaid
+erDiagram
+  auth_group {
+    int id PK
+    string name
+  }
+  auth_group_permissions {
+    int id PK
+    int group_id
+    int permission_id
+  }
+  auth_permission {
+    int id PK
+    int content_type_id
+    string codename
+    string name
+  }
+  courses_chapter {
+    int chapter_id PK
+    string title
+    datetime created_at
+    int course_id
+    uint order_index
+  }
+  courses_course {
+    int course_id PK
+    string title
+    string category
+    string type
+    string level
+    int price
+    text description
+    datetime course_time
+    datetime course_duedate
+    string discord_url
+    datetime created_at
+    bool is_active
+    uint order_index
+    string price_type
+    uint code
+    string course_image
+  }
+  courses_courselike {
+    int id PK
+    datetime created_at
+    int course_id
+    int user_id
+  }
+  courses_enrollment {
+    int id PK
+    string status
+    datetime enrolled_at
+    datetime expired_at
+    decimal progress
+    int course_id
+    int user_id
+  }
+  courses_instructor {
+    int instructor_id PK
+    string name
+    int code
+    datetime created_at
+    string affiliation
+    int course_id
+    string profile_image
+    string english_name
+  }
+  courses_video {
+    int video_id PK
+    string title
+    int duration
+    int chapter_id
+    int course_id
+    uint order_index
+    string video_file
+  }
+  django_admin_log {
+    int id PK
+    text object_id
+    string object_repr
+    usmallint action_flag
+    text change_message
+    int content_type_id
+    int user_id
+    datetime action_time
+  }
+  django_content_type {
+    int id PK
+    string app_label
+    string model
+  }
+  django_migrations {
+    int id PK
+    string app
+    string name
+    datetime applied
+  }
+  django_session {
+    string session_key PK
+    text session_data
+    datetime expire_date
+  }
+  token_blacklist_blacklistedtoken {
+    int id PK
+    datetime blacklisted_at
+    bigint token_id
+  }
+  token_blacklist_outstandingtoken {
+    int id PK
+    string jti
+    text token
+    datetime created_at
+    datetime expires_at
+    int user_id
+  }
+  users_user {
+    datetime last_login
+    bool is_superuser
+    string first_name
+    string last_name
+    bool is_staff
+    datetime date_joined
+    int id PK
+    string email
+    string password
+    string name
+    string gender
+    date birth_date
+    string role
+    bool is_active
+    datetime created_at
+    datetime updated_at
+    string profile_image
+  }
+  users_user_course {
+    int id PK
+    int user_id
+    int course_id
+  }
+  users_user_groups {
+    int id PK
+    int user_id
+    int group_id
+  }
+  users_user_user_permissions {
+    int id PK
+    int user_id
+    int permission_id
+  }
 
- <!-- ERD 다이어그램 첨부 -->
+  auth_permission ||--|{ auth_group_permissions : "permission_id -> id"
+  auth_group ||--|{ auth_group_permissions : "group_id -> id"
+  django_content_type ||--|{ auth_permission : "content_type_id -> id"
+  courses_course ||--|{ courses_chapter : "course_id -> course_id"
+  users_user ||--|{ courses_courselike : "user_id -> id"
+  courses_course ||--|{ courses_courselike : "course_id -> course_id"
+  users_user ||--|{ courses_enrollment : "user_id -> id"
+  courses_course ||--|{ courses_enrollment : "course_id -> course_id"
+  courses_course ||--|{ courses_instructor : "course_id -> course_id"
+  courses_course ||--|{ courses_video : "course_id -> course_id"
+  courses_chapter ||--|{ courses_video : "chapter_id -> chapter_id"
+  users_user ||--|{ django_admin_log : "user_id -> id"
+  django_content_type ||--o{ django_admin_log : "content_type_id -> id"
+  token_blacklist_outstandingtoken ||--|{ token_blacklist_blacklistedtoken : "token_id -> id"
+  users_user ||--o{ token_blacklist_outstandingtoken : "user_id -> id"
+  courses_course ||--|{ users_user_course : "course_id -> course_id"
+  users_user ||--|{ users_user_course : "user_id -> id"
+  auth_group ||--|{ users_user_groups : "group_id -> id"
+  users_user ||--|{ users_user_groups : "user_id -> id"
+  auth_permission ||--|{ users_user_user_permissions : "permission_id -> id"
+  users_user ||--|{ users_user_user_permissions : "user_id -> id"
+
+```
 
 # 📺 구현 페이지
 
@@ -237,16 +505,32 @@
 - 내 강의 목록 페이지 (/my-lecture)
 - 강의 상세 페이지
 
-### 공통 기능
+## 🌟 메인 기능
+- **👤 사용자 관리**:
+  - JWT와 리프레시 토큰을 통해 안전하고 효율적인 사용자 인증 및 권한 관리 기능을 구현했습니다.
+  - 회원가입, 로그인, 로그아웃, 비밀번호 찾기 이메일 발송 기능을 제공합니다.
+  - 사용자 역할은 관리자, 수강생으로 구분됩니다.
 
-- 좋아요 기능
-- 빈 카드 스켈레톤UI
-- 이미지 업데이트
+- **📚 강의 관리**:
+  - 코스, 챕터, 비디오 3depth로 강의를 관리합니다.
+  - 강의 유형별, 레벨별, 가격별, 분야별 필터 다중 검색 기능을 지원합니다.
+  - 수강신청 및 수강 기간을 관리하며 내가 수강중인 강의 역시 유형별, 가격별로 필터 다중 검색을 지원합니다.
+  - 강의 좋아요 기능과 내가 좋아요한 강의를 따로 조회할 수 있습니다.
 
-## 페이지별 주요 기능
+- **🧑🏻‍🏫 강사 관리**:
+  - 관리자가 강사 프로필을 등록/수정/삭제/조회 관리할 수 있습니다.
 
--
--
+- **🎥 동영상 학습 시스템**:
+  - 
+
+- **📈 학습 진행 관리**:
+  - 사용자는 자신의 학습 진행 상황을 확인하고, 동영상 시청 기록을 관리할 수 있습니다.
+
+- **🔒 권한 관리**:
+  - 관리자와 사용자 역할에 따른 권한을 설정하고 관리할 수 있습니다.
+
+- **📝 미션 평가 시스템**:
+  - 
 
 ## 프로젝트 시연 영상
 
@@ -359,4 +643,15 @@
 
 ### ⭐최나영
 
-<aside>내용을 입력해주세요</aside>
+<aside>구현해야 할 내용이 방대하여 막막했으나, 할 수 있는것과 해야 할 것을 구분하는 과정에서 팀원들과 원활한 소통으로 순조롭게 방향을 정할 수 있어서 감사했습니다.
+
+부족한 실력이지만 반복적인 구현과 해보지 않은것에 대한 도전을 통해 나날이 성장함을 느꼈습니다.
+가장 인상깊었던 작업은 사용자 인증 관리를 통해 JWT 인증 시스템을 구현하면서 Django REST Framework의 장점을 크게 느꼈고, permission 구현으로 권한 관리를 적용하며 이후 다시 프로젝트를 구성할 때 어떤식으로 접근하면 좋을지 감을 찾을 수 있었습니다. 
+
+또 실제 서비스를 구현하기 위해 어떻게 앱 구조를 효율적으로 구성해야 하는가 고민을 많이 하였는데 완벽하진 않지만 다시 돌아보니 아쉬운 부분과 개선점이 명확히 보일 정도로 구조적인 측면에서 크게 성장했음을 느꼈습니다.
+
+이번 프로젝트를 통해 성장할 수 있었음에 감사하며, 앞으로 마주할 다양한 경험과 성장 또한 기대됩니다.
+개발은 참 재밌습니다. 부족한 실력에 위축감이 들 때도 있지만 시간이 해결해줄 것이라 긍정적으로 생각하며 다가가면 너무나 재밌는 분야입니다.
+다시 교육계로 돌아가 앞으로 만날 교육생들에게 더 의미있고 유익한 교육을 제공할 수 있을것이라 기대됩니다. 
+
+임신 기간동안 만삭이 다 될 때까지 대부분의 일상을 함께한 모두의 연구소 백엔드 과정, 성장을 위한 발걸음에 동행할 수 있어서 감사했습니다.</aside>
