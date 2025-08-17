@@ -47,9 +47,9 @@ export const authApiSlice = createApi({
   reducerPath: "authApi",
   baseQuery: baseQueryWithReauth,
   tagTypes: ["Auth"],
-  endpoints: (builder) => ({
+  endpoints: builder => ({
     login: builder.mutation<LoginResponse, LoginRequest>({
-      query: (credentials) => ({
+      query: credentials => ({
         url: "/users/login/",
         method: "POST",
         body: credentials,
@@ -58,7 +58,7 @@ export const authApiSlice = createApi({
     }),
 
     logout: builder.mutation<LogoutResponse, LogoutRequest>({
-      query: (tokens) => ({
+      query: tokens => ({
         url: "/users/logout/",
         method: "POST",
         body: tokens,
@@ -72,7 +72,7 @@ export const authApiSlice = createApi({
     }),
 
     refreshToken: builder.mutation<RefreshTokenResponse, RefreshTokenRequest>({
-      query: (body) => ({
+      query: body => ({
         url: "/users/refresh/",
         method: "POST",
         body,
