@@ -3,6 +3,12 @@ import type { Course } from "../../types/course/course";
 import HeartIconHover from "../../assets/icon-heart-hover.png";
 import HeartIcon from "../../assets/icon-heart.png";
 import HeartPicked from "../../assets/icon-heart-picked.png";
+import LectureBlue from "../../assets/lecture-blue-img.png";
+import LectureOrange from "../../assets/lecture-orange-img.png";
+import LectureChacol from "../../assets/lecture-chacol-img.png";
+import LectureGreen from "../../assets/lecture-green-img.png";
+import LecturePurple from "../../assets/lecture-purple-img.png";
+import ProfileImage from "../../assets/profile-img.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useAppDispatch, useAppSelector } from "../../hooks/hook";
@@ -80,6 +86,25 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
     return isHovered ? HeartIconHover : HeartIcon;
   };
 
+  const getCategoryImage = (category: string) => {
+    switch (category) {
+      case "프론트엔드":
+        return LectureBlue;
+      case "백엔드":
+        return LectureOrange;
+      case "데이터 분석":
+        return LectureChacol;
+      case "AI":
+        return LectureGreen;
+      case "디자인":
+        return LecturePurple;
+      case "기타":
+        return LecturePurple;
+      default:
+        return LecturePurple;
+    }
+  };
+
   return (
     <div className="rounded-lg shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-200 course-card cursor-pointer">
       <div
@@ -87,7 +112,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         onClick={() => navigateToCourseDetail(course.course_id)}
       >
         {/* 강의 이미지 */}
-        <img src={course.course_image} alt="강의이미지" />
+        <img src={getCategoryImage(course.category)} alt="강의이미지" />
 
         {/* 좋아요 이미지 */}
         {isAuthenticated && (
@@ -129,7 +154,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course }) => {
         <div className="flex items-center gap-3 mb-3">
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
             <img
-              src={course.instructors?.[0]?.profile_image}
+              src={ProfileImage}
               alt="강사"
               className="w-full h-full object-cover"
             />
