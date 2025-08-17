@@ -13,7 +13,7 @@ import type {
   LocalProgressCache,
   LocalCourseCache,
   LocalChapterCache,
-  CourseProgressResponse
+  CourseProgressResponse,
 } from "../../types/progress.types";
 
 import type { SimpleProgressCache } from "../../services/SimpleProgressCache";
@@ -21,7 +21,7 @@ import { loadCache, updateCache } from "../../services/SimpleProgressCache";
 import {
   convertWatchProgressToCache,
   localChapterToWatchProgress,
-  convertServerDataToLocalCourseCache
+  convertServerDataToLocalCourseCache,
 } from "../../utils/convertCacheToWatchProgress";
 
 import { useGetLecturesQuery } from "../../store/slices/lectureApiSlice";
@@ -320,62 +320,7 @@ interface Chapter {
   completed: boolean;
 }
 
-// const chapters: Chapter[] = [
-//   {
-//     id: 1,
-//     title: "변수와 상수",
-//     time: "0:00",
-//     duration: "5:00",
-//     durationSeconds: 5,
-//     videoFile: "video1.mp4",
-//     completed: false,
-//   },
-//   {
-//     id: 2,
-//     title: "연산자 종류",
-//     time: "5:00",
-//     duration: "10:00",
-//     durationSeconds: 5,
-//     videoFile: "video2.mp4",
-//     completed: false,
-//   },
-//   {
-//     id: 3,
-//     title: "조건문 기초",
-//     time: "15:00",
-//     duration: "8:00",
-//     durationSeconds: 5,
-//     videoFile: "video3.mp4",
-//     completed: false,
-//   },
-//   {
-//     id: 4,
-//     title: "반복문 활용",
-//     time: "23:00",
-//     duration: "12:00",
-//     durationSeconds: 5,
-//     videoFile: "video4.mp4",
-//     completed: false,
-//   },
-//   {
-//     id: 5,
-//     title: "함수 정의",
-//     time: "35:00",
-//     duration: "15:00",
-//     durationSeconds: 5,
-//     videoFile: "video5.mp4",
-//     completed: false,
-//   },
-//   {
-//     id: 6,
-//     title: "실습 문제",
-//     time: "50:00",
-//     duration: "10:00",
-//     durationSeconds: 5,
-//     videoFile: "video6.mp4",
-//     completed: false,
-//   },
-// ];
+
 
 const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   onClose,
@@ -398,21 +343,18 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   const [chapters, setChapters] = useState<Chapter[]>([]); // 빈 배열로 시작
   const [isChaptersLoading, setIsChaptersLoading] = useState(true);
 
-  //DB 백업 캐시
-  const [cachedProgress, setCachedProgress] = useState<
-    Record<number, WatchProgress>
-  >({});
-  const [realtimeCache, setRealtimeCache] = useState<SimpleProgressCache>({});
-
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [completedChapters, setCompletedChapters] = useState(new Set<number>());
 
   //실시간 진행률 -프로그래스바
   const [chapterProgress, setChapterProgress] = useState<
     Record<number, number>
   >({});
+  const [completedChapters, setCompletedChapters] = useState<Set<number>>(
+    new Set()
+  );
+  const [realtimeCache, setRealtimeCache] = useState<SimpleProgressCache>({});
+
   const [startTime, setStartTime] = useState(0);
 
   //"처음 시청=false,시청한 적 있음=true
@@ -420,22 +362,22 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [lastSaveTime, setLastSaveTime] = useState(0);
 
-  // 새 UI용 상태
-  const [expandedGroups, setExpandedGroups] = useState<Set<number>>(
-    new Set([1, 2])
-  );
-
   // UI용 변수들
   const courseTitle =
     lecturesData?.results?.[0]?.title || "프로그래밍 기초 강의";
   const courseId = lecturesData?.results?.[0]?.course_id || 1; // 🆕 courseId 추가
   const currentChapter = chapters[currentChapterIndex];
+  /// 🔥 ui에서 사용
   const totalDuration = chapters.reduce(
     (acc, chapter) => acc + chapter.durationSeconds,
     0
   );
 
-  //순서 인덱스
+  useEffect(() => {
+    console.log("🔄 chapterProgress updated:", chapterProgress);
+  }, [chapterProgress]);
+
+  // 🔥 할당되지만 사용되지 않음
   const chapterOrder = currentChapterIndex + 1; // 챕터의 순서 (1부터)
   const chapterIndex = currentChapterIndex; // 챕터의 배열 인덱스 (0부터)
 
@@ -453,30 +395,18 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   console.log("  📋 currentChapter?.title:", currentChapter?.title);
   console.log("  📋 userId:", userId);
 
-  // 🆕 챕터 그룹 토글 함수
-  const toggleGroup = (groupId: number) => {
-    setExpandedGroups((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(groupId)) {
-        newSet.delete(groupId);
-      } else {
-        newSet.add(groupId);
-      }
-      return newSet;
-    });
-  };
+  // 🔥 initializeEmptyState 함수는 정의되었지만 실제 호출 위치가 제한적
+  // const initializeEmptyState = useCallback((): void => {
+  //   setRealtimeCache({});
+  //   setCachedProgress({});
+  //   setCompletedChapters(new Set());
+  //   setChapterProgress({});
+  //   setStartTime(0);
+  //   setHasProgressData(false);
+  //   console.log("🆕 빈 상태로 초기화 완료");
+  // }, []);
 
-  const initializeEmptyState = useCallback((): void => {
-    setRealtimeCache({});
-    setCachedProgress({});
-    setCompletedChapters(new Set());
-    setChapterProgress({});
-    setStartTime(0);
-    setHasProgressData(false);
-    console.log("🆕 빈 상태로 초기화 완료");
-  }, []);
-
-  // 🔥 2. 첫 번째 챕터 시작 시간 설정
+  // 🔥 사용되지 않음 - updateUIStatesFromCache에서 progressCache 설정하지만 실제 사용 안함
   const setInitialChapterStartTime = useCallback(
     (progressCache: Record<number, WatchProgress>): void => {
       console.log("🎯 [DEBUG] setInitialChapterStartTime 시작");
@@ -510,51 +440,36 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
 
   //기존인데 이ㅣㄹ로옮기기
 
-  const getProgressFromCache = (
-    chapterId: number
-  ): LocalChapterCache | WatchProgress | null => {
-    const currentIndex = chapters.findIndex((ch) => ch.id === chapterId);
-    if (currentIndex !== -1 && chapterProgress[currentIndex]) {
-      const currentTime = chapterProgress[currentIndex];
-      const chapter = chapters[currentIndex];
+  const getProgressFromCache = useCallback(
+    (chapterId: number): LocalChapterCache | null => {
+      const currentIndex = chapters.findIndex((ch) => ch.id === chapterId);
 
-      // CacheEntry 타입변환
-      const realtimeProgress: LocalChapterCache = {
-        currentTime,
-        totalDuration: chapter.durationSeconds, // Optional이므로 있으면 추가
-        watchedPercentage: (currentTime / chapter.durationSeconds) * 100, // Optional
-        isCompleted: false, // Optional
-        lastUpdated: Date.now(),
-        isDirty: false,
-      };
+      if (currentIndex !== -1 && chapterProgress[currentIndex] !== undefined) {
+        const currentTime = chapterProgress[currentIndex];
+        const chapter = chapters[currentIndex];
 
-      console.log(
-        `🎮 현재 재생 중 진행률: 챕터 ${chapterId} - ${currentTime}초`
-      );
-      return realtimeProgress;
-    }
+        return {
+          currentTime,
+          totalDuration: chapter.durationSeconds,
+          watchedPercentage: (currentTime / chapter.durationSeconds) * 100,
+          isCompleted: false,
+          lastUpdated: Date.now(),
+          isDirty: false,
+        };
+      }
 
-    // 1️⃣ 실시간 캐시 확인 - 구조 변경 ✅
-    const userCourseKey = `progress_${userId}_course${
-      lecturesData?.results[0].course_id || 1
-    }`;
-    const courseCache = realtimeCache[userCourseKey];
-    if (courseCache?.chapters?.[chapterId]) {
-      const chapterData = courseCache.chapters[chapterId];
-      console.log(`⚡ 실시간 캐시에서 발견: 챕터 ${chapterId}`);
-      return chapterData;
-    }
+      const courseId = lecturesData?.results[0]?.course_id || 1;
+      const userCourseKey = `progress_${userId}_course${courseId}`;
+      const courseCache = realtimeCache[userCourseKey];
 
-    // 2DB 캐시 확인 (ProgressTracker)
-    const dbCached = cachedProgress[chapterId];
-    if (dbCached) {
-      console.log(`💾 DB 캐시에서 발견: 챕터 ${chapterId}`);
-      return dbCached;
-    }
+      if (courseCache?.chapters?.[chapterId]) {
+        return courseCache.chapters[chapterId];
+      }
 
-    console.log(`❌ 캐시에 없음: 챕터 ${chapterId}`);
-    return null;
-  };
+      return null;
+    },
+    [chapters, chapterProgress, realtimeCache, lecturesData, userId]
+  );
 
   //기존로컬 캐시로드 - 백업 로드
   // useEffect(() => {
@@ -568,97 +483,93 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //   loadExistingProgress();
   // }, [userId]);
   //컴포넌트 정리
-  // 🔥 3 UI 상태 업데이트 함수들 (컴포넌트 내부에 추가)
+
+  // 서버->로컬캐쉬->ui업로드 테스트 완료
   const updateUIStatesFromCache = useCallback(
     (cache: SimpleProgressCache): void => {
-      console.log("🔄 [DEBUG] updateUIStatesFromCache 시작");
       console.log("🔄 [DEBUG] 입력 캐시:", cache);
 
-      const progressCache: Record<number, WatchProgress> = {};
-      const userCompletedChapters = new Set<number>();
-      const userChapterProgress: Record<number, number> = {};
+      const legacyUserCompleted = new Set<number>();
+      const legacyUserProgress: number[] = [];
+      const legacyProgressCache: Record<number, WatchProgress> = {};
 
-      const userCourseKey = `progress_${userId}_course${
-        lecturesData?.results[0].course_id || 1
-      }`;
+      const legacyCourseId = 1;
+      const legacyUserCourseKey = `progress_${userId}_course${legacyCourseId}`;
       console.log("🔄 [DEBUG] 사용자 코스 키:", userCourseKey);
 
-      const courseCache = cache[userCourseKey];
-      console.log("🔄 [DEBUG] 코스 캐시:", courseCache);
+      // 🔹 cache에서 해당 코스 데이터 가져오기
+      const legacyCourseCache = loadCache();
+      console.log("🔄 [DEBUG] 코스 캐시:", legacyCourseCache);
 
-      if (courseCache?.chapters) {
+      if (legacyCourseCache?.chapters) {
         console.log(
           "🔄 [DEBUG] 챕터 데이터 있음:",
-          Object.keys(courseCache.chapters)
+          Object.keys(legacyCourseCache.chapters)
         );
 
-        chapters.forEach((chapter, index) => {
-          const chapterData = courseCache.chapters[chapter.id];
-          console.log(
-            `🔄 [DEBUG] 챕터 ${chapter.id} (${index}) 데이터:`,
-            chapterData
-          );
+        legacyCourseCache.chapterOrder.forEach((chapterId, index) => {
+          const chapterData = legacyCourseCache.chapters[String(chapterId)]; // 문자열 키로 접근
+          if (!chapterData) return;
 
-          if (chapterData) {
-            const watchProgress: WatchProgress = {
-              id: `${userId}_${chapter.id}`,
-              userId,
-              chapterId: chapter.id,
-              courseId: lecturesData?.results[0].course_id || 1,
-              currentTime: chapterData.currentTime,
-              totalDuration: chapterData.totalDuration || 0,
-              watchedPercentage: chapterData.watchedPercentage || 0,
-              isCompleted: chapterData.isCompleted || false,
-              totalWatchTime: chapterData.currentTime,
-              sessionCount: 1,
-              watchSpeed: 1,
-              firstWatchedAt: new Date(
-                chapterData.lastUpdated || Date.now()
-              ).toISOString(),
-              lastWatchedAt: new Date(
-                chapterData.lastUpdated || Date.now()
-              ).toISOString(),
-              completedAt: chapterData.isCompleted
-                ? new Date().toISOString()
-                : null,
-            };
+          console.log(`🔄 챕터 ${chapterId} 데이터:`, chapterData);
 
-            console.log(
-              `🔄 [DEBUG] 챕터 ${chapter.id} 진행률: ${chapterData.currentTime}초`
-            );
-
-            progressCache[chapter.id] = watchProgress;
-
-            if (chapterData.isCompleted) {
-              userCompletedChapters.add(index);
-              console.log(`✅ [DEBUG] 챕터 ${index} 완료됨`);
-            }
-
-            userChapterProgress[index] = chapterData.currentTime;
+          if (chapterData.isCompleted) {
+            legacyUserCompleted.add(index);
+            console.log(`✅ [DEBUG] 챕터 ${index} 완료됨`);
           }
+
+          legacyUserProgress[index] = chapterData.currentTime || 0;
+          console.log(
+            `🔄 [DEBUG] 챕터 ${index} 진행 시간: ${legacyUserProgress[index]}초`
+          );
         });
       } else {
         console.log("❌ [DEBUG] 코스 캐시에 챕터 데이터 없음");
       }
 
-      console.log("🔄 [DEBUG] 최종 progressCache:", progressCache);
-      console.log("🔄 [DEBUG] 최종 userChapterProgress:", userChapterProgress);
-
-      setCachedProgress(progressCache);
-      setCompletedChapters(userCompletedChapters);
-      setChapterProgress(userChapterProgress);
-      setCompletedChapters(userCompletedChapters);
-      setInitialChapterStartTime(progressCache);
-
-      console.log("✅ [DEBUG] updateUIStatesFromCache 완료");
+      setCachedProgress(legacyProgressCache);
+      setCompletedChapters(legacyUserCompleted);
+      // setChapterProgress(userChapterProgress);
+      // setCompletedChapters(userCompletedChapters);
+      // setInitialChapterStartTime(progressCache);
+      if (chapters.length === 0) {
+        return; // chapters 준비 안됨 - 레거시 결과만 사용
+      }
+  
+      const modernChapterProgress: Record<number, number> = {};
+      const modernCompletedChapters = new Set<number>();
+  
+      const modernCourseId = lecturesData?.results?.[0]?.course_id || 1;
+      const modernUserCourseKey = `progress_${userId}_course${modernCourseId}`;
+      const modernCourseCache = cache[modernUserCourseKey];
+  
+      if (modernCourseCache?.chapters) {
+        chapters.forEach((chapter, index) => {
+          const chapterData = modernCourseCache.chapters[chapter.id];
+          
+          if (chapterData) {
+            modernChapterProgress[index] = chapterData.currentTime || 0;
+            
+            if (chapterData.isCompleted) {
+              modernCompletedChapters.add(index);
+            }
+          } else {
+            modernChapterProgress[index] = 0;
+          }
+        });
+  
+        // 모던 결과로 레거시 결과 덮어씀
+        setChapterProgress(modernChapterProgress);
+        setCompletedChapters(modernCompletedChapters);
+      }
     },
     [
       userId,
       lecturesData?.results[0].course_id,
       chapters,
-      setInitialChapterStartTime,
     ]
   );
+
   // 🔥 5. 기존 checkExistingChapterProgress 개선
   const checkExistingChapterProgress = useCallback(
     (chapterIndex: number) => {
@@ -745,8 +656,8 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
           id: item.id || index + 1,
           title: item.title || `챕터 ${index + 1}`,
           time: item.time || "0:00",
-          duration: item.duration || "5:00",
-          durationSeconds: item.durationSeconds || item.duration_seconds || 300,
+          duration: item.duration || "0:05",
+          durationSeconds: item.durationSeconds || item.duration_seconds || 5,
           videoFile:
             item.videoFile ||
             item.video_url ||
@@ -757,6 +668,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       );
 
       console.log("🔄 변환된 챕터 데이터:", formattedChapters);
+      //  chapters 상태 첫 대입!
       setChapters(formattedChapters);
       setIsChaptersLoading(false);
 
@@ -773,12 +685,13 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   }, [lecturesData, lecturesLoading, lecturesError]);
 
   // 사용자 첫로드 UI 진행률 로드 -진행률 디비 api 요청 및 컨버터
+  //로컬 스토리지 관리 별도 진행 
   const initializeProgress = async (courseId: number) => {
     console.log("🚀 [DEBUG] initializeProgress 시작");
     console.log("🚀 [DEBUG] userId:", userId);
     console.log("🚀 [DEBUG] courseId 매개변수:", courseId);
 
-    if (!userId || !courseId) {
+    if (!userId || !courseId || chapters.length === 0)  {
       console.warn("⚠️ userId 또는 courseId가 없어 초기화 생략");
       return;
     }
@@ -799,13 +712,30 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
         if (serverData?.chapters && serverData.chapters.length > 0) {
           console.log("📡 [DEBUG] 서버 데이터 유효함 - 변환 시작");
 
-          const formattedCache = convertServerDataToLocalCourseCache(serverData, courseId);
+          const formattedCache = convertServerDataToLocalCourseCache(
+            serverData,
+            courseId,
+            chapters
+          );
           console.log("📡 [DEBUG] 변환된 로컬 캐시:", formattedCache);
 
-          // 실시간 캐시 업데이트
-          setRealtimeCache(formattedCache);
-          updateCache(formattedCache); // 로컬스토리지 저장
-          updateUIStatesFromCache(formattedCache);
+
+          const userCourseKey = `progress_${userId}_course${courseId}`;
+          //실시간 캐시:LocalProgressCache 형태로 래핑
+          setRealtimeCache((prev) => ({
+            ...prev,
+            [userCourseKey]: formattedCache, // courseId 키 추가
+          }));
+
+          updateCache({ 
+            ...loadCache(), // 기존 localStorage 데이터 유지
+            [userCourseKey]: formattedCache,
+          });
+
+          updateUIStatesFromCache({
+            ...loadCache(),
+            [userCourseKey]: formattedCache,
+          });
 
           console.log("✅ 서버 데이터로 초기화 완료");
           return;
@@ -839,6 +769,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     }
   };
 
+  
   //컴포넌트 정리 끝
 
   //: 리팩터전 api 조회 테스트
@@ -956,8 +887,15 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   // 1. 메인 초기화 useEffect
   // 🔥 메인 초기화 useEffect
   useEffect(() => {
-    if (lecturesLoading) return; // 아직 로딩 중이면 대기
+    if (lecturesLoading){
+      setIsChaptersLoading(true);
+      return;
+    }  // 아직 로딩 중이면 대기
+
+
     if (lecturesError) {
+      setChapters([]);
+    setIsChaptersLoading(false);
       console.error("❌ 강의 목록 로드 실패:", lecturesError);
       return;
     }
@@ -965,8 +903,10 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     let isMounted = true; // 메모리 누수 방지
 
     const loadProgress = async () => {
-      console.log("📋 [DEBUG] loadProgress 함수 시작");
-
+      if (isChaptersLoading || chapters.length === 0) {
+        console.log("⏳ chapters 로딩 대기 중...");
+        return;
+      }
       if (!isMounted) {
         console.log("❌ [DEBUG] 컴포넌트 언마운트됨 - 중단");
         return;
@@ -974,7 +914,13 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
 
       if (lecturesData?.results?.length > 0) {
         const firstCourse = lecturesData.results[0];
-        console.log("✅ 첫 번째 강의:", firstCourse);
+        console.log("✅ [Step 2] 진행률 초기화 실행:", {
+          courseId: firstCourse.course_id,
+          chaptersCount: chapters.length,
+          chapterTitles: chapters.map(ch => ch.title)
+        });
+
+
 
         // 🔥 진행률 초기화 실행 (courseId 넘겨줌)
         await initializeProgress(firstCourse.course_id);
@@ -1007,7 +953,13 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
       console.log("🗑️ [DEBUG] 메인 초기화 useEffect 클린업");
       isMounted = false;
     };
-  }, [lecturesLoading, lecturesData, lecturesError, currentChapterIndex]);
+  }, [lecturesLoading,      // RTK Query 로딩 상태
+    lecturesData,         // RTK Query 데이터
+    lecturesError,        // RTK Query 에러
+    isChaptersLoading,    // Chapter[] 변환 로딩 상태
+    chapters.length,      // Chapter[] 배열 길이 (데이터 존재 여부)
+    currentChapterIndex   // 현재 챕터 인덱스
+  ]);
 
   // 2. 챕터 변경 시 진행률 체크
   useEffect(() => {
@@ -1125,7 +1077,7 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   //   };
   // }, [hasProgressData, currentChapter, isVideoPlaying, userId, lecturesData?.results[0].course_id]);
 
-  // 5. realtimeCache 저장
+  // 5. realtimeCache 자동 저장- 로컬스토리지
   useEffect(() => {
     console.log("💾 [DEBUG] realtimeCache 변경 감지");
     console.log(
@@ -1531,9 +1483,15 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
 
   // 🎥 로컬만저장 :비디오 시간 업데이트 핸들러  1초 간격으로 진행률을 업데이트(진행률 데이터가 있을 때만 저장)
   const onVideoProgress = (currentTime: number, videoDuration: number) => {
+    const progress = Math.min(currentTime, videoDuration);
+
+    console.log("🎥 [onVideoProgress] 업데이트 전:");
+    console.log("  - chapterProgress 상태:", chapterProgress);
+    console.log("  - 현재 챕터 인덱스:", currentChapterIndex);
+    console.log("  - 현재 챕터 진행률:", chapterProgress[currentChapterIndex]);
+    console.log("  - 새로운 progress 값:", progress);
     setCurrentTime(currentTime);
 
-    const progress = Math.min(currentTime, videoDuration);
     setChapterProgress((prev) => ({
       ...prev,
       [currentChapterIndex]: progress, // ← UI 진행률 바 실시간 반영
@@ -1775,6 +1733,8 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
     setCurrentChapterIndex(chapterIndex);
     setCurrentTime(0);
     setIsVideoPlaying(false);
+
+   
   };
 
   // const saveProgressToLocalStorage = () => {
@@ -1788,6 +1748,8 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
   // };
 
   //  테스트 진행률 초기화
+
+  // 🔥 UI에서 호출되지 않음
   const handleResetProgress = () => {
     if (confirm("모든 학습 진행률을 초기화하시겠습니까?")) {
       ProgressTracker.clearAllUserData(userId);
@@ -1808,6 +1770,8 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
 
   // 6. 5분 체크포인트 저장 (기존 주기적 저장에 추가)
   let lastCheckpointTime = 0;
+
+  //사용되지 않음 - 체크포인트 로직이 주석처리됨
   const saveCheckpoint = () => {
     const now = Date.now();
     if (now - lastCheckpointTime > 300000) {
@@ -1864,97 +1828,94 @@ const StudyLayoutPlayer: React.FC<StudyLayoutPlayerProps> = ({
                 {lecturesData?.results?.[0]?.title || courseTitle}
               </span>
             </div>
+            {/*진행률  */}
+            {chapters.map((chapter, index) => {
+              const isCurrent = index === currentChapterIndex; // ID 대신 인덱스 비교
+              const duration = chapter.durationSeconds || 1;
+              const currentTime = chapterProgress[index] || 0; // 인덱스로 접근
+              const currentProgress = Math.min(
+                100,
+                (currentTime / duration) * 100
+              );
+              const isCompleted = completedChapters.has(index); // 인덱스로 확인
 
-            <div className="ml-4 space-y-1">
-              {chapters.map((chapter, index) => {
-                const isCurrent = chapter.id === currentChapter?.id;
-                // const isCompleted = completedChapters.has(index);
-                // const currentProgress = chapterProgress[index]
-                //   ? Math.round(
-                //       (chapterProgress[index] / chapter.durationSeconds) * 100
-                //     )
-                //   : 0;
-                // const hasProgress = currentProgress > 0;
-                const realTimeProgress = chapterProgress[index]
-                  ? (chapterProgress[index] / chapter.durationSeconds) * 100
-                  : 0;
+              console.log(`🎨 [Render] 챕터 ${index}:`, {
+                title: chapter.title,
+                isCurrent,
+                currentTime,
+                currentProgress,
+                isCompleted,
+              });
+              console.log(`챕터 ${index} 상세:`, {
+                title: chapter.title,
+                currentTime,
+                duration: duration,
+                durationFromChapter: chapter.durationSeconds,
+                durationString: chapter.duration,
+                progress: currentProgress,
+                // 비디오 실제 길이도 확인
+                expectedProgress: '5초면 몇%여야 하는지'
+              });
 
-                const savedProgress = getProgressFromCache(chapter.id);
-                const savedPercent = savedProgress
-                  ? savedProgress.watchedPercentage
-                  : 0;
-                const currentProgress = Math.max(
-                  realTimeProgress,
-                  savedPercent
-                );
-                const hasProgress = currentProgress > 0;
-
-                const lastWatchTime = savedProgress?.currentTime ?? 0;
-                const isCompleted =
-                  savedProgress?.isCompleted || completedChapters.has(index);
-
-                return (
-                  <button
-                    key={chapter.id}
-                    onClick={() => handleChapterClick(chapter.id)}
-                    className={`w-full flex items-center gap-3 p-3 text-left rounded-lg transition-colors ${
-                      isCurrent
-                        ? "bg-blue-50 border border-blue-200"
-                        : "hover:bg-gray-100"
+              return (
+                <button
+                  key={chapter.id}
+                  onClick={() => handleChapterClick(chapter.id)} // ID로 호출
+                  className={`w-full flex items-center gap-3 p-3 text-left rounded-lg transition-colors ${
+                    isCurrent
+                      ? "bg-blue-50 border border-blue-200"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                      isCompleted
+                        ? "bg-green-500 text-white"
+                        : isCurrent
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 text-gray-600"
                     }`}
                   >
-                    {/* 아이콘 */}
-                    <div
-                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
-                        isCompleted
-                          ? "bg-green-500 text-white"
-                          : isCurrent
-                          ? "bg-blue-500 text-white"
-                          : hasProgress
-                          ? "bg-yellow-500 text-white"
-                          : "bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      {isCompleted ? (
-                        <CheckCircle className="w-3 h-3" />
-                      ) : isCurrent ? (
-                        <Play className="w-3 h-3" />
-                      ) : (
-                        <span>{index + 1}</span>
-                      )}
+                    {isCompleted ? (
+                      <CheckCircle className="w-3 h-3" />
+                    ) : (
+                      index + 1
+                    )}
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p
+                        className={`text-sm font-medium truncate ${
+                          isCurrent ? "text-blue-900" : "text-gray-900"
+                        }`}
+                      >
+                        {chapter.title}
+                      </p>
+                      <span className="text-xs text-gray-500 ml-2">
+                        {chapter.duration}
+                      </span>
                     </div>
 
-                    {/* 챕터 정보 */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p
-                          className={`text-sm font-medium truncate ${
-                            isCurrent ? "text-blue-900" : "text-gray-900"
-                          }`}
-                        >
-                          {chapter.title}
-                        </p>
-                        <span className="text-xs text-gray-500 ml-2">
-                          {chapter.duration}
-                        </span>
+                    <div className="mt-1">
+                      <div className="w-full bg-gray-200 rounded-full h-1">
+                        <div
+                          className="bg-yellow-400 h-1 rounded-full transition-all duration-300"
+                          style={{ 
+                                 width: `${currentProgress}%`
+                          }}
+                        />
                       </div>
-
-                      {/* 진행률 바 */}
-                      {hasProgress && !isCompleted && (
-                        <div className="mt-1">
-                          <div className="w-full bg-gray-200 rounded-full h-1">
-                            <div
-                              className="bg-yellow-400 h-1 rounded-full transition-all duration-300"
-                              style={{ width: `${currentProgress}%` }}
-                            />
-                          </div>
-                        </div>
-                      )}
+                      {/* 디버깅용 진행률 표시 */}
+                      <div className="text-xs text-gray-500 mt-1">
+                        {currentProgress.toFixed(1)}% ({currentTime.toFixed(1)}
+                        s)
+                      </div>
                     </div>
-                  </button>
-                );
-              })}
-            </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
