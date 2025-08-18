@@ -609,6 +609,117 @@ erDiagram
 - **📈 학습 진행 관리**:
 
   - 사용자는 자신의 학습 진행 상황을 확인하고, 동영상 시청 기록을 관리할 수 있습니다.
+  - - 시청 기록(`WatchProgress`), 마지막 위치(`LastWatched`), 로컬 캐시(`LocalProgressCache`) 등을 통해 온라인/오프라인 학습을 모두 지원합니다.
+```ts
+export interface WatchProgress {
+    id: string;
+    userId: string;
+    chapterId: number;
+    courseId: number;
+    videoId: number;
+    currentTime: number;
+    totalDuration: number;
+    watchedPercentage: number;
+    isCompleted: boolean;
+    totalWatchTime: number;
+    sessionCount: number;
+    watchSpeed: number;
+    firstWatchedAt: string;
+    lastWatchedAt: string;
+    completedAt: string | null;
+
+    missionId?: number;
+    missionScore?: number;
+    missionPassed?: boolean;
+  }
+
+  export interface LocalChapterCache {
+    currentTime: number;
+    totalDuration: number; 
+    watchedPercentage: number;  
+    isCompleted: boolean;  
+    lastUpdated: number;
+    isDirty: boolean;
+  }
+
+  export interface LocalCourseCache {
+    userId: string;
+    courseId: string;
+    courseTitle?: string;
+    chapterOrder: number[];
+    chapters: {
+      [chapterId: number]: LocalChapterCache;
+    };
+  }
+
+  export interface LocalProgressCache {
+    [userCourseKey: string]: LocalCourseCache;  // Example key: "user123_course1"
+  }
+
+  export interface LastWatched {
+    lastChapterId: number;
+    lastVideoId: number;
+    lastChapterOrder: number;
+    lastVideoOrder: number;
+    lastChapterIndex: number;
+    lastVideoIndex: number;
+    lastWatchedAt: string;
+    currentTime: number;
+  }
+
+  export interface CreateWatchProgressParams {
+    userId: string;
+    chapterId: number;
+    courseId?: number;
+  }
+
+  export interface CourseProgressStatistics {
+    totalChapters: number;
+    completedChapters: number;
+    totalVideos: number;
+    completedVideos: number;
+    overallProgress: number; // 0 ~ 1
+    isCompleted: boolean;
+  }
+
+  export interface CourseProgressResponse {
+    userId: string;
+    videoId: number;
+    chapters: WatchProgress[];
+    lastWatched: LastWatched | null;
+    statistics: CourseProgressStatistics;
+  }
+```
+--🛠 로컬 캐시 기반 학습 진행 관리
+
+본 프로젝트에서는 학습 진행(동영상 시청 기록) 을 안정적으로 추적하기 위해
+로컬 캐시(Local Cache) + 서버 동기화 모델을 사용합니다.
+
+-로직 개요
+
+사용자가 강의를 시청할 때 1초 단위로 진행률을 로컬 캐시에 저장
+네트워크 상태와 무관하게 사용자의 진행 상황이 실시간으로 반영
+특정 이벤트 발생 시(영상 일시정지, 종료, 탭 전환 등) 서버에 저장하여 데이터 일관성 보장
+첫 강의 로드시, 서버에서 기존 진행률 데이터를 불러와 로컬 캐시에 초기화
+
+-동작 흐름
+
+1.초기 로드
+2.서버에서 사용자의 진행 데이터를 불러와 로컬 캐시에 초기화
+3.실시간 캐싱
+4.비디오 재생 중 매 초마다 진행률(currentTime, watchedPercentage)을 로컬 캐시에 저장
+5.이벤트 트리거 시 서버 저장
+6.영상 종료, 일시정지, 앱 백그라운드 전환 등 주요 이벤트 발생 시 서버 동기화
+7.네트워크가 끊겨도 로컬 캐시에 진행률 유지
+8.재연결 시 서버와 동기화 수행
+
+-장점
+
+실시간 학습 진행 반영: UI에 즉시 반영 가능
+데이터 유실 방지: 네트워크 불안정 상황에서도 안전하게 기록
+서버 부담 최소화: 이벤트 기반 동기화로 불필요한 API 호출 최소화
+확장성: 모바일/웹 환경 모두 적용 가능
+
 
 - **🔒 권한 관리**:
 
