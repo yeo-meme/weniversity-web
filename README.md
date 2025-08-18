@@ -67,7 +67,6 @@
 
 ![AWS](https://img.shields.io/badge/AWS_Lightsail-FF9900?style=flat-square&logo=amazon-aws&logoColor=white)<img src="https://img.shields.io/badge/AWS%20EC2-FF9900?style=for-the-badge&logo=amazon-ec2&logoColor=white"> ![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white) ![Gunicorn](https://img.shields.io/badge/gunicorn-%298729.svg?style=for-the-badge&logo=gunicorn&logoColor=white) ![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
 
-
 ## Project Management
 
 ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
@@ -114,34 +113,34 @@
 
 ### user
 
-| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
-| --- | --- | --- | --- | --- |
-| 회원가입 | `POST` | `/api/users/register/` |  |  |
-| 로그인(JWT) | `POST` | `/api/users/login/` |  | refresh token |
-| 토큰리프레쉬 | `POST` | `/api/users/refresh/` | **✅** | refresh token |
-| 로그아웃 | `POST` | **`/api/users/logout/`** | **✅** |  |
-| 마이페이지(프로필사진) 조회/변경 | `GET`/ `PUT` | `/api/users/mypage/` | **✅** |  |
-| 비밀번호 변경 | `PATCH` | `/api/users/mypage/change-password/` | **✅** |  |
-| 비밀번호 변경 이메일 발송 | `POST` | `api/password-reset/` | **✅** |  |
-| 내가 좋아요한 코스 리스트 | `GET` | `api/users/mypage/likes/` | **✅** |  |
+| Description                      | HTTP Method  | URL Pattern Endpoint                 | Authentication | note          |
+| -------------------------------- | ------------ | ------------------------------------ | -------------- | ------------- |
+| 회원가입                         | `POST`       | `/api/users/register/`               |                |               |
+| 로그인(JWT)                      | `POST`       | `/api/users/login/`                  |                | refresh token |
+| 토큰리프레쉬                     | `POST`       | `/api/users/refresh/`                | **✅**         | refresh token |
+| 로그아웃                         | `POST`       | **`/api/users/logout/`**             | **✅**         |               |
+| 마이페이지(프로필사진) 조회/변경 | `GET`/ `PUT` | `/api/users/mypage/`                 | **✅**         |               |
+| 비밀번호 변경                    | `PATCH`      | `/api/users/mypage/change-password/` | **✅**         |               |
+| 비밀번호 변경 이메일 발송        | `POST`       | `api/password-reset/`                | **✅**         |               |
+| 내가 좋아요한 코스 리스트        | `GET`        | `api/users/mypage/likes/`            | **✅**         |               |
 
 ### 강의/영상
 
-| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
-| --- | --- | --- | --- | --- |
-| 강의 목록 | `GET` | `/api/courses/` |  |  |
-| 강의 상세 | `GET` | `/api/courses/<id>/` |  |  |
-| 강의 필터 | `GET` | `/api/courses/?` |  |  |
-| 강의 좋아요 | `POST` | `/api/courses/int:course_id/like/` | **✅** |  |
-| 강의 좋아요 취소 | `DELETE` | `/api/courses/int:course_id/like/` | **✅** |  |
+| Description      | HTTP Method | URL Pattern Endpoint               | Authentication | note |
+| ---------------- | ----------- | ---------------------------------- | -------------- | ---- |
+| 강의 목록        | `GET`       | `/api/courses/`                    |                |      |
+| 강의 상세        | `GET`       | `/api/courses/<id>/`               |                |      |
+| 강의 필터        | `GET`       | `/api/courses/?`                   |                |      |
+| 강의 좋아요      | `POST`      | `/api/courses/int:course_id/like/` | **✅**         |      |
+| 강의 좋아요 취소 | `DELETE`    | `/api/courses/int:course_id/like/` | **✅**         |      |
 
 ### 수강 등록/진도
 
-| Description | HTTP Method | URL Pattern Endpoint | Authentication | note |
-| --- | --- | --- | --- | --- |
-| 내 수강 강의 | `GET` | `/api/my-courses/` | **✅** |  |
-| 수강 신청 | `POST` | `/api/courses/enroll/<int:course_id/>` | **✅** |  |
-| 내 수강 강의 필터 | `GET` | `/api/my-courses/?` | **✅** |  |
+| Description       | HTTP Method | URL Pattern Endpoint                   | Authentication | note |
+| ----------------- | ----------- | -------------------------------------- | -------------- | ---- |
+| 내 수강 강의      | `GET`       | `/api/my-courses/`                     | **✅**         |      |
+| 수강 신청         | `POST`      | `/api/courses/enroll/<int:course_id/>` | **✅**         |      |
+| 내 수강 강의 필터 | `GET`       | `/api/my-courses/?`                    | **✅**         |      |
 
 ## 권한 구조
 
@@ -154,23 +153,54 @@
 
 ## FE 프로젝트 구조
 
- <!-- 임시 구조 트리입니다. 수정 필요 -->
+repository: https://github.com/yeo-meme/weniversity-web
 
 ```
 📦weniversity-web
 ┣ 📂dist
 ┣ 📂public
 ┣ 📂src
-┃ ┣ 📂assets          #이미지
-┃ ┣ 📂auth
+┃ ┣ 📂assets
+┃ ┣ 📂auth (로그인 관련)
 ┃ ┣ 📂components
-┃ ┣ 📂hooks
-┃ ┣ 📂page
+┃ ┃ ┣ 📂common
+┃ ┃ ┣ 📂course
+┃ ┃ ┣ 📂courseDetail
+┃ ┃ ┣ 📂footer
+┃ ┃ ┣ 📂header
+┃ ┃ ┣ 📂hero
+┃ ┃ ┣ 📂home
+┃ ┃ ┣ 📂mission
+┃ ┃ ┣ 📂myLectures
+┃ ┃ ┣ 📂myPage
+┃ ┃ ┣ 📂reigister
+┃ ┃ ┗ 📂video
+┃ ┣ 📂hooks (redux-toolkit 정의)
+┃ ┣ 📂page (페이지 관리)
+┃ ┃ ┣ 📂course
+┃ ┃ ┣ 📂courseDetail
 ┃ ┃ ┣ 📂login
-┃ ┃ ┗ 📂my-lectures
-┃ ┣ 📂store
-┃ ┃ ┗ 📂slices
-┃ ┣ 📂types
+┃ ┃ ┣ 📂main
+┃ ┃ ┣ 📂myLectures
+┃ ┃ ┣ 📂mypage
+┃ ┃ ┣ 📂register
+┃ ┃ ┣ 📂search
+┃ ┃ ┗ 📜NotFoundPage.tsx
+┃ ┣ 📂services (유틸리티)
+┃ ┃ ┣ 📂mypage
+┃ ┃ ┣ 📂register
+┃ ┃ ┗ 📂video
+┃ ┣ 📂store (API 관련)
+┃ ┣ 📂types (type 정의)
+┃ ┃ ┣ 📂course
+┃ ┃ ┣ 📂courseDetail
+┃ ┃ ┣ 📂mission
+┃ ┃ ┣ 📂myLectures
+┃ ┃ ┣ 📂mypage
+┃ ┃ ┣ 📂register
+┃ ┃ ┣ 📂search
+┃ ┃ ┗ 📂video
+┃ ┣ 📂utils
 ┃ ┣ 📜App.css
 ┃ ┣ 📜App.tsx
 ┃ ┣ 📜AppContent.tsx
@@ -192,7 +222,9 @@
 ┣ 📜tsconfig.node.json
 ┗ 📜vite.config.ts
 ```
-## BE 프로젝트 구조 
+
+## BE 프로젝트 구조
+
 repository: https://github.com/nanna0/weniversity-server
 
 ```
@@ -243,12 +275,57 @@ repository: https://github.com/nanna0/weniversity-server
 ┃ ┣ 📜urls.py
 ┃ ┣ 📜views.py
 ```
+
 ## WBS
 
 ```mermaid
 gantt
     dateFormat  YYYY-MM-DD
-    title       weniversity 프로젝트 WBS
+    title       Weniversity 프론트엔드 개발 WBS
+    excludes    weekends
+
+    section 프로젝트 초기 설정 (여밈, 혜민, 재호)
+    프론트엔드 프로젝트 셋업              :2025-07-28, 2d
+    관리자 페이지 로컬데이터 로그인/로그아웃 기능 및 UI :2025-07-29, 1d
+    SNS 소셜 로그인, 회원가입          :2025-07-29, 2d
+    ERD 기획, 엔드포인트 계획          :2025-07-29, 1d
+    메인페이지 헤더 컴포넌트            :2025-07-29, 2d
+    깃 레파지토리 브랜치 룰 변경         :2025-07-29, 1d
+    학습 동영상 UI 개발               :2025-07-30, 2d
+
+    section 기본 UI 구조 (여밈, 혜민, 재호)
+    메인페이지 슬라이드&프로필 가드 연결  :2025-08-01, 3d
+    회원가입 figma 디자인 수정          :2025-08-01, 1d
+    로그인 페이지 UI 구현               :2025-08-04, 2d
+    학습 동영상 플레이 UI 및 테스트 기능  :2025-08-04, 3d
+    학습 동영상 플레이 개선            :2025-08-05, 2d
+    로그인 기능구현 ~ 리뷰 연결경       :2025-08-06, 9d
+
+    section 강의 관련 기능 (여밈, 혜민, 재호)
+    내 강의 목록 UI                   :2025-08-07, 8d
+    코스[데일페이지] API 작업          :2025-08-08, 2d
+    동영상 플레이어 서버 저장 포인트 수정  :2025-08-09, 2d
+    동영상 플레이어 로컬 서버구축 (테스트 ver) :2025-08-09, 2d
+    코스페이지 API 연동 작업           :2025-08-11, 2d
+    동영상 플레이어 리덕스툴킷 리팩토링    :2025-08-12, 1d
+
+    section API 연동 및 검색 (여밈, 혜민, 재호)
+    배포 API 호출 배포환경, 넷플리파이 리다렉트 프록시설정 :2025-08-13, 1d
+    루트 도큐 헤더 관련               :2025-08-13, 2d
+    검색 페이지 UI 작업               :2025-08-13, 2d
+    내 강의 목록 API 연결             :2025-08-14, 2d
+    검색페이지 API 작업               :2025-08-14, 2d
+    좋아요 API 작업                  :2025-08-15, 2d
+    메인 리스트 UI 및 API 작업         :2025-08-15, 2d
+    라우팅                          :2025-08-16, 1d
+    배포 및 테스트                    :2025-08-17, 1d
+
+```
+
+```mermaid
+gantt
+    dateFormat  YYYY-MM-DD
+    title       Weniversity 백엔드 개발 WBS
     excludes    weekends
 
     section 프로젝트 준비 (나영)
@@ -322,6 +399,7 @@ gantt
 ```
 
 # 🗄 데이터베이스 모델링 (ERD)
+
 ```mermaid
 erDiagram
   auth_group {
@@ -498,43 +576,48 @@ erDiagram
 
 # 📺 구현 페이지
 
-- 메인 페이지 (로그인 전/후)
+- 메인 페이지
 - 로그인 페이지
 - 회원가입 페이지
 - 마이페이지
-- 내 강의 목록 페이지 (/my-lecture)
+- 내 강의 목록 페이지
 - 강의 상세 페이지
+- 검색 페이지
 
 ## 🌟 메인 기능
+
 - **👤 사용자 관리**:
+
   - JWT와 리프레시 토큰을 통해 안전하고 효율적인 사용자 인증 및 권한 관리 기능을 구현했습니다.
   - 회원가입, 로그인, 로그아웃, 비밀번호 찾기 이메일 발송 기능을 제공합니다.
   - 사용자 역할은 관리자, 수강생으로 구분됩니다.
 
 - **📚 강의 관리**:
+
   - 코스, 챕터, 비디오 3depth로 강의를 관리합니다.
   - 강의 유형별, 레벨별, 가격별, 분야별 필터 다중 검색 기능을 지원합니다.
   - 수강신청 및 수강 기간을 관리하며 내가 수강중인 강의 역시 유형별, 가격별로 필터 다중 검색을 지원합니다.
   - 강의 좋아요 기능과 내가 좋아요한 강의를 따로 조회할 수 있습니다.
 
 - **🧑🏻‍🏫 강사 관리**:
+
   - 관리자가 강사 프로필을 등록/수정/삭제/조회 관리할 수 있습니다.
 
 - **🎥 동영상 학습 시스템**:
-  - 
+
+  -
 
 - **📈 학습 진행 관리**:
+
   - 사용자는 자신의 학습 진행 상황을 확인하고, 동영상 시청 기록을 관리할 수 있습니다.
 
 - **🔒 권한 관리**:
+
   - 관리자와 사용자 역할에 따른 권한을 설정하고 관리할 수 있습니다.
 
-- **📝 미션 평가 시스템**:
-  - 
+- ## **📝 미션 평가 시스템**:
 
 ## 프로젝트 시연 영상
-
- <!-- 하단 gif 첨부 필요 -->
 
 ### 🔐비로그인 상태
 
@@ -610,22 +693,17 @@ erDiagram
 - **커리큘럼 / 강의 데이터 미입력**
   - 상세페이지 및 내 강의 목록 일부 강의 정보 미입력
   - DB 데이터 입력 시 해결
-- **비밀번호 재설정 CORS 오류**
-  - 현재 개발 환경에서 비밀번호 재설정 후 오류 발생
-  - 변경 후 로그인 페이지 이동 예정
 - **공유하기 버튼**
   - 버튼만 구현, 기능 미개발
 - **강의 상세페이지 수강완료 체크 기능 미구현**
+- **이미지 파일 불러오기**
+  - 배포시 이미지 파일이 저장된 경로로 불러오지 못하는 이슈
 
 # 🔍 프로젝트 회고
 
 ## 개선 목표
 
- <!-- 추가 -->
-
-## 트러블슈팅
-
- <!-- 추가 -->
+- 리팩토링, 반응형 대응, 미구현된 기능 개발
 
 ## 개인 회고
 
@@ -635,23 +713,25 @@ erDiagram
 
 ### ⭐최재호
 
-<aside>내용을 입력해주세요</aside>
+<aside>프로젝트의 방대한 양에 구현을 다 할 수 있을까? 라는 의문이 들었습니다. 하지만 프로젝트를 진행하며 팀원들과 함께라면 필수과제는 구현할 수 있을 것이라는 생각이 들었습니다.
+실력이 부족하지만 팀원들과 소통을 잘 한다면 최선의 결과를 만들어낼 수 있을 거라고 생각하며 열심히 프로젝트에 임했습니다.
+처음 사용해보는 typescript와 redux-toolkit을 이번 프로젝트를 통해 조금은 공부할 수 있게 된것과 팀원들과의 소통이 저의 성장에 좋은 기회가 되었다고 생각합니다.<aside>
 
 ### ⭐이혜민
 
-<aside>내용을 입력해주세요</aside>
+<aside>프론트엔드와 백엔드 연동, 상태 관리, 팀 협업 과정을 직접 경험하며 실제 서비스가 어떻게 개발되는지에 대한 흐름을 알게되어 좋았습니다. 이번 팀 프로젝트는 책임감을 가지고 문제에 임하는 자세를 다시 한번 상기하는 기회가 되었으며 앞으로 더 나은 방향으로 팀에 기여할 수 있도록 계속 노력할 예정입니다. 프로젝트를 진행하면서 잦은 실수로 팀에 부담을 준 것 같아 죄송한 마음이 아직도 크지만... 그만큼 더 많이 배우고 성장할 수 있었던 것 같습니다. 끝까지 응원해주신 팀장님과 팀원분들께 진심으로 감사드립니다!!</aside>
 
 ### ⭐최나영
 
 <aside>구현해야 할 내용이 방대하여 막막했으나, 할 수 있는것과 해야 할 것을 구분하는 과정에서 팀원들과 원활한 소통으로 순조롭게 방향을 정할 수 있어서 감사했습니다.
 
 부족한 실력이지만 반복적인 구현과 해보지 않은것에 대한 도전을 통해 나날이 성장함을 느꼈습니다.
-가장 인상깊었던 작업은 사용자 인증 관리를 통해 JWT 인증 시스템을 구현하면서 Django REST Framework의 장점을 크게 느꼈고, permission 구현으로 권한 관리를 적용하며 이후 다시 프로젝트를 구성할 때 어떤식으로 접근하면 좋을지 감을 찾을 수 있었습니다. 
+가장 인상깊었던 작업은 사용자 인증 관리를 통해 JWT 인증 시스템을 구현하면서 Django REST Framework의 장점을 크게 느꼈고, permission 구현으로 권한 관리를 적용하며 이후 다시 프로젝트를 구성할 때 어떤식으로 접근하면 좋을지 감을 찾을 수 있었습니다.
 
 또 실제 서비스를 구현하기 위해 어떻게 앱 구조를 효율적으로 구성해야 하는가 고민을 많이 하였는데 완벽하진 않지만 다시 돌아보니 아쉬운 부분과 개선점이 명확히 보일 정도로 구조적인 측면에서 크게 성장했음을 느꼈습니다.
 
 이번 프로젝트를 통해 성장할 수 있었음에 감사하며, 앞으로 마주할 다양한 경험과 성장 또한 기대됩니다.
 개발은 참 재밌습니다. 부족한 실력에 위축감이 들 때도 있지만 시간이 해결해줄 것이라 긍정적으로 생각하며 다가가면 너무나 재밌는 분야입니다.
-다시 교육계로 돌아가 앞으로 만날 교육생들에게 더 의미있고 유익한 교육을 제공할 수 있을것이라 기대됩니다. 
+다시 교육계로 돌아가 앞으로 만날 교육생들에게 더 의미있고 유익한 교육을 제공할 수 있을것이라 기대됩니다.
 
 임신 기간동안 만삭이 다 될 때까지 대부분의 일상을 함께한 모두의 연구소 백엔드 과정, 성장을 위한 발걸음에 동행할 수 있어서 감사했습니다.</aside>
