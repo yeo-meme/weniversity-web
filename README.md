@@ -4,7 +4,7 @@
   <img src="./public/images/project-logo.png" alt="프로젝트 로고">
 </div>
 
-> https://weniversity.netlify.app/ > <br/>
+> https://weniversity.netlify.app/ <br/>
 
 <br/>
 
@@ -28,7 +28,7 @@
 
 # 🔥 팀 소개
 
-- Team. 이것첫번째레슨
+- Team. 이건첫번째레슨
 
   |              [김여밈](https://github.com/yeo-meme)               |               [최재호](https://github.com/jaeho614)               |               [이혜민](https://github.com/100gun)               |               [최나영](https://github.com/nanna0)               |
   | :--------------------------------------------------------------: | :---------------------------------------------------------------: | :-------------------------------------------------------------: | :-------------------------------------------------------------: |
@@ -90,8 +90,6 @@
   - **💬 Discord**: 실시간 소통 및 팀 간 문의, 알림, 스크럼 회의
 
 # 📄 요구사항 및 기능 명세
-
-★필요시 작성 및 보강
 
 ## 요구사항
 
@@ -159,6 +157,7 @@ repository: https://github.com/yeo-meme/weniversity-web
 📦weniversity-web
 ┣ 📂dist
 ┣ 📂public
+┃ ┣ 📂images            #README용 이미지
 ┣ 📂src
 ┃ ┣ 📂assets
 ┃ ┣ 📂auth (로그인 관련)
@@ -626,16 +625,19 @@ erDiagram
   <img src="./public/images/demo-carousel.gif" alt="" width="50%" />
 - 메인 섹션 카테고리 클릭 → 페이지 이동
   <br/>
-  <img src="./public/images/demo-main-category.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-main-category.gif" alt="" width="50%" />
+- 카드 더보기 클릭 → 페이지 이동
+  <br/>
+  <img src="./public/images/demo-main-more.gif" alt="" width="50%" />
 - 필터 선택 → 리스트 반영, 초기화 버튼 클릭 시 전체 필터 선택 해제
   <br/>
-  <img src="./public/images/demo-filter-select.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-filter-select.gif" alt="" width="50%" />
   - 한 페이지에 9개 리스트 노출, 페이지네이션 구현, 10개가 되지 않으면 페이지네이션 ui 숨김
     <br/>
-    <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+    <img src="./public/images/demo-list-pagination.gif" alt="" width="50%" />
 - 강의 카드 클릭 → 상세페이지 이동 (강의 카드의 좋아요 버튼은 비로그인 상태라 보이지 않음)
   <br/>
-  <img src="./public/images/demo-detail-page.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-detail-page.gif" alt="" width="50%" />
 
 ### 📝회원가입
 
@@ -647,49 +649,58 @@ erDiagram
   <img src="./public/images/demo-signupn-enabled.gif" alt="" width="50%" />
 - 가입 이메일 중복 체크
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-signup-duplicate.gif" alt="" width="50%" />
 
 ### 🔑로그인 후 상태
 
 - 프로필 카드/헤더 변화
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-login-header.gif" alt="" width="50%" />
 - 좋아요 버튼 클릭 → 색상 채움/해제
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-login-like.gif" alt="" width="50%" />
 - 마이페이지 이미지 변경 & 미리보기
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
-- 비밀번호 재설정
+  <img src="./public/images/demo-login-profile-img.gif" alt="" width="50%" />
+- 비밀번호 재설정 → 가입한 메일로 비밀번호 재설정 메일 발송, 비밀번호 변경 가능
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-login-pw-reset.gif" alt="" width="50%" />
+  <img src="./public/images/demo-login-pw-reset2.gif" alt="" width="50%" />
 - 내 강의 목록 카드 클릭 → 상세페이지 이동 (내 강의 목록에서는 좋아요가 보이지 않음)
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-my-lecture-detail.gif" alt="" width="50%" />
+- 수강신청
+  <br/>
+  <img src="./public/images/demo-course-enroll.gif" alt="" width="50%" />
+- 상세페이지 이미지 상단 수강신청 버튼
+  <br/>
+  <img src="./public/images/demo-detail-page-enroll.gif" alt="" width="50%" />
 - 수강신청 중복 알림
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-course-enroll2.gif" alt="" width="50%" />
 
 ### 🌐공통 UI / 기타
 
 - 로그인/비로그인 접근 제한
   - 라우터 확인 → 로그인 필요 페이지 (ex. /my-lecture) 접근 시 로그인 페이지로 이동
     <br/>
-    <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+    <img src="./public/images/demo-login-access.gif" alt="" width="50%" />
 - 페이지 로딩 시 Skeleton UI
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-ui-skeleton.gif" alt="" width="50%" />
 - 필터 적용 후 좋아요 상태 반영
   <br/>
-  <img src="./public/images/temp-01.jpg" alt="" width="50%" />
+  <img src="./public/images/demo-ui-like-sync.gif" alt="" width="50%" />
+- 상세페이지 이미지 상단의 메뉴 클릭 시 해당 섹션으로 이동, FAQ 아코디언
+  <br/>
+  <img src="./public/images/demo-detail-page2.gif" alt="" width="50%" />
 
 # 🐞 현재 문제점
 
 - **내 강의 목록 페이지 스크롤**
   - 수강신청 후 페이지 이동 시 스크롤 위치가 상단으로 초기화되지 않음
 - **마이페이지 이미지 업데이트**
-  - 마이페이지에서 이미지 변경 후 헤더, 프로필 카드에 바로 반영되지 않음
-  - 재로그인 시 정상 적용
+  - 마이페이지에서 이미지 변경 후 헤더, 프로필 카드에 반영되지 않음
 - **커리큘럼 / 강의 데이터 미입력**
   - 상세페이지 및 내 강의 목록 일부 강의 정보 미입력
   - DB 데이터 입력 시 해결
