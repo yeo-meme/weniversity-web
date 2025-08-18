@@ -151,7 +151,7 @@
 
 ## FE 프로젝트 구조
 
- <!-- 임시 구조 트리입니다. 수정 필요 -->
+repository: https://github.com/yeo-meme/weniversity-web
 
 ```
 📦weniversity-web
@@ -159,16 +159,47 @@
 ┣ 📂public
 ┃ ┣ 📂images            #README용 이미지
 ┣ 📂src
-┃ ┣ 📂assets            #공통 이미지
-┃ ┣ 📂auth
+┃ ┣ 📂assets
+┃ ┣ 📂auth (로그인 관련)
 ┃ ┣ 📂components
-┃ ┣ 📂hooks
-┃ ┣ 📂page
+┃ ┃ ┣ 📂common
+┃ ┃ ┣ 📂course
+┃ ┃ ┣ 📂courseDetail
+┃ ┃ ┣ 📂footer
+┃ ┃ ┣ 📂header
+┃ ┃ ┣ 📂hero
+┃ ┃ ┣ 📂home
+┃ ┃ ┣ 📂mission
+┃ ┃ ┣ 📂myLectures
+┃ ┃ ┣ 📂myPage
+┃ ┃ ┣ 📂reigister
+┃ ┃ ┗ 📂video
+┃ ┣ 📂hooks (redux-toolkit 정의)
+┃ ┣ 📂page (페이지 관리)
+┃ ┃ ┣ 📂course
+┃ ┃ ┣ 📂courseDetail
 ┃ ┃ ┣ 📂login
-┃ ┃ ┗ 📂my-lectures
-┃ ┣ 📂store
-┃ ┃ ┗ 📂slices
-┃ ┣ 📂types
+┃ ┃ ┣ 📂main
+┃ ┃ ┣ 📂myLectures
+┃ ┃ ┣ 📂mypage
+┃ ┃ ┣ 📂register
+┃ ┃ ┣ 📂search
+┃ ┃ ┗ 📜NotFoundPage.tsx
+┃ ┣ 📂services (유틸리티)
+┃ ┃ ┣ 📂mypage
+┃ ┃ ┣ 📂register
+┃ ┃ ┗ 📂video
+┃ ┣ 📂store (API 관련)
+┃ ┣ 📂types (type 정의)
+┃ ┃ ┣ 📂course
+┃ ┃ ┣ 📂courseDetail
+┃ ┃ ┣ 📂mission
+┃ ┃ ┣ 📂myLectures
+┃ ┃ ┣ 📂mypage
+┃ ┃ ┣ 📂register
+┃ ┃ ┣ 📂search
+┃ ┃ ┗ 📂video
+┃ ┣ 📂utils
 ┃ ┣ 📜App.css
 ┃ ┣ 📜App.tsx
 ┃ ┣ 📜AppContent.tsx
@@ -249,7 +280,51 @@ repository: https://github.com/nanna0/weniversity-server
 ```mermaid
 gantt
     dateFormat  YYYY-MM-DD
-    title       weniversity 프로젝트 WBS
+    title       Weniversity 프론트엔드 개발 WBS
+    excludes    weekends
+
+    section 프로젝트 초기 설정 (여밈, 혜민, 재호)
+    프론트엔드 프로젝트 셋업              :2025-07-28, 2d
+    관리자 페이지 로컬데이터 로그인/로그아웃 기능 및 UI :2025-07-29, 1d
+    SNS 소셜 로그인, 회원가입          :2025-07-29, 2d
+    ERD 기획, 엔드포인트 계획          :2025-07-29, 1d
+    메인페이지 헤더 컴포넌트            :2025-07-29, 2d
+    깃 레파지토리 브랜치 룰 변경         :2025-07-29, 1d
+    학습 동영상 UI 개발               :2025-07-30, 2d
+
+    section 기본 UI 구조 (여밈, 혜민, 재호)
+    메인페이지 슬라이드&프로필 가드 연결  :2025-08-01, 3d
+    회원가입 figma 디자인 수정          :2025-08-01, 1d
+    로그인 페이지 UI 구현               :2025-08-04, 2d
+    학습 동영상 플레이 UI 및 테스트 기능  :2025-08-04, 3d
+    학습 동영상 플레이 개선            :2025-08-05, 2d
+    로그인 기능구현 ~ 리뷰 연결경       :2025-08-06, 9d
+
+    section 강의 관련 기능 (여밈, 혜민, 재호)
+    내 강의 목록 UI                   :2025-08-07, 8d
+    코스[데일페이지] API 작업          :2025-08-08, 2d
+    동영상 플레이어 서버 저장 포인트 수정  :2025-08-09, 2d
+    동영상 플레이어 로컬 서버구축 (테스트 ver) :2025-08-09, 2d
+    코스페이지 API 연동 작업           :2025-08-11, 2d
+    동영상 플레이어 리덕스툴킷 리팩토링    :2025-08-12, 1d
+
+    section API 연동 및 검색 (여밈, 혜민, 재호)
+    배포 API 호출 배포환경, 넷플리파이 리다렉트 프록시설정 :2025-08-13, 1d
+    루트 도큐 헤더 관련               :2025-08-13, 2d
+    검색 페이지 UI 작업               :2025-08-13, 2d
+    내 강의 목록 API 연결             :2025-08-14, 2d
+    검색페이지 API 작업               :2025-08-14, 2d
+    좋아요 API 작업                  :2025-08-15, 2d
+    메인 리스트 UI 및 API 작업         :2025-08-15, 2d
+    라우팅                          :2025-08-16, 1d
+    배포 및 테스트                    :2025-08-17, 1d
+
+```
+
+```mermaid
+gantt
+    dateFormat  YYYY-MM-DD
+    title       Weniversity 백엔드 개발 WBS
     excludes    weekends
 
     section 프로젝트 준비 (나영)
@@ -500,12 +575,13 @@ erDiagram
 
 # 📺 구현 페이지
 
-- 메인 페이지 (로그인 전/후)
+- 메인 페이지
 - 로그인 페이지
 - 회원가입 페이지
 - 마이페이지
-- 내 강의 목록 페이지 (/my-lecture)
+- 내 강의 목록 페이지
 - 강의 상세 페이지
+- 검색 페이지
 
 ## 🌟 메인 기능
 
@@ -628,22 +704,17 @@ erDiagram
 - **커리큘럼 / 강의 데이터 미입력**
   - 상세페이지 및 내 강의 목록 일부 강의 정보 미입력
   - DB 데이터 입력 시 해결
-- **비밀번호 재설정 CORS 오류**
-  - 현재 개발 환경에서 비밀번호 재설정 후 오류 발생
-  - 변경 후 로그인 페이지 이동 예정
 - **공유하기 버튼**
   - 버튼만 구현, 기능 미개발
 - **강의 상세페이지 수강완료 체크 기능 미구현**
+- **이미지 파일 불러오기**
+  - 배포시 이미지 파일이 저장된 경로로 불러오지 못하는 이슈
 
 # 🔍 프로젝트 회고
 
 ## 개선 목표
 
- <!-- 추가 -->
-
-## 트러블슈팅
-
- <!-- 추가 -->
+- 리팩토링, 반응형 대응, 미구현된 기능 개발
 
 ## 개인 회고
 
@@ -653,7 +724,9 @@ erDiagram
 
 ### ⭐최재호
 
-<aside>내용을 입력해주세요</aside>
+<aside>프로젝트의 방대한 양에 구현을 다 할 수 있을까? 라는 의문이 들었습니다. 하지만 프로젝트를 진행하며 팀원들과 함께라면 필수과제는 구현할 수 있을 것이라는 생각이 들었습니다.
+실력이 부족하지만 팀원들과 소통을 잘 한다면 최선의 결과를 만들어낼 수 있을 거라고 생각하며 열심히 프로젝트에 임했습니다.
+처음 사용해보는 typescript와 redux-toolkit을 이번 프로젝트를 통해 조금은 공부할 수 있게 된것과 팀원들과의 소통이 저의 성장에 좋은 기회가 되었다고 생각합니다.<aside>
 
 ### ⭐이혜민
 
